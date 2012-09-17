@@ -18,7 +18,7 @@
  * along with Avalon. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace avalon\helpers;
+namespace Avalon\Helpers;
 
 /**
  * Time Helper
@@ -40,11 +40,11 @@ class Time
 	public static function date($format = "Y-m-d H:i:s", $time = null)
 	{
 		$time = ($time !== null ? $time : time());
-		
+
 		if (!is_numeric($time)) {
 			$time = static::to_unix($time);
 		}
-		
+
 		return date($format, $time);
 	}
 
@@ -70,7 +70,7 @@ class Time
 		$stamp = static::to_unix($datetime);
 		return date("Y-m-d H:i:s", $stamp + date("Z"));
 	}
-	
+
 	/**
 	 * Converts a datetime timestamp into a unix timestamp.
 	 *
@@ -101,7 +101,7 @@ class Time
 			return strtotime($original);
 		}
 	}
-	
+
 	/**
 	 * Returns time ago in words of the given date.
 	 *
@@ -117,7 +117,7 @@ class Time
 		if (!is_numeric($original)) {
 			$original = static::to_unix($original);
 		}
-		
+
 		$now = time(); // Get the time right now...
 
 		// Time chunks...

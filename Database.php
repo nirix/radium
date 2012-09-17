@@ -18,7 +18,7 @@
  * along with Avalon. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace avalon;
+namespace Avalon;
 
 /**
  * Database class.
@@ -31,7 +31,7 @@ class Database
 {
 	private static $connections = array();
 	private static $initiated = array();
-	
+
 	/**
 	 * Connects to the database.
 	 *
@@ -40,7 +40,7 @@ class Database
 	public static function init($db)
 	{
 		require SYSPATH . '/database/model.php';
-		
+
 		// Define the DB_PREFIX constant
 		define("DB_PREFIX", isset($db['prefix']) ? $db['prefix'] : '');
 
@@ -91,7 +91,7 @@ class Database
 
 		return static::$connections[$name];
 	}
-	
+
 	/**
 	 * Returns the database instance object.
 	 *
@@ -103,7 +103,7 @@ class Database
 	{
 		return isset(static::$connections[$name]) ? static::$connections[$name] : false;
 	}
-	
+
 	/**
 	 * Returns true if the database has been initiated, false if not.
 	 *

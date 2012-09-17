@@ -18,8 +18,8 @@
  * along with Avalon. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace avalon\database;
-use avalon\core\Error;
+namespace Avalon\Database;
+use Avalon\Core\Error;
 
 /**
  * Database driver base.
@@ -51,7 +51,7 @@ class Driver
 		{
 			$error = 'Unknown error. ' . implode('/', $error);
 		}
-		
+
 		Error::halt("Database Error", $error . '<br />' . $this->last_query);
 	}
 }

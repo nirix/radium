@@ -18,10 +18,10 @@
  * along with Avalon. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace avalon\database\pdo;
+namespace Avalon\Database\PDO;
 
-use avalon\Database;
-use avalon\database\PDO;
+use Avalon\Database;
+use Avalon\Database\PDO;
 
 /**
  * PDO Database wrapper query builder
@@ -45,7 +45,7 @@ class Query
 	private $custom_sql = array();
 	private $set;
 	private $_model;
-	
+
 	/**
 	 * PDO Query builder constructor.
 	 *
@@ -65,12 +65,12 @@ class Query
 		} else if ($type == 'UPDATE') {
 			$this->table = $data;
 		}
-		
+
 		$this->type = $type;
 		$this->prefix = $this->_conn()->prefix;
 		return $this;
 	}
-	
+
 	/**
 	 * Enable use of the model object for table rows.
 	 *
@@ -83,7 +83,7 @@ class Query
 		$this->_model = $model;
 		return $this;
 	}
-	
+
 	/**
 	 * Append DISTINCT to query type.
 	 *
@@ -120,7 +120,7 @@ class Query
 		$this->table = $table;
 		return $this;
 	}
-	
+
 	/**
 	 * Sets the column => value data.
 	 *
@@ -133,7 +133,7 @@ class Query
 		$this->data = $data;
 		return $this;
 	}
-	
+
 	/**
 	 * Orders the query rows.
 	 *
@@ -147,7 +147,7 @@ class Query
 		$this->order_by = array($col, $dir);
 		return $this;
 	}
-	
+
 	/**
 	 * Insert custom SQL into the query.
 	 *
@@ -160,7 +160,7 @@ class Query
 		$this->custom_sql[] = $sql;
 		return $this;
 	}
-	
+
 	/**
 	 * Easily add a "table = something" to the query.
 	 *
@@ -191,10 +191,10 @@ class Query
 		{
 			$this->where[] = array($columm, $cond, $value === null ? 'NULL' : $value);
 		}
-		
+
 		return $this;
 	}
-	
+
 	/**
 	 * Limits the query rows.
 	 *
@@ -217,7 +217,7 @@ class Query
 	public function exec()
 	{
 		$result = $this->_conn()->prepare($this->_assemble());
-		
+
 		if ($this->type != 'INSERT')
 		{
 			foreach ($this->where as $where)
@@ -225,7 +225,7 @@ class Query
 				$result->bind_value(':'. $where[0], $where[2]);
 			}
 		}
-		
+
 		return $result->_model($this->_model)->exec();
 	}
 
@@ -238,7 +238,7 @@ class Query
 	{
 		$query = array();
 		$query[] = $this->type;
-		
+
 		if (in_array($this->type, array("SELECT", "SELECT DISTINCT"))) {
 			$cols = array();
 			foreach ($this->cols as $col => $as)
@@ -261,33 +261,33 @@ class Query
 			}
 			$query[] = implode(', ', $cols);
 		}
-		
+
 		// Select or Delete query
 		if (in_array($this->type, array("SELECT", "SELECT DISTINCT", "DELETE")))
 		{
 			$query[] = "FROM `{$this->prefix}{$this->table}`";
-			
+
 			// Where
 			$query = array_merge($query, $this->_build_where());
-			
+
 			// Group by
 			if (count($this->group_by) > 0)
 			{
 				$query[] = "GROUP BY " . implode(', ', $this->group_by);
 			}
-			
+
 			// Custom SQL
 			if (count($this->custom_sql))
 			{
 				$query[] = implode(" ", $this->custom_sql);
 			}
-			
+
 			// Order by
 			if (count($this->order_by) > 0)
 			{
 				$query[] = "ORDER BY `{$this->prefix}{$this->table}`.`{$this->order_by[0]}` {$this->order_by[1]}";
 			}
-			
+
 			// Limit
 			if ($this->limit != null)
 			{
@@ -298,15 +298,15 @@ class Query
 		else if($this->type == "INSERT INTO")
 		{
 			$query[] = "`{$this->prefix}{$this->table}`";
-			
+
 			$keys = array();
 			$values = array();
-			
+
 			foreach($this->data as $key => $value) {
 				$keys[] = "`{$key}`";
 				$values[] = $this->_process_value($value);
 			}
-			
+
 			$query[] = '(' . implode(', ', $keys) . ')';
 			$query[] = 'VALUES(' . implode(', ', $values) . ')';
 		}
@@ -314,7 +314,7 @@ class Query
 		else if($this->type == "UPDATE")
 		{
 			$query[] = "`{$this->prefix}{$this->table}`";
-			
+
 			$query[] = "SET";
 			$set = array();
 			foreach ($this->data as $column => $value)
@@ -323,35 +323,35 @@ class Query
 				$set[] = "`{$column}` = {$value}";
 			}
 			$query[] = implode(', ', $set);
-			
+
 			// Where
 			$query = array_merge($query, $this->_build_where());
 		}
-		
+
 		return implode(" ", $query);
 	}
-	
+
 	private function _build_where()
 	{
 		$query = array();
-		
+
 		// Where
 		if (count($this->where))
 		{
 			$where = array();
-			
+
 			foreach ($this->where as $param)
 			{
 				$where[] = "`{$param[0]}` {$param[1]} :{$param[0]}";
 			}
-			
+
 			$query[] = "WHERE " . implode(' AND ', $where);
 			unset($where);
 		}
-		
+
 		return $query;
 	}
-	
+
 	/**
 	 * Processes the value.
 	 *
@@ -367,7 +367,7 @@ class Query
 			return $this->_conn()->quote($value);
 		}
 	}
-	
+
 	/**
 	 * Private function to return the database connection.
 	 *

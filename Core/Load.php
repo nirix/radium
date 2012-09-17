@@ -18,7 +18,7 @@
  * along with Avalon. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace avalon\core;
+namespace Avalon\Core;
 
 /**
  * Avalons loader class.
@@ -33,7 +33,7 @@ class Load
 	private static $libs = array();
 	private static $helpers = array();
 	public static $search_paths = array();
-	
+
 	/**
 	 * Loads the specified controller.
 	 *
@@ -85,11 +85,11 @@ class Load
 		if (isset(static::$libs[$class])) {
 			return static::$libs[$class];
 		}
-		
+
 		// Set the class and file name
 		$class_name = ucfirst($class);
 		$file_name = static::lowercase($class);
-		
+
 		// App library
 		if (file_exists(APPPATH . '/libs/' . $file_name . '.php'))
 		{
@@ -106,7 +106,7 @@ class Load
 			Error::halt("Loader Error", "Unable to load library '{$class}'");
 			return false;
 		}
-		
+
 		// Initiate the class?
 		if ($init)
 		{
@@ -117,10 +117,10 @@ class Load
 		{
 			static::$libs[$class] = $class_name;
 		}
-		
+
 		return static::$libs[$class];
 	}
-	
+
 	/**
 	 * Helper loader.
 	 *
@@ -132,7 +132,7 @@ class Load
 	{
 		// In case we're loading multiple helpers
 		$class = func_num_args() > 1 ? func_get_args() : func_get_arg(0);
-		
+
 		// Multiple helpers
 		if (is_array($class)) {
 			foreach ($class as $helper) {
@@ -140,15 +140,15 @@ class Load
 			}
 			return;
 		}
-		
+
 		// Is it already loaded?
 		if (in_array($class, static::$helpers)) {
 			return true;
 		}
-		
+
 		// Lowercase the file name
 		$file_name = static::lowercase($class);
-		
+
 		// App helper
 		if (file_exists(APPPATH . '/helpers/' . $file_name . '.php'))
 		{
@@ -165,7 +165,7 @@ class Load
 			Error::halt("Loader Error", "Unable to load helper '{$class}'");
 			return false;
 		}
-		
+
 		static::$helpers[] = $class;
 		return true;
 	}
@@ -179,13 +179,13 @@ class Load
 	{
 		static::$search_paths[] = $path;
 	}
-	
+
 	/**
 	 * Lower cases the specified string.
 	 */
 	private static function lowercase($string) {
 		$string = strtolower(preg_replace('/(?<=[a-z])([A-Z])/', '_' . '\\1', $string));
-		
+
 		return str_replace(array_keys(static::$undo), array_values(static::$undo), $string);
 	}
 }

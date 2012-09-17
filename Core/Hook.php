@@ -3,19 +3,21 @@
  * FishHook
  * Copyright (C) 2009-2012 Jack P.
  * https://github.com/nirix
- * 
+ *
  * FishHook is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation; version 3 only.
- * 
+ *
  * FishHook is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with FishHook. If not, see <http://www.gnu.org/licenses/>.
  */
+
+namespace Avalon\Core;
 
 /**
  * The FishHook plugin library
@@ -25,11 +27,11 @@
  * @copyright (C) 2009-2012 Jack P.
  * @version 4.0
  */
-class FishHook
+class Hook
 {
 	private static $_version = '4.0';
 	private static $_plugins = array();
-	
+
 	/**
 	 * Adds a plugin to the library
 	 *
@@ -43,11 +45,11 @@ class FishHook
 		{
 			static::$_plugins[$hook] = array();
 		}
-		
-		// Add the plugin 
+
+		// Add the plugin
 		static::$_plugins[$hook][] = $plugin;
 	}
-	
+
 	/**
 	 * Executes a hook
 	 *
@@ -67,7 +69,7 @@ class FishHook
 		{
 			throw new Exception('Paramters to be passed to addon methods need to be wrapped in an array.');
 		}
-		
+
 		// Run the hook
 		foreach (static::$_plugins[$hook] as $plugin)
 		{

@@ -18,7 +18,7 @@
  * along with Avalon. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace avalon\http;
+namespace Avalon\Http;
 
 /**
  * The router.
@@ -39,7 +39,7 @@ class Router
 
 	// Router stuff
 	public static $extensions = array('.json', '.xml', '.rss');
-	
+
 	/**
 	 * Matche the request to a route and get the controller, method and arguments.
 	 * @param string $request The request.
@@ -52,17 +52,17 @@ class Router
 			static::set_request(static::$routes['root']);
 			return true;
 		}
-		
+
 		// Check if we have an exact match
 		if (isset(static::$routes[$request])) {
 			static::set_request(static::$routes[$request]);
 			return true;
 		}
-		
+
 		// Loop through routes and find a regex match
 		foreach (static::$routes as $route => $args) {
 			$route = '#^' . $route . '(?<extension>' . implode('|', static::$extensions) . ')?$#';
-			
+
 			if (preg_match($route, $request, $params)) {
 				unset($params[0]);
 				$args['params'] = array_merge($args['params'], $params);
@@ -72,7 +72,7 @@ class Router
 				return true;
 			}
 		}
-		
+
 		// No match, error controller, make it so.
 		static::set_request(array('value' => 'Error::404', 'params' => array()));
 		return false;
@@ -94,7 +94,7 @@ class Router
 			);
 		}
 	}
-	
+
 	/**
 	 * Private function to set the routed controller, method, parameters and method arguments.
 	 * @param array $route The route array.

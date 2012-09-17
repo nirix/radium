@@ -18,10 +18,10 @@
  * along with Avalon. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace avalon\database;
+namespace Avalon\Database;
 
-use avalon\database\pdo\Query;
-use avalon\database\pdo\Statement;
+use Avalon\Database\PDO\Query;
+use Avalon\Database\PDO\Statement;
 
 /**
  * PDO Database wrapper
@@ -38,9 +38,9 @@ class PDO extends Driver
 	private $connection_name;
 	private $query_count = 0;
 	protected $last_query;
-	
+
 	public $prefix;
-	
+
 	/**
 	 * PDO wrapper constructor.
 	 *
@@ -63,7 +63,7 @@ class PDO extends Driver
 		{
 			$this->connection_name = $name;
 			$this->prefix = isset($config['prefix']) ? $config['prefix'] : '';
-			
+
 			// Check if a DSN is already specified
 			if (isset($config['dsn']))
 			{
@@ -94,7 +94,7 @@ class PDO extends Driver
 			$this->halt($e->getMessage());
 		}
 	}
-	
+
 	/**
 	 * Quotes a string for use in a query.
 	 *
@@ -105,7 +105,7 @@ class PDO extends Driver
 	{
 		return $this->connection->quote($string, $type);
 	}
-	
+
 	/**
 	 * Executes an SQL statement, returning a result set as a PDOStatement object.
 	 *
@@ -117,11 +117,11 @@ class PDO extends Driver
 	{
 		$this->query_count++;
 		$this->last_query = $query;
-		
+
 		$rows = $this->connection->query($query);
 		return $rows;
 	}
-	
+
 	/**
 	 * Prepares a statement for execution and returns a statement object.
 	 *
@@ -135,7 +135,7 @@ class PDO extends Driver
 		$this->last_query = $query;
 		return new Statement($this->connection->prepare($query, $options), $this->connection_name);
 	}
-	
+
 	/**
 	 * Returns a select query builder object.
 	 *
@@ -150,7 +150,7 @@ class PDO extends Driver
 		}
 		return new Query("SELECT", $cols, $this->connection_name);
 	}
-	
+
 	/**
 	 * Returns an update query builder object.
 	 *
@@ -162,7 +162,7 @@ class PDO extends Driver
 	{
 		return new Query("UPDATE", $table, $this->connection_name);
 	}
-	
+
 	/**
 	 * Returns a delete query builder object.
 	 *
@@ -184,7 +184,7 @@ class PDO extends Driver
 	{
 		return new Query("INSERT INTO", $data, $this->connection_name);
 	}
-	
+
 	/**
 	 * Returns the ID of the last inserted row.
 	 *

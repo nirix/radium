@@ -18,7 +18,7 @@
  * along with Avalon. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace avalon;
+namespace Avalon;
 
 /**
  * Avalon's Autoloader
@@ -38,7 +38,7 @@ class Autoloader
 	 */
 	public static function register()
 	{
-		spl_autoload_register('avalon\Autoloader::load', true, true);
+		spl_autoload_register('Avalon\Autoloader::load', true, true);
 	}
 
 	/**
@@ -145,7 +145,7 @@ class Autoloader
 	 */
 	public static function file_path($class, $vendor_path = null)
 	{
-		return (($vendor_path === null) ? static::$vendor_path : $vendor_path) . static::lowercase(str_replace(array('\\', '_'), '/', "/{$class}.php"));
+		return (($vendor_path === null) ? static::$vendor_path : $vendor_path) . str_replace(array('\\', '_'), '/', "/{$class}.php");
 	}
 
 	/**

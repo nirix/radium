@@ -18,10 +18,10 @@
  * along with Avalon. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace avalon\core;
+namespace Avalon\Core;
 
-use avalon\http\Request;
-use avalon\http\Router;
+use Avalon\Http\Request;
+use Avalon\Http\Router;
 
 /**
  * The core Avalon class.
@@ -34,7 +34,7 @@ class Kernel
 {
 	private static $version = '0.2';
 	private static $app;
-	
+
 	/**
 	 * Initialize the Avalon framework
 	 */
@@ -44,7 +44,7 @@ class Kernel
 		Request::process();
 		Router::process(Request::url());
 	}
-	
+
 	/**
 	 * Execute the routed controller and method
 	 */
@@ -122,7 +122,7 @@ class Kernel
 		{
 			call_user_func_array(array(static::$app, $method_name), $method_args);
 		}
-		
+
 		// Call our custom 'destructor'. Why not use __destruct(): because even
 		// after 'die', 'exit', etc is called, __destruct() is still executed.
 		if (method_exists(static::$app, '__shutdown'))
@@ -130,7 +130,7 @@ class Kernel
 			static::$app->__shutdown();
 		}
 	}
-	
+
 	/**
 	 * Returns the application object.
 	 *
@@ -140,7 +140,7 @@ class Kernel
 	{
 		return static::$app;
 	}
-	
+
 	/**
 	 * Returns the version of the Avalon framework.
 	 *

@@ -18,10 +18,10 @@
  * along with Avalon. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace avalon\database\pdo;
+namespace Avalon\Database\PDO;
 
-use avalon\Database;
-use avalon\database\PDO;
+use Avalon\Database;
+use Avalon\Database\PDO;
 
 /**
  * PDO Database wrapper statement class
@@ -37,7 +37,7 @@ class Statement
 	private $connection_name;
 	private $statement;
 	private $_model;
-	
+
 	/**
 	 * PDO Statement constructor.
 	 *
@@ -51,7 +51,7 @@ class Statement
 		$this->connection_name = $connection_name;
 		return $this;
 	}
-	
+
 	/**
 	 * Sets the model for the rows to use.
 	 *
@@ -64,7 +64,7 @@ class Statement
 		$this->_model = $model;
 		return $this;
 	}
-	
+
 	/**
 	 * Fetches all the rows.
 	 *
@@ -74,7 +74,7 @@ class Statement
 	{
 		$result = $this->statement->fetchAll(\PDO::FETCH_ASSOC);
 		$rows = array();
-		
+
 		if ($this->_model !== null)
 		{
 			foreach ($result as $row)
@@ -90,10 +90,10 @@ class Statement
 				$rows[] = $row;
 			}
 		}
-		
+
 		return $rows;
 	}
-	
+
 	/**
 	 * Fetches the next row from a result set.
 	 *
@@ -111,7 +111,7 @@ class Statement
 		}
 
 		$result = $this->statement->fetch($style, $orientation, $offset);
-		
+
 		if ($this->_model !== null)
 		{
 			$model = $this->_model;
@@ -122,7 +122,7 @@ class Statement
 			return $result;
 		}
 	}
-	
+
 	/**
 	 * Binds a parameter to the specified variable name.
 	 *
@@ -139,7 +139,7 @@ class Statement
 		$this->statement->bindParam($param, $value, $type, $length, $options);
 		return $this;
 	}
-	
+
 	/**
 	 * Binds a value to a parameter.
 	 *
@@ -154,7 +154,7 @@ class Statement
 		$this->statement->bindValue($param, $value, $type);
 		return $this;
 	}
-	
+
 	/**
 	 * Executes a prepared statement.
 	 *
@@ -163,7 +163,7 @@ class Statement
 	public function exec()
 	{
 		$result = $this->statement->execute();
-		
+
 		if ($result)
 		{
 			return $this;
@@ -173,7 +173,7 @@ class Statement
 			Database::connection($this->connection_name)->halt($this->statement->errorInfo());
 		}
 	}
-	
+
 	/**
 	 * Returns the number of rows affected by the last SQL statement.
 	 *

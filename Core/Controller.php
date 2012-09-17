@@ -18,14 +18,14 @@
  * along with Avalon. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace avalon\core;
+namespace Avalon\Core;
 
-use avalon\core\Kernel;
-use avalon\Database;
-use avalon\http\Request;
-use avalon\http\Router;
-use avalon\output\View;
-use avalon\output\Body;
+use Avalon\Core\Kernel;
+use Avalon\Database;
+use Avalon\Http\Request;
+use Avalon\Http\Router;
+use Avalon\Output\View;
+use Avalon\Output\Body;
 
 /**
  * Base controller class.
@@ -39,7 +39,7 @@ class Controller
 	public $db;
 	public $_render = array('action' => true, 'layout' => 'default', 'view' => null);
 	public $_before = array();
-	
+
 	public function __construct()
 	{
 		// Get the database for easy access
@@ -54,7 +54,7 @@ class Controller
 		if (Router::$extension !== null)
 		{
 			$this->_render['view'] = $this->_render['view'] . Router::$extension;
-			
+
 			// Lets make sure the view for the extension exists
 			if (View::exists($this->_render['view']) === false)
 			{
@@ -65,7 +65,7 @@ class Controller
 				$this->_render['layout'] = 'plain';
 			}
 		}
-		
+
 		// Allow the views to access the app,
 		// even though its not good practice...
 		View::set('app', $this);
@@ -90,12 +90,12 @@ class Controller
 		if (!$this->_render['view']) {
 			return;
 		}
-		
+
 		// Render the view, get the content and clear the output
 		View::render($this->_render['view']);
 		$output = Body::body();
 		Body::clear();
-		
+
 		// Set the X-Powered-By header and render the layout with the content
 		header("X-Powered-By: Avalon/" . Kernel::version());
 		View::render("layouts/{$this->_render['layout']}", array('output' => $output));

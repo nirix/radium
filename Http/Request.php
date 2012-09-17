@@ -18,7 +18,7 @@
  * along with Avalon. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace avalon\http;
+namespace Avalon\Http;
 
 /**
  * Request class.
@@ -37,7 +37,7 @@ class Request
 	public static $request;
 	public static $method;
 	public static $post;
-	
+
 	/**
 	 * Processes the request and gets the URL,
 	 * request method, request type, and so on.
@@ -51,7 +51,7 @@ class Request
 		static::$method = strtolower($_SERVER['REQUEST_METHOD']);
 		static::$post = $_POST;
 	}
-	
+
 	/**
 	 * Determines the base URL of the app.
 	 *
@@ -61,7 +61,7 @@ class Request
 	{
 		return str_replace(basename($_SERVER['SCRIPT_NAME']), '', $_SERVER['SCRIPT_NAME']) . (func_num_args() > 0 ? trim(implode('/' , func_get_args()), '/') : '');
 	}
-	
+
 	/**
 	 * Redirects to the specified URL.
 	 *
@@ -72,7 +72,7 @@ class Request
 		header("Location: " . $url);
 		exit;
 	}
-	
+
 	/**
 	 * Returns the requested URL.
 	 *
@@ -82,7 +82,7 @@ class Request
 	{
 		return '/' . static::$url;
 	}
-	
+
 	/**
 	 * Returns the full URI of the request.
 	 *
@@ -92,7 +92,7 @@ class Request
 	{
 		return static::base(trim(static::url(), '/'));
 	}
-	
+
 	/**
 	 * Checks of the URI matches the specified URI.
 	 *
@@ -104,7 +104,7 @@ class Request
 	{
 		return trim($uri, '/') == trim(implode('/', self::$segments), '/');
 	}
-	
+
 	/**
 	 * Returns the segment at the specified index.
 	 *
@@ -116,7 +116,7 @@ class Request
 	{
 		return @static::$segments[$num];
 	}
-	
+
 	/**
 	 * Checks if the request was made via Ajax.
 	 *
@@ -126,7 +126,7 @@ class Request
 	{
 		return strtolower(static::$requested_with) == 'xmlhttprequest';
 	}
-	
+
 	/**
 	 * Gets the base URL
 	 *
@@ -137,7 +137,7 @@ class Request
 		static::$base_url = rtrim(dirname(static::_get_script_url()), '\\/');
 		return static::$base_url;
 	}
-	
+
 	/**
 	 * Determines the path info.
 	 *
@@ -166,13 +166,13 @@ class Request
 			} else {
 				throw new Exception("Unable to determin path info.");
 			}
-			
+
 			static::$path_info = trim($path_info, '/');
 		}
-		
+
 		return static::$path_info;
 	}
-	
+
 	/**
 	 * Determines the script URL.
 	 *
@@ -182,7 +182,7 @@ class Request
 	{
 		if (static::$entry_file === null) {
 			$file_name = basename($_SERVER['SCRIPT_FILENAME']);
-			
+
 			// script_name
 			if (basename($_SERVER['SCRIPT_NAME']) === $file_name) {
 				static::$entry_file = $_SERVER['SCRIPT_NAME'];
@@ -211,10 +211,10 @@ class Request
 				throw new Exception("Unable to determin entry file.");
 			}
 		}
-		
+
 		return static::$entry_file;
 	}
-	
+
 	/**
 	 * Determines the requested URL.
 	 *
@@ -246,7 +246,7 @@ class Request
 				throw new Exception("Unable to determin URI.");
 			}
 		}
-		
+
 		return static::$url;
 	}
 }

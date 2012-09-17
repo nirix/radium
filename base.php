@@ -18,5 +18,5 @@
  * along with Avalon. If not, see <http://www.gnu.org/licenses/>.
  */
 
-require SYSPATH . '/autoloader.php';
-require SYSPATH . '/libs/fishhook.php';
+require SYSPATH . '/Autoloader.php';
+require SYSPATH . '/Core/Hook.php';
