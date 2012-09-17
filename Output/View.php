@@ -1,204 +1,186 @@
 <?php
 /*!
- * Avalon
- * Copyright (C) 2011-2012 Jack Polgar
+ * Radium
+ * Copyright (C) 2011-2012 Jack P.
+ * https://github.com/nirix
  *
- * This file is part of Avalon.
+ * This file is part of Radium.
  *
- * Avalon is free software: you can redistribute it and/or modify
+ * Radium is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation; version 3 only.
  *
- * Avalon is distributed in the hope that it will be useful,
+ * Radium is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with Avalon. If not, see <http://www.gnu.org/licenses/>.
+ * along with Radium. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Avalon\Output;
+namespace Radium\Output;
 
-use Avalon\Core\Load;
-use Avalon\Core\Error;
+use Radium\Core\Error;
 
 /**
- * View class.
+ * Radium's View rendering class.
  *
+ * @since 0.1
+ * @package Radium
+ * @subpackage Output
  * @author Jack P.
- * @package Avalon
+ * @copyright (C) Jack P.
  */
 class View
 {
-	private static $ob_level;
-	public static $theme;
-	public static $inherit_from;
-	private static $vars = array();
+    private static $ob_level;
+    private static $theme;
+    private static $inherit_from;
+    private static $search_paths = [];
+    private static $vars = [];
 
-	/**
-	 * Renders the specified file.
-	 *
-	 * @param string $file
-	 * @param array $vars Variables to be passed to the view.
-	 */
-	public static function render($file, array $vars = array())
-	{
-		// Get the view content
-		$content = self::_get_view($file, $vars);
+    /**
+     * Renders the specified file.
+     *
+     * @param string $file
+     * @param array $vars Variables to be passed to the view.
+     */
+    public static function render($file, array $vars = [])
+    {
+        // Get the view content
+        $content = static::getView($file, $vars);
+        
+        // Check if we need to flush or append
+        if(ob_get_level() > static::$ob_level + 1) {
+            ob_end_flush();
+        }
+        // Append it to the output
+        else {
+            Body::append($content);
+            @ob_end_clean();
+        }
+    }
 
-		// Check if we need to flush or append
-		if(ob_get_level() > self::$ob_level + 1) {
-			ob_end_flush();
-		}
-		// Append it to the output
-		else {
-			Body::append($content);
-			@ob_end_clean();
-		}
-	}
+    /**
+     * Private function to handle the rendering of files.
+     *
+     * @param string $file
+     * @param array $vars Variables to be passed to the view.
+     *
+     * @return string
+     */
+    private static function getView($file, array $vars = [])
+    {
+        // Get the file name/path
+        $file = static::filePath($file);
+        
+        // Make sure the ob_level is set
+        if (static::$ob_level === null) {
+            static::$ob_level = ob_get_level();
+        }
+        
+        // Make the set variables accessible
+        foreach (static::$vars as $_var => $_val) {
+            $$_var = $_val;
+        }
+        
+        // Make the vars for this view accessible
+        if (count($vars)) {
+            foreach($vars as $_var => $_val) {
+                $$_var = $_val;
+            }
+        }
+        
+        // Load up the view and get the contents
+        ob_start();
+        include($file);
+        $content = ob_get_contents();
+        
+        return $content;
+    }
 
-	/**
-	 * Renders and returns the specified file.
-	 *
-	 * @param string $file
-	 * @param array $vars Variables to be passed to the view.
-	 *
-	 * @return string
-	 */
-	public static function get($file, array $vars = array())
-	{
-		// Get the content and clean the buffer
-		$content = self::_get_view($file, $vars, true);
-		ob_end_clean();
-		return $content;
-	}
+    /**
+     * Determines the path of the view file.
+     *
+     * @param string $file File name.
+     *
+     * @return string
+     */
+    private static function filePath($file)
+    {
+        // Remove the namespace from the file path
+        $file = explode('\\', $file); // Stupid "pass by reference" shit
+        $file = str_replace('\\', '/', strtolower(array_pop($file)));
 
-	/**
-	 * Private function to handle the rendering of files.
-	 *
-	 * @param string $file
-	 * @param array $vars Variables to be passed to the view.
-	 *
-	 * @return string
-	 */
-	private static function _get_view($_file, array $vars = array())
-	{
-		// Get the file name/path
-		$_file = self::_view_file_path($_file);
+        // Get the path
+        $path = static::exists($file);
 
-		// Make sure the ob_level is set
-		if (self::$ob_level === null) {
-			self::$ob_level = ob_get_level();
-		}
+        // Check if the file was found
+        if (!$path) {
+            Error::halt("View Error", "Unable to load view '{$file}'");
+        }
+        
+        unset($file);
+        return $path;
+    }
 
-		// Make the set variables accessible
-		foreach (self::$vars as $_var => $_val) {
-			$$_var = $_val;
-		}
+    /**
+     * Attempts to locate the view path in
+     * all registered search paths.
+     *
+     * @param string $file
+     *
+     * @return mixed
+     */
+    public static function exists($file)
+    {
+        $dirs = [];
 
-		// Make the vars for this view accessible
-		if (count($vars)) {
-			foreach($vars as $_var => $_val)
-				$$_var = $_val;
-		}
+        // Add the theme directory if one is set
+        if (static::$theme !== null) {
+            $dirs[] = APPPATH . '/views/' . static::$theme;
+        }
 
-		// Load up the view and get the contents
-		ob_start();
-		include($_file);
-		$content = ob_get_contents();
+        // Add the registered search paths
+        $dirs = array_merge($dirs, static::$search_paths);
 
-		return $content;
-	}
+        // Add the inheritance path, if set
+        if (static::$inherit_from !== null) {
+            $dirs[] = static::$inherit_from;
+        }
 
-	/**
-	 * Determines the path of the view file.
-	 *
-	 * @param string $file File name.
-	 *
-	 * @return string
-	 */
-	private static function _view_file_path($file)
-	{
-		$file = strtolower($file);
-		$path = static::exists($file);
+        // And the root of the views path
+        $dirs[] = APPPATH . '/views';
 
-		// Check if the theme has this view
-		if (!$path)
-		{
-			Error::halt("View Error", "Unable to load view '{$file}'", 'HALT');
-		}
+        // Search time
+        foreach ($dirs as $dir) {
+            $path = "{$dir}/{$file}.php";
+            if (file_exists($path)) {
+                // Found!
+                return $path;
+            }
+        }
 
-		unset($file);
-		return $path;
-	}
+        // Not found
+        return false;
+    }
 
-	public static function exists($name)
-	{
-		$dirs = array();
+    /**
+     * Converts a controller/method namespace to it's view path.
+     *
+     * @param string $namespace
+     *
+     * @return string
+     */
+    public static function pathForNamespace($namespace)
+    {
+        // Convert the namespace and method to a directory structure
+        $namespace = str_replace(['\\', '::'], '/', $namespace);
 
-		// Add the theme path, if a theme is set
-		if (static::$theme !== null)
-		{
-			$dirs[] = APPPATH . '/views/' . static::$theme . '/';
-		}
+        // Change the controllers segment to views
+        $namespace = str_replace('controllers', 'views', $namespace);
 
-		// Registered search paths
-		foreach (Load::$search_paths as $path)
-		{
-			if (is_dir($path . '/views'))
-			{
-				$dirs[] = $path . '/views/';
-			}
-		}
-
-		// Add the inheritance path, if there is one
-		if (static::$inherit_from !== null)
-		{
-			$dirs[] = static::$inherit_from . '/';
-		}
-
-		// Add the regular path
-		$dirs[] = APPPATH . '/views/';
-
-		// Loop over and find the view
-		foreach ($dirs as $dir)
-		{
-			$path = $dir . $name . '.php';
-			if (file_exists($path))
-			{
-				return $path;
-			}
-		}
-
-		// Damn it Jim, I'm a doctor not a view path.
-		return false;
-	}
-
-	/**
-	 * Sends the variable to the view.
-	 *
-	 * @param string $var The variable name.
-	 * @param mixed $val The variables value.
-	 */
-	public static function set($var, $val)
-	{
-		if (is_array($var)) {
-			foreach ($var as $vr => $vl) {
-				self::$vars[$vr] = $vl;
-			}
-		} else {
-			self::$vars[$var] = $val;
-		}
-	}
-
-	/**
-	 * Returns the variables array.
-	 *
-	 * @return array
-	 */
-	public static function vars()
-	{
-		return self::$vars;
-	}
+        return $namespace;
+    }
 }

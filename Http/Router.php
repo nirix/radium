@@ -1,127 +1,121 @@
 <?php
 /*!
- * Avalon
- * Copyright (C) 2011-2012 Jack Polgar
+ * Radium
+ * Copyright (C) 2011-2012 Jack P.
+ * https://github.com/nirix
  *
- * This file is part of Avalon.
+ * This file is part of Radium.
  *
- * Avalon is free software: you can redistribute it and/or modify
+ * Radium is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation; version 3 only.
  *
- * Avalon is distributed in the hope that it will be useful,
+ * Radium is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with Avalon. If not, see <http://www.gnu.org/licenses/>.
+ * along with Radium. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Avalon\Http;
+namespace Radium\Http;
+
+use Radium\Core\Exception as Exception;
 
 /**
- * The router.
+ * Radium's Router.
  *
+ * @since 0.1
+ * @package Radium
+ * @subpackage HTTP
  * @author Jack P.
- * @package Avalon
+ * @copyright (C) Jack P.
  */
 class Router
 {
-	public static $namespace;
-	public static $controller;
-	public static $method;
-	public static $params = array();
-	public static $args = array();
-	public static $extension;
-	public static $error404;
-	private static $routes = array();
+    private static $routes = [];
 
-	// Router stuff
-	public static $extensions = array('.json', '.xml', '.rss');
+    // Routed values
+    public static $controller;
+    public static $method;
+    public static $params = [];
 
-	/**
-	 * Matche the request to a route and get the controller, method and arguments.
-	 * @param string $request The request.
-	 * @return boolean
-	 */
-	public static function process($request)
-	{
-		// Are we on the front page?
-		if ($request == '/') {
-			static::set_request(static::$routes['root']);
-			return true;
-		}
+    /**
+     * Adds a route to be routed.
+     *
+     * @param string $route  URI to match
+     * @param string $value  Controller/method to route to
+     * @param array  $params Default params to pass to the method
+     */
+    public static function add($route, $value, array $params = [])
+    {
+        // Don't overwrite the route
+        if (!isset(static::$routes[$route])) {
+            static::$routes[$route] = [
+                'route'  => $route,
+                'value'  => $value,
+                'params' => $params
+            ];
+        }
+    }
 
-		// Check if we have an exact match
-		if (isset(static::$routes[$request])) {
-			static::set_request(static::$routes[$request]);
-			return true;
-		}
+    /**
+     * Routes the request to the controller.
+     *
+     * @param Request $request
+     */
+    public static function route(Request $request)
+    {
+        // Is this the root route?
+        if ($request->uri() === '/' and isset(static::$routes['root'])) {
+            return static::setRoute(static::$routes['root']);
+        }
 
-		// Loop through routes and find a regex match
-		foreach (static::$routes as $route => $args) {
-			$route = '#^' . $route . '(?<extension>' . implode('|', static::$extensions) . ')?$#';
+        // Do we have an exact match?
+        if (isset(static::$routes[$request->uri()])) {
+            return static::setRoute(static::$routes[$request->uri()]);
+        }
 
-			if (preg_match($route, $request, $params)) {
-				unset($params[0]);
-				$args['params'] = array_merge($args['params'], $params);
-				$args['value'] = preg_replace($route, $args['value'], $request);
-				$args['extension'] = isset($params['extension']) ? $params['extension'] : null;
-				static::set_request($args);
-				return true;
-			}
-		}
+        // The fun begins
+        foreach (static::$routes as $route) {
+            // Does the route match the request?
+            if (preg_match("#^{$route['route']}?$#", $request->uri(), $params)) {
+                unset($params[0]);
+                $route['params'] = array_merge($route['params'], $params);
+                $route['value'] = preg_replace("#^{$route['route']}?$#", $route['value'], $request->uri());
+                return static::setRoute($route);
+            }
+        }
 
-		// No match, error controller, make it so.
-		static::set_request(array('value' => 'Error::404', 'params' => array()));
-		return false;
-	}
+        // No matches, try 404 route
+        if (isset(static::$routes['404'])) {
+            return static::setRoute(static::$routes['404']);
+        }
+        // No 404 route, Exception time! FUN :D
+        else {
+            throw new Exception("No routes found for '{$request->uri()}'");
+        }
+    }
 
-	/**
-	 * Add a route.
-	 * @param string $route The route to match to.
-	 * @param string $value The controller and method to route to.
-	 * @param array $params Parameters to be passed to the controller method.
-	 */
-	public static function add($route, $value, $params = array())
-	{
-		if (!isset(static::$routes[$route])) {
-			static::$routes[$route] = array(
-				'template' => $route,
-				'value' => $value,
-				'params' => $params
-			);
-		}
-	}
+    /**
+     * Sets the route info to that of the 404 route.
+     */
+    public static function set404()
+    {
+        if (!isset(static::$routes['404'])) {
+            throw new Exception("There is no 404 route set.");
+        }
+        return static::setRoute(static::$routes['404']);
+    }
 
-	/**
-	 * Private function to set the routed controller, method, parameters and method arguments.
-	 * @param array $route The route array.
-	 */
-	private static function set_request($route)
-	{
-		// Seperate the namespace, controller, method and arguments
-		$bits = explode('::', $route['value']);
-		$method_bits = explode('/', end($bits));
+    private static function setRoute($route)
+    {
+        $value = explode('.', $route['value']);
+        $method = explode('/', $value[1]);
 
-		static::$namespace = ($ns = implode('::', array_slice($bits, 0, -2)) and !empty($ns)) ? $ns : null;
-		static::$controller = $bits[count($bits) - 2];
-		static::$method = $method_bits[0];
-		static::$args = (isset($method_bits[1])) ? explode(',', $method_bits[1]) : array();
-		static::$extension = isset($route['extension']) ? $route['extension'] : null;
-		static::$params = $route['params'];
-
-		unset($bits, $method_bits, $ns);
-	}
-
-	/**
-	 * Returns the namespace in the form of a directory path.
-	 *
-	 * @return string
-	 */
-	public static function namespace_path()
-	{
-		return str_replace('::', '/', static::$namespace) . '/';
-	}
+        static::$controller = str_replace('::', '\\', '\\'.$value[0]);
+        static::$method = $method[0];
+        static::$params = (isset($method[1]) and $params = explode(',', $method[1])) ? $params : [];
+    }
 }

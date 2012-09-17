@@ -22,32 +22,14 @@
 namespace Radium\Core;
 
 /**
- * Error class
+ * Exceptional exception class, mostly.
  *
- * @since 0.1
+ * @since 0.3
  * @package Radium
  * @subpackage Core
  * @author Jack P.
  * @copyright (C) Jack P.
  */
-class Error
+class Exception extends \Exception
 {
-    public static function halt($title, $message = '')
-    {
-        @ob_end_clean();
-
-        $body = array();
-        $body[] = "<blockquote style=\"font-family:'Helvetica Neue', Arial, Helvetica, sans-serif;background:#fbe3e4;color:#8a1f11;padding:0.8em;margin-bottom:1em;border:2px solid #fbc2c4;\">";
-
-        if (!$title !== null) {
-            $body[] = "  <h1 style=\"margin: 0;\">{$title}</h1>";
-        }
-
-        $body[] = "  {$message}";
-        $body[] = "  <div style=\"margin-top:8px;\"><small>Powered by Radium</small></div>";
-        $body[] = "</blockquote>";
-
-        echo implode(PHP_EOL, $body);
-        exit;
-    }
 }

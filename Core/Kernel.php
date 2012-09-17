@@ -1,153 +1,81 @@
 <?php
 /*!
- * Avalon
- * Copyright (C) 2011-2012 Jack Polgar
+ * Radium
+ * Copyright (C) 2011-2012 Jack P.
+ * https://github.com/nirix
  *
- * This file is part of Avalon.
+ * This file is part of Radium.
  *
- * Avalon is free software: you can redistribute it and/or modify
+ * Radium is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation; version 3 only.
  *
- * Avalon is distributed in the hope that it will be useful,
+ * Radium is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with Avalon. If not, see <http://www.gnu.org/licenses/>.
+ * along with Radium. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Avalon\Core;
+namespace Radium\Core;
 
-use Avalon\Http\Request;
-use Avalon\Http\Router;
+use Radium\Http\Router;
+use Radium\Http\Request;
+use Radium\Output\Body;
+use Radium\Output\View;
 
 /**
- * The core Avalon class.
+ * Radium's Kernel, the heart of it all.
  *
- * @author Jack P.
- * @package Avalon
+ * @since 0.1
+ * @package Radium
  * @subpackage Core
+ * @author Jack P.
+ * @copyright (C) Jack P.
  */
 class Kernel
 {
-	private static $version = '0.2';
-	private static $app;
+    private static $app;
 
-	/**
-	 * Initialize the Avalon framework
-	 */
-	public static function init()
-	{
-		// Route the request
-		Request::process();
-		Router::process(Request::url());
-	}
+    /**
+     * Initializes the the kernel and routes the request.
+     */
+    public static function init()
+    {
+        // Route the request
+        Router::route(new Request);
 
-	/**
-	 * Execute the routed controller and method
-	 */
-	public static function run()
-	{
-		// Controller
-		$namespace = Router::$namespace;
-		$controller_name = str_replace('::', '', $namespace) . Router::$controller . "Controller";
-		$controller_file = Load::controller((Router::$namespace !== null ? str_replace('::', '/', Router::$namespace) . '/' : '') . Router::$controller);
+        // Check if the routed controller and method exists
+        if (!class_exists(Router::$controller) or !method_exists(Router::$controller, 'action' . ucfirst(Router::$method))) {
+            Router::set404();
+        }
+    }
 
-		// Method
-		$method_name = 'action_' . Router::$method;
-		$method_args = Router::$args;
+    /**
+     * Executes the routed request.
+     */
+    public static function run()
+    {
+        // Start the app
+        static::$app = new Router::$controller;
 
-		// Load root namespace app controller
-		if (file_exists(APPPATH . "/controllers/app_controller.php"))
-		{
-			require APPPATH . "/controllers/app_controller.php";
-		}
+        // Call the method
+        if (static::$app->render['action']) {
+            $output = call_user_func_array([static::$app, 'action' . ucfirst(Router::$method)], Router::$params);
+        }
 
-		// Load controller namespaces app controllers
-		if ($namespace !== null)
-		{
-			$ns_path = array();
-			foreach (explode('::', $namespace) as $ns)
-			{
-				$ns_path[] = strtolower($ns);
+        // Check if the action returned content
+        if ($output !== null) {
+            static::$app->render['view'] = false;
+            Body::append($output);
+        }
+        // Automatically render the view
+        elseif ($output === false) {
 
-				// Check that the file exists...
-				$file_path = APPPATH . "/controllers/" . implode('/', $ns_path) . "/app_controller.php";
-				if (file_exists($file_path))
-				{
-					require $file_path;
-				}
-			}
-		}
+        }
 
-		// Check if the controller file exists...
-		if (file_exists($controller_file))
-		{
-			require $controller_file;
-		}
-
-		// Start the app/controller
-		static::$app = new $controller_name();
-
-		// Run before filters
-		if (is_array(static::$app->_before))
-		{
-			$filters = array();
-
-			// Before all
-			if (isset(static::$app->_before['*']) and is_array(static::$app->_before['*']))
-			{
-				// Merge them into the filters array
-				$filters = array_merge($filters, static::$app->_before['*']);
-			}
-
-			// Before certain methods
-			if (isset(static::$app->_before[Router::$method]) and is_array(static::$app->_before[Router::$method]))
-			{
-				// Merge them into the fitlers array
-				$filters = array_merge($filters, static::$app->_before[Router::$method]);
-			}
-
-			// Execute the filters
-			foreach ($filters as $filter)
-			{
-				static::$app->$filter(Router::$method);
-			}
-		}
-
-		// Call the method
-		if (static::$app->_render['action'])
-		{
-			call_user_func_array(array(static::$app, $method_name), $method_args);
-		}
-
-		// Call our custom 'destructor'. Why not use __destruct(): because even
-		// after 'die', 'exit', etc is called, __destruct() is still executed.
-		if (method_exists(static::$app, '__shutdown'))
-		{
-			static::$app->__shutdown();
-		}
-	}
-
-	/**
-	 * Returns the application object.
-	 *
-	 * @return object
-	 */
-	public static function app()
-	{
-		return static::$app;
-	}
-
-	/**
-	 * Returns the version of the Avalon framework.
-	 *
-	 * @return string
-	 */
-	public static function version()
-	{
-		return static::$version;
-	}
+        static::$app->__shutdown();
+    }
 }

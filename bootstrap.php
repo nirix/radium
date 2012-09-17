@@ -19,33 +19,28 @@
  * along with Radium. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Radium\Output;
+// Fetch the autoloader class
+require __DIR__ . "/Autoloader.php";
 
-/**
- * Radium's View rendering class.
- *
- * @since 0.1
- * @package Radium
- * @subpackage Output
- * @author Jack P.
- * @copyright (C) Jack P.
- */
-class Body
-{
-    public static $content = '';
+use Radium\Core\Autoloader;
 
-    public static function append($content)
-    {
-        static::$content .= $content;
-    }
+// Register the vendor directory
+Autoloader::vendorLocation(VENDORPATH);
 
-    public static function content()
-    {
-        return static::$content;
-    }
+// Register common classes for ease of use
+Autoloader::aliasClasses([
+	// Core classes
+	'\Radium\Http\Request' => 'Request',
+	'\Radium\Output\View'  => 'View',
 
-    public static function clear()
-    {
-    	static::$content = '';
-    }
-}
+	// Helpres
+	'\Radium\Helpers\HTML' => 'HTML',
+	'\Radium\Helpers\Form' => 'Form',
+	'\Radium\Helpers\Time' => 'Time',
+
+	// Utilities
+	'\Radium\Util\Str' => 'Str'
+]);
+
+// Register the autoloader
+Autoloader::register();

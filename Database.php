@@ -1,118 +1,71 @@
 <?php
 /*!
- * Avalon
- * Copyright (C) 2011-2012 Jack Polgar
+ * Radium
+ * Copyright (C) 2011-2012 Jack P.
+ * https://github.com/nirix
  *
- * This file is part of Avalon.
+ * This file is part of Radium.
  *
- * Avalon is free software: you can redistribute it and/or modify
+ * Radium is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation; version 3 only.
  *
- * Avalon is distributed in the hope that it will be useful,
+ * Radium is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with Avalon. If not, see <http://www.gnu.org/licenses/>.
+ * along with Radium. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Avalon;
+namespace Radium;
+
+use Radium\Database\Exception;
 
 /**
- * Database class.
+ * Radium's Database class.
  *
+ * @since 0.1
+ * @package Radium
+ * @subpackage Database
  * @author Jack P.
- * @package Avalon
- * @subpackage Core
+ * @copyright (C) Jack P.
  */
 class Database
 {
-	private static $connections = array();
-	private static $initiated = array();
+    protected static $connections = [];
 
-	/**
-	 * Connects to the database.
-	 *
-	 * @return object
-	 */
-	public static function init($db)
-	{
-		require SYSPATH . '/database/model.php';
+    /**
+     * Creates a new database connection.
+     *
+     * @param string $name   Connection name
+     * @param array  $config Connection configuration
+     *
+     * @return object
+     */
+    public static function factory($name, array $config)
+    {
+        // Make sure a connection with same name doesn't exist
+        if (array_key_exists($name, static::$connections)) {
+            throw new Exception("Database connection {$name} already exists.");
+        }
 
-		// Define the DB_PREFIX constant
-		define("DB_PREFIX", isset($db['prefix']) ? $db['prefix'] : '');
+        // Set the class name, with the namespace
+        $className = '\radium\database\\'. $config['driver'];
 
-		static::factory($db, 'main');
+        // Connect to the database and return the object
+        static::$connections[$name] = new $className($config);
+        return static::$connections[$name];
+    }
 
-		// Load the models
-		foreach(scandir(APPPATH . '/models') as $file)
-		{
-			// Make sure it's not a directory and is a php file
-			if(!is_dir($file) and substr($file, -3) == 'php')
-			{
-				require(APPPATH . '/models/' . $file);
-			}
-		}
-
-		return static::$connections['main'];
-	}
-
-	/**
-	 * Create a new database connection based off the passed
-	 * config array and the specified name.
-	 *
-	 * @param array $config
-	 * @param string $name
-	 *
-	 * @return object
-	 */
-	public static function factory(array $config, $name)
-	{
-		// Make sure the connection name is available
-		if (isset(static::$connections[$name]))
-		{
-			throw new Exception("Database connection name '{$name}' already initiated");
-		}
-
-		// Prepend 'DB_' to the driver name
-		$class_name = "\\avalon\\database\\{$config['driver']}";
-
-		// Load the driver class
-		if (!class_exists($class_name))
-		{
-			require SYSPATH . '/database/' . strtolower($config['driver']) . '.php';
-		}
-
-		// Create the connection and mark it as initiated.
-		static::$connections[$name] = new $class_name($config, $name);
-		static::$initiated[$name] = true;
-
-		return static::$connections[$name];
-	}
-
-	/**
-	 * Returns the database instance object.
-	 *
-	 * @param string $name Connection name
-	 *
-	 * @return object
-	 */
-	public static function connection($name = 'main')
-	{
-		return isset(static::$connections[$name]) ? static::$connections[$name] : false;
-	}
-
-	/**
-	 * Returns true if the database has been initiated, false if not.
-	 *
-	 * @param string $name Connection name
-	 *
-	 * @return bool
-	 */
-	public static function initiated($name = 'main')
-	{
-		return isset(static::$initiated[$name]) ? static::$initiated[$name] : false;
-	}
+    /**
+     * Returns the database object for the specified connection name.
+     *
+     * @return object
+     */
+    public static function connection($name)
+    {
+        return array_key_exists($name, static::$connections) ? static::$connections[$name] : false;
+    }
 }
