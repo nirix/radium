@@ -277,21 +277,7 @@ class Query
         if ($this->query['type'] == "SELECT"
         or  $this->query['type'] == "SELECT DISTINCT") {
             // Build columns to select
-            $columns = [];
-            foreach ($this->query['select'] as $column => $as) {
-                // Normal column select
-                if (is_numeric($column)) {
-                    $columns[] = "`{$as}`";
-                }
-                // Alias
-                else {
-                    $columns[] = "`{$column}` AS `{$as}`";
-                }
-            }
-
-            // Join columns
-            $queryString[] = implode(', ', $columns);
-            unset($columns);
+            $queryString[] = $this->buildSelectColumns();
 
             // From
             $queryString[] = "FROM `{$this->prefix}{$this->query['table']}`";
@@ -304,6 +290,45 @@ class Query
         }
 
         return implode(" ", str_replace("%prefix%", $this->prefix, $queryString));
+    }
+
+    /**
+     * Builds the columns for the select queries.
+     *
+     * @return string
+     */
+    private function buildSelectColumns()
+    {
+        $columns = [];
+
+        foreach ($this->query['select'] as $column => $as) {
+            // Normal column select
+            if (is_numeric($column)) {
+                $columns[] = $this->buildSelectColumnName($as);
+            }
+            // Alias
+            else {
+                $columns[] = $this->buildSelectColumnName($column) . " AS `{$as}`";
+            }
+        }
+
+        // Join columns and return
+        return implode(', ', $columns);
+    }
+
+    /**
+     * Builds the select query column names.
+     *
+     * @return string
+     */
+    private function buildSelectColumnName($column)
+    {
+        // Regular column name
+        if (strpos($column, '(') === false) {
+            return "`{$column}`";
+        } else {
+            return trim(str_replace(['(', ')'], ['(`', '`)'], $column), '`');
+        }
     }
 
     private function buildWhere()
