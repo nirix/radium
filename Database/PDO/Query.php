@@ -178,7 +178,7 @@ class Query
                 $this->orderBy($col, $how);
             }
         } else {
-            $this->query['order_by'][] = str_replace('.', "`.`", "`{$column}` {$how}");
+            $this->query['order_by'][] = $this->columnName($column) . " {$how}";
         }
         return $this;
     }
@@ -304,11 +304,11 @@ class Query
         foreach ($this->query['select'] as $column => $as) {
             // Normal column select
             if (is_numeric($column)) {
-                $columns[] = $this->buildSelectColumnName($as);
+                $columns[] = $this->columnName($as);
             }
             // Alias
             else {
-                $columns[] = $this->buildSelectColumnName($column) . " AS `{$as}`";
+                $columns[] = $this->columnName($column) . " AS `{$as}`";
             }
         }
 
@@ -317,17 +317,17 @@ class Query
     }
 
     /**
-     * Builds the select query column names.
+     * Makes the column name safe for queries.
      *
      * @return string
      */
-    private function buildSelectColumnName($column)
+    private function columnName($column)
     {
         // Regular column name
         if (strpos($column, '(') === false) {
-            return "`{$column}`";
+            return str_replace(['.'], ['`.`'], "`{$column}`");
         } else {
-            return trim(str_replace(['(', ')'], ['(`', '`)'], $column), '`');
+            return trim(str_replace(['(', ')', '.'], ['(`', '`)', '`.`'], $column), '`');
         }
     }
 
@@ -343,14 +343,15 @@ class Query
                     // Get column name
                     $column = str_replace('`', '', explode(" ", $condition[0])[0]); // PHP 5.4 array dereferencing, fuck yeah!
 
-                    $condition[0] = str_replace([$column, '.'], ["`{$column}`", "`.`"], $condition[0]);
+                    // Make the column name safe
+                    $condition[0] = str_replace($column, $this->columnName($column), $condition[0]);
 
                     // Add value to the bind queue
-                    $this->valuesToBind[] = $condition[1];
-                    $valueBindKey = count($this->valuesToBind) - 1;
+                    $valueBindKey = str_replace('.', '_', $column);
+                    $this->valuesToBind[$valueBindKey] = $condition[1];
 
                     // Add condition to group
-                    $group[] = str_replace("?", ":{$valueBindKey}_{$column}", $condition[0]);
+                    $group[] = str_replace("?", ":{$valueBindKey}", $condition[0]);
                 }
 
                 // Add the group
