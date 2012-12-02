@@ -41,7 +41,7 @@ class Model
      *
      * @var string
      */
-    protected static $_name;
+    protected static $_table;
 
     /**
      * Primary key field, uses `id` by default.
@@ -84,6 +84,13 @@ class Model
     protected static $_connectionName = 'default';
 
     /**
+     * Is new row?
+     *
+     * @var boolean
+     */
+    protected $isNew;
+
+    /**
      * Table schema.
      *
      * @var array
@@ -114,6 +121,12 @@ class Model
     {
         // Get table schema
         static::getSchema();
+
+        foreach ($data as $column => $value) {
+            $this->{$column} = $value;
+        }
+
+        $this->_isNew = $isNew;
     }
 
     /**
@@ -129,5 +142,32 @@ class Model
             // Describe the table...
             // code goes here...
         }
+    }
+
+    /**
+     * Fetch all rows.
+     *
+     * @return array
+     */
+    public static function all()
+    {
+        return Database::connection(static::$_connectionName)
+            ->select(array_keys(static::$_schema))
+            ->model(get_called_class())
+            ->from(static::$_table)
+            ->fetchAll();
+    }
+
+    /**
+     * Build a query based off the model.
+     *
+     * @return object
+     */
+    public static function select($fields = '*')
+    {
+        return Database::connection(static::$_connectionName)
+            ->select(array_keys(static::$_schema))
+            ->from(static::$_table)
+            ->model(get_called_class());
     }
 }
