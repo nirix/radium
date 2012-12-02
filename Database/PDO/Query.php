@@ -79,7 +79,7 @@ class Query
      *
      * @return object
      */
-    public function __construct($type, $data = null, $connectionName = 'main')
+    public function __construct($type, $data = null, $connectionName = 'default')
     {
         // Set connection name
         $this->connectionName = $connectionName;
@@ -91,7 +91,7 @@ class Query
         switch ($type) {
             case "SELECT":
             case "SELECT DISTINCT":
-                $this->query['select'] = ($data) ? $data : '*';
+                $this->query['select'] = ($data) ? $data : ['*'];
                 break;
 
             case "INSERT INTO":
@@ -113,9 +113,9 @@ class Query
      *
      * @return object
      */
-    public function _model($model)
+    public function model($model)
     {
-        $this->_model = $model;
+        $this->model = $model;
         return $this;
     }
 
@@ -250,6 +250,11 @@ class Query
         return $this;
     }
 
+    public function fetchAll()
+    {
+        return $this->exec()->fetchAll();
+    }
+
     /**
      * Executes the query and return the statement.
      *
@@ -257,9 +262,9 @@ class Query
      */
     public function exec()
     {
-        $result = $this->connection()->prepare($this->_assemble());
+        $result = $this->connection()->prepare($this->assemble());
 
-        return $result->_model($this->_model)->exec();
+        return $result->model($this->model)->exec();
     }
 
     /**
@@ -286,7 +291,9 @@ class Query
             $queryString[] = $this->buildWhere();
 
             // Order by
-            $queryString[] = "ORDER BY " . implode(", ", $this->query['order_by']);
+            if (isset($this->query['order_by'])) {
+                $queryString[] = "ORDER BY " . implode(", ", $this->query['order_by']);
+            }
         }
 
         return implode(" ", str_replace("%prefix%", $this->prefix, $queryString));
@@ -323,8 +330,12 @@ class Query
      */
     private function columnName($column)
     {
+        // Select all
+        if ($column == '*') {
+            return '*';
+        }
         // Regular column name
-        if (strpos($column, '(') === false) {
+        elseif (strpos($column, '(') === false) {
             return str_replace(['.'], ['`.`'], "`{$column}`");
         } else {
             return trim(str_replace(['(', ')', '.'], ['(`', '`)', '`.`'], $column), '`');
@@ -336,7 +347,7 @@ class Query
         $query = [];
 
         // Make sure there's something to do
-        if (count($this->query['where'])) {
+        if (isset($this->query['where']) and count($this->query['where'])) {
             foreach ($this->query['where'] as $group => $conditions) {
                 $group = []; // Yes, because the $group above is not used, get over it.
                 foreach ($conditions as $condition) {

@@ -44,7 +44,7 @@ class Database
      *
      * @return object
      */
-    public static function factory($name, array $config)
+    public static function factory($name = 'default', array $config)
     {
         // Make sure a connection with same name doesn't exist
         if (array_key_exists($name, static::$connections)) {
@@ -55,7 +55,7 @@ class Database
         $className = '\radium\database\\'. $config['driver'];
 
         // Connect to the database and return the object
-        static::$connections[$name] = new $className($config);
+        static::$connections[$name] = new $className($config, $name);
         return static::$connections[$name];
     }
 
@@ -64,7 +64,7 @@ class Database
      *
      * @return object
      */
-    public static function connection($name)
+    public static function connection($name = 'default')
     {
         return array_key_exists($name, static::$connections) ? static::$connections[$name] : false;
     }
