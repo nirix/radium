@@ -37,6 +37,7 @@ use Radium\Output\View;
  */
 class Kernel
 {
+    private static $version = '0.1';
     private static $app;
 
     /**
@@ -44,11 +45,13 @@ class Kernel
      */
     public static function init()
     {
+        session_start();
+
         // Route the request
         Router::route(new Request);
 
         // Check if the routed controller and method exists
-        if (!class_exists(Router::$controller) or !method_exists(Router::$controller, 'action' . ucfirst(Router::$method))) {
+        if (!class_exists(Router::$controller) or !method_exists(Router::$controller, Router::$method . 'Action')) {
             Router::set404();
         }
     }
@@ -61,21 +64,62 @@ class Kernel
         // Start the app
         static::$app = new Router::$controller;
 
+        // Before filters
+        $filters = array_merge(
+            isset(static::$app->before['*']) ? static::$app->before['*'] : [],
+            isset(static::$app->before[Router::$method]) ? static::$app->before[Router::$method] : []
+        );
+        foreach ($filters as $filter) {
+            static::$app->{$filter}(Router::$method);
+        }
+        unset($filters, $filter);
+
         // Call the method
         if (static::$app->render['action']) {
-            $output = call_user_func_array([static::$app, 'action' . ucfirst(Router::$method)], Router::$params);
+            $output = call_user_func_array([static::$app, Router::$method . 'Action'], Router::$vars);
         }
+
+        // After filters
+        $filters = array_merge(
+            isset(static::$app->after['*']) ? static::$app->after['*'] : [],
+            isset(static::$app->after[Router::$method]) ? static::$app->after[Router::$method] : []
+        );
+        foreach ($filters as $filter) {
+            static::$app->{$filter}(Router::$method);
+        }
+        unset($filters, $filter);
 
         // Check if the action returned content
         if ($output !== null) {
             static::$app->render['view'] = false;
             Body::append($output);
-        }
-        // Automatically render the view
-        elseif ($output === false) {
 
+            // Get the content, clear the body
+            // and append content to a clean slate.
+            $content = Body::content();
+            Body::clear();
+            Body::append($content);
         }
 
         static::$app->__shutdown();
+    }
+
+    /**
+     * Returns the app object.
+     *
+     * @return object
+     */
+    public static function app()
+    {
+        return static::$app;
+    }
+
+    /**
+     * Returns the version of Avalon.
+     *
+     * @return string
+     */
+    public static function version() {
+        return static::$version;
     }
 }
