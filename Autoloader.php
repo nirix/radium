@@ -19,7 +19,7 @@
  * along with Radium. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Radium\Core;
+namespace Radium;
 
 require __DIR__ . '/Core/Exception.php';
 
@@ -28,7 +28,6 @@ require __DIR__ . '/Core/Exception.php';
  *
  * @since 0.1
  * @package Radium
- * @subpackage Core
  * @author Jack P.
  * @copyright (C) Jack P.
  */
@@ -42,7 +41,7 @@ class Autoloader
      */
     public static function register()
     {
-        spl_autoload_register('Radium\Core\Autoloader::load', true, true);
+        spl_autoload_register('Radium\Autoloader::load', true, true);
     }
 
     /**
