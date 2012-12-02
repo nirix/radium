@@ -21,7 +21,7 @@
 
 namespace Radium\Http;
 
-use Radium\Core\Exception as Exception;
+use Radium\Exception as Exception;
 
 /**
  * Radium's Router.

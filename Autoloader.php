@@ -21,7 +21,7 @@
 
 namespace Radium;
 
-require __DIR__ . '/Core/Exception.php';
+require __DIR__ . '/Exception.php';
 
 /**
  * Radium's Autoloader, the magic behind the scenes.

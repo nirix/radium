@@ -21,7 +21,7 @@
 
 namespace Radium;
 
-use Radium\Database\Exception;
+use Radium\Exception;
 
 /**
  * Radium's Database class.

@@ -21,7 +21,7 @@
 
 namespace Radium\Output;
 
-use Radium\Core\Error;
+use Radium\Error;
 
 /**
  * Radium's View rendering class.

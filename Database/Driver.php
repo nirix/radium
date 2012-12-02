@@ -19,7 +19,9 @@
  * along with Radium. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Radium\Catabase;
+namespace Radium\Database;
+
+use Radium\Error;
 
 /**
  * Database driver
