@@ -57,9 +57,11 @@ class Controller
         if ($this->render['layout']) {
             $content = Body::$content;
             Body::clear();
-            Body::append(View::render("layouts/{$this->render['layout']}", ['output' => $content]));
+            View::render("layouts/{$this->render['layout']}", ['output' => $content]);
         }
 
+        // Set the X-Powered-By header and render the layout with the content
+        header("X-Powered-By: Radium/" . Kernel::version());
         print(Body::content());
     }
 }
