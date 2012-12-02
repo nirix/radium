@@ -50,7 +50,7 @@ class View
     public static function render($file, array $vars = [])
     {
         // Get the view content
-        $content = static::getView($file, $vars);
+        $content = static::get($file, $vars);
 
         // Check if we need to flush or append
         if(ob_get_level() > static::$obLevel + 1) {
@@ -71,7 +71,7 @@ class View
      *
      * @return string
      */
-    private static function getView($file, array $vars = [])
+    public static function get($file, array $vars = [])
     {
         // Get the file name/path
         $file = static::filePath($file);
@@ -81,16 +81,9 @@ class View
             static::$obLevel = ob_get_level();
         }
 
-        // Make the set variables accessible
-        foreach (static::$vars as $_var => $_val) {
+        // Make the variables available to the view
+        foreach (array_merge(static::$vars, $vars) as $_var => $_val) {
             $$_var = $_val;
-        }
-
-        // Make the vars for this view accessible
-        if (count($vars)) {
-            foreach($vars as $_var => $_val) {
-                $$_var = $_val;
-            }
         }
 
         // Load up the view and get the contents
@@ -99,6 +92,24 @@ class View
         $content = ob_get_contents();
 
         return $content;
+    }
+
+    /**
+     * Sends the variable to the view.
+     *
+     * @param string $var The variable name.
+     * @param mixed $val The variables value.
+     */
+    public static function set($var, $val = null)
+    {
+        // Mass set
+        if (is_array($var)) {
+            foreach ($var as $k => $v) {
+                static::set($k, $v);
+            }
+        } else {
+            self::$vars[$var] = $val;
+        }
     }
 
     /**
