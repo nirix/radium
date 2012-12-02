@@ -34,11 +34,12 @@ use Radium\Core\Error;
  */
 class View
 {
-    private static $ob_level;
-    private static $theme;
-    private static $inherit_from;
-    private static $search_paths = [];
+    private static $obLevel;
+    public static $theme;
+    public static $inheritFrom;
+    private static $searchPaths = [];
     private static $vars = [];
+    private static $viewExtensions = ['phtml', 'php', 'js.php', 'json.php'];
 
     /**
      * Renders the specified file.
@@ -50,9 +51,9 @@ class View
     {
         // Get the view content
         $content = static::getView($file, $vars);
-        
+
         // Check if we need to flush or append
-        if(ob_get_level() > static::$ob_level + 1) {
+        if(ob_get_level() > static::$obLevel + 1) {
             ob_end_flush();
         }
         // Append it to the output
@@ -74,29 +75,29 @@ class View
     {
         // Get the file name/path
         $file = static::filePath($file);
-        
+
         // Make sure the ob_level is set
-        if (static::$ob_level === null) {
-            static::$ob_level = ob_get_level();
+        if (static::$obLevel === null) {
+            static::$obLevel = ob_get_level();
         }
-        
+
         // Make the set variables accessible
         foreach (static::$vars as $_var => $_val) {
             $$_var = $_val;
         }
-        
+
         // Make the vars for this view accessible
         if (count($vars)) {
             foreach($vars as $_var => $_val) {
                 $$_var = $_val;
             }
         }
-        
+
         // Load up the view and get the contents
         ob_start();
         include($file);
         $content = ob_get_contents();
-        
+
         return $content;
     }
 
@@ -120,7 +121,7 @@ class View
         if (!$path) {
             Error::halt("View Error", "Unable to load view '{$file}'");
         }
-        
+
         unset($file);
         return $path;
     }
@@ -143,11 +144,11 @@ class View
         }
 
         // Add the registered search paths
-        $dirs = array_merge($dirs, static::$search_paths);
+        $dirs = array_merge($dirs, static::$searchPaths);
 
         // Add the inheritance path, if set
-        if (static::$inherit_from !== null) {
-            $dirs[] = static::$inherit_from;
+        if (static::$inheritFrom !== null) {
+            $dirs[] = static::$inheritFrom;
         }
 
         // And the root of the views path
@@ -155,10 +156,12 @@ class View
 
         // Search time
         foreach ($dirs as $dir) {
-            $path = "{$dir}/{$file}.php";
-            if (file_exists($path)) {
-                // Found!
-                return $path;
+            foreach (static::$viewExtensions as $ext) {
+                $path = "{$dir}/{$file}.{$ext}";
+                if (file_exists($path)) {
+                    // Found!
+                    return $path;
+                }
             }
         }
 
