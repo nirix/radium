@@ -145,17 +145,38 @@ class Model
     }
 
     /**
+     * Returns the connection for the model.
+     *
+     * @return object
+     */
+    protected static function connection()
+    {
+        return Database::connection(static::$_connectionName);
+    }
+
+    /**
+     * Returns the first found row.
+     *
+     * @return object
+     */
+    public static function find($find, $value = null)
+    {
+        if ($value === null) {
+            $value = $find;
+            $find = static::$_primaryKey;
+        }
+
+        return static::select()->where($find. " = ?", $value)->fetch();
+    }
+
+    /**
      * Fetch all rows.
      *
      * @return array
      */
     public static function all()
     {
-        return Database::connection(static::$_connectionName)
-            ->select(array_keys(static::$_schema))
-            ->model(get_called_class())
-            ->from(static::$_table)
-            ->fetchAll();
+        return static::select()->fetchAll();
     }
 
     /**
@@ -165,7 +186,7 @@ class Model
      */
     public static function select($fields = '*')
     {
-        return Database::connection(static::$_connectionName)
+        return static::connection()
             ->select(array_keys(static::$_schema))
             ->from(static::$_table)
             ->model(get_called_class());
