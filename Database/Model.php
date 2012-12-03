@@ -130,6 +130,11 @@ class Model
         // Get table schema
         static::loadSchema();
 
+        // Set defaults
+        foreach (static::schema() as $field => $properties) {
+            $this->{$field} = $properties['default'];
+        }
+
         // Set data
         foreach ($data as $column => $value) {
             $this->{$column} = $value;
