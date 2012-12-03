@@ -95,21 +95,21 @@ class Model
      *
      * @var array
      */
-    protected static $_schema = [];
+    protected static $_schema =[];
 
     /**
      * Filters to process data before certain events.
      *
      * @var array
      */
-    protected static $_filtersBefore = [];
+    protected static $_before = [];
 
     /**
      * Filters to process data after certain events.
      *
      * @var array
      */
-    protected static $_filtersAfter  = [];
+    protected static $_after  = [];
 
     /**
      * Model constructor.
@@ -120,7 +120,7 @@ class Model
     public function __construct(array $data = [], $isNew = true)
     {
         // Get table schema
-        static::getSchema();
+        static::loadSchema();
 
         foreach ($data as $column => $value) {
             $this->{$column} = $value;
@@ -134,14 +134,36 @@ class Model
      *
      * @access protected
      */
-    protected static function getSchema()
+    protected static function loadSchema()
     {
+        if (!array_key_exists(static::$_table, static::$_schema)) {
+            static::$_schema[static::$_table] = null;
+        }
+
         // Make sure we haven't already fetched
         // the tables schema.
-        if (static::$_schema === null) {
-            // Describe the table...
-            // code goes here...
+        if (static::$_schema[static::$_table] === null) {
+            $result = static::connection()->prepare("DESCRIBE `" . static::$_table . "`")->exec();
+            foreach ($result->fetchAll(\PDO::FETCH_COLUMN) as $column) {
+                static::$_schema[static::$_table][$column['Field']] = [
+                    'type'    => $column['Type'],
+                    'default' => $column['Default'],
+                    'null'    => $column['Null'] == 'NO' ? false : true,
+                    'key'     => $column['Key'],
+                    'extra'   => $column['Extra']
+                ];
+            }
         }
+    }
+
+    /**
+     * Returns the Models schema.
+     *
+     * @return array
+     */
+    public static function schema()
+    {
+        return array_key_exists(static::$_table, static::$_schema) ? static::$_schema[static::$_table] : null;
     }
 
     /**
@@ -187,7 +209,7 @@ class Model
     public static function select($fields = '*')
     {
         return static::connection()
-            ->select(array_keys(static::$_schema))
+            ->select()
             ->from(static::$_table)
             ->model(get_called_class());
     }
