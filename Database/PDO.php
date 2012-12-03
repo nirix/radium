@@ -36,7 +36,7 @@ use Radium\Database\PDO\Statement;
 class PDO extends Driver
 {
     private $connection;
-    private $connection_name;
+    private $connectionName;
     private $query_count = 0;
     protected $last_query;
 
@@ -53,7 +53,7 @@ class PDO extends Driver
         $config['type'] = strtolower($config['type']);
 
         // Set connection name and table prefix
-        $this->connection_name = $name;
+        $this->connectionName = $name;
         $this->prefix = isset($config['prefix']) ? $config['prefix'] : '';
 
         // Check if a DSN is already specified
@@ -92,7 +92,7 @@ class PDO extends Driver
      * @param string  $string String to quote
      * @param integer $type   Paramater type
      */
-    public function quote($string, $type = PDO::PARAM_STR)
+    public function quote($string, $type = \PDO::PARAM_STR)
     {
         return $this->connection->quote($string, $type);
     }
@@ -124,7 +124,7 @@ class PDO extends Driver
     public function prepare($query, array $options = array())
     {
         $this->last_query = $query;
-        return new Statement($this->connection->prepare($query, $options), $this->connection_name);
+        return new Statement($this->connection->prepare($query, $options), $this->connectionName);
     }
 
     /**
@@ -139,7 +139,7 @@ class PDO extends Driver
         if (!is_array($cols)) {
             $cols = func_get_args();
         }
-        return new Query("SELECT", $cols, $this->connection_name);
+        return new Query("SELECT", $cols, $this->connectionName);
     }
 
     /**
@@ -151,7 +151,7 @@ class PDO extends Driver
      */
     public function update($table)
     {
-        return new Query("UPDATE", $table, $this->connection_name);
+        return new Query("UPDATE", $table, $this->connectionName);
     }
 
     /**
@@ -161,7 +161,7 @@ class PDO extends Driver
      */
     public function delete()
     {
-        return new Query("DELETE", null, $this->connection_name);
+        return new Query("DELETE", null, $this->connectionName);
     }
 
     /**
@@ -173,7 +173,7 @@ class PDO extends Driver
      */
     public function insert(array $data)
     {
-        return new Query("INSERT INTO", $data, $this->connection_name);
+        return new Query("INSERT INTO", $data, $this->connectionName);
     }
 
     /**
