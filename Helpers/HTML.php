@@ -42,6 +42,9 @@ class HTML
      */
     public static function cssLinkTag($href, $media = 'screen')
     {
+        if (strpos($href, 'http') === false) {
+            $href = Request::base($href);
+        }
         return '<link rel="stylesheet" href="' . $href . '" screen="' . $media . '">' . PHP_EOL;
     }
 
@@ -54,6 +57,9 @@ class HTML
      */
     public static function jsIncTag($path)
     {
+        if (strpos($path, 'http') === false) {
+            $path = Request::base($path);
+        }
         return '<script src="' . $path . '" type="text/javascript"></script>' . PHP_EOL;
     }
 
