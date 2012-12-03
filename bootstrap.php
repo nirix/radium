@@ -22,7 +22,7 @@
 // Fetch the autoloader class
 require __DIR__ . "/Autoloader.php";
 
-use Radium\Core\Autoloader;
+use Radium\Autoloader;
 
 // Register the vendor directory
 Autoloader::vendorLocation(VENDORPATH);
