@@ -64,6 +64,9 @@ class Kernel
         // Start the app
         static::$app = new Router::$controller;
 
+        // Filters
+        static::$app->filters();
+
         // Before filters
         $filters = array_merge(
             isset(static::$app->before['*']) ? static::$app->before['*'] : [],

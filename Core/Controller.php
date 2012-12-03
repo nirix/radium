@@ -42,9 +42,16 @@ class Controller
         'layout' => 'default' // Layout to render
     ];
 
+    public $before = [];
+    public $after = [];
+
     public function __construct()
     {
         $this->render['view'] = get_called_class() . '/' . Router::$method;
+    }
+
+    public function filters()
+    {
     }
 
     public function __shutdown()
