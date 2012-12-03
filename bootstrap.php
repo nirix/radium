@@ -29,17 +29,17 @@ Autoloader::vendorLocation(VENDORPATH);
 
 // Register common classes for ease of use
 Autoloader::aliasClasses([
-	// Core classes
-	'\Radium\Http\Request' => 'Request',
-	'\Radium\Output\View'  => 'View',
+    // Core classes
+    '\Radium\Http\Request' => 'Request',
+    '\Radium\Output\View'  => 'View',
 
-	// Helpres
-	'\Radium\Helpers\HTML' => 'HTML',
-	'\Radium\Helpers\Form' => 'Form',
-	'\Radium\Helpers\Time' => 'Time',
+    // Helpres
+    '\Radium\Helpers\HTML' => 'HTML',
+    '\Radium\Helpers\Form' => 'Form',
+    '\Radium\Helpers\Time' => 'Time',
 
-	// Utilities
-	'\Radium\Util\Str' => 'Str'
+    // Utilities
+    '\Radium\Util\Str' => 'Str'
 ]);
 
 // Register the autoloader
