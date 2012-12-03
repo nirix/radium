@@ -100,7 +100,7 @@ class Statement
      */
     public function fetch($style = \PDO::FETCH_ASSOC, $orientation = \PDO::FETCH_ORI_NEXT, $offset = 0)
     {
-        if ($this->row_count() == 0) {
+        if ($this->rowCount() == 0) {
             return false;
         }
 
