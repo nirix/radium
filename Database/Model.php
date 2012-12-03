@@ -88,7 +88,7 @@ class Model
      *
      * @var boolean
      */
-    protected $isNew;
+    protected $_isNew;
 
     /**
      * Table schema.
@@ -170,6 +170,7 @@ class Model
      * Returns the connection for the model.
      *
      * @return object
+     * @access protected
      */
     protected static function connection()
     {
@@ -212,5 +213,76 @@ class Model
             ->select()
             ->from(static::$_table)
             ->model(get_called_class());
+    }
+
+    /**
+     * Updates the model attributes.
+     *
+     * @param array $attributes
+     */
+    public function set($attributes)
+    {
+        foreach ($attributes as $column => $value) {
+            $this->{$column} = $value;
+        }
+    }
+
+    /**
+     * Gets the models data.
+     *
+     * @return array
+     */
+    public function data()
+    {
+        $data = [];
+        foreach (array_keys(static::schema()) as $column) {
+            if (isset($this->{$column})) {
+                $data[$column] = $this->{$column};
+            }
+        }
+        return $data;
+    }
+
+    /**
+     * Validates the model data.
+     *
+     * @param array $data
+     *
+     * @return boolean
+     */
+    public function validates($data = null)
+    {
+        if ($data === null) {
+            $data = static::data();
+        }
+    }
+
+    /**
+     * Saves the model to the database.
+     *
+     * @return boolean
+     */
+    public function save()
+    {
+        // Get data
+        $data = static::data();
+
+        // Validate
+        if (!$this->validates($data)) {
+            //return false;
+        }
+
+        if ($this->_isNew) {
+            return static::connection()
+                ->insert($data)
+                ->into(static::$_table)
+                ->exec();
+        } else {
+            return static::connection()
+                ->update(static::$_table)
+                ->set($data)
+                ->where(static::$_primaryKey . ' = ?', $data[static::$_primaryKey])
+                ->exec();
+        }
     }
 }
