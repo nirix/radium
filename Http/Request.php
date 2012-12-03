@@ -35,9 +35,11 @@ use Radium\Exception as Exception;
 class Request
 {
     private static $uri;
-    private static $segments = [];
+    private static $segments = array();
     private static $method;
     private static $requested_with;
+    public static $request = array();
+    public static $post = array();
 
     public function __construct()
     {
@@ -52,16 +54,53 @@ class Request
 
         // Requested with
         static::$requested_with = @$_SERVER['HTTP_X_REQUESTED_WITH'];
+
+        // _REQUEST
+        static::$request = $_REQUEST;
+
+        // _POST
+        static::$post = $_POST;
     }
 
     /**
-     * Returns the requested URI.
+     * Static method for returning the relative URI.
      *
      * @return string
      */
     public function uri()
     {
         return static::$uri;
+    }
+
+    /**
+     * Returns the request method if nothing
+     * is passed, otherwise returns true/false
+     * if the passed string matches the method.
+     *
+     * @param string $matches
+     *
+     * @return string
+     */
+    public static function method($matches = false)
+    {
+        // Return the request method
+        if (!$matches) {
+            return static::$method;
+        }
+        // Match the request method
+        else {
+            return static::$method == $matches;
+        }
+    }
+
+    /**
+     * Returns the full requested URI.
+     *
+     * @return string
+     */
+    public static function requestUri()
+    {
+        return $_SERVER['REQUEST_URI'];
     }
 
     /**
@@ -73,7 +112,7 @@ class Request
      */
     public static function seg($segment)
     {
-        return (isset(static::$segments[$segment]) ? static::$segments[$segments] : false);
+        return (isset(static::$segments[$segment]) ? static::$segments[$segment] : false);
     }
 
     /**
