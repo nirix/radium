@@ -22,6 +22,7 @@
 namespace Radium\Database;
 
 use Radium\Database;
+use Radium\Database\Validations;
 use Radium\Helpers\Time;
 use Radium\Core\Hook;
 
@@ -69,12 +70,19 @@ class Model
      *
      * @example
      *  $_validates = [
-     *      'username' => ['unique', 'maxLength' => 20] // Unique and max 20 characters
+     *      'username' => ['unique' => true, 'maxLength' => 20] // Unique and max 20 characters
      *  ];
      *
      * @var array
      */
     protected static $_validates = [];
+
+    /**
+     * Model errors.
+     *
+     * @var array
+     */
+    protected $errors = [];
 
     /**
      * Name of the connection name if not the default one.
@@ -122,9 +130,13 @@ class Model
         // Get table schema
         static::loadSchema();
 
+        // Set data
         foreach ($data as $column => $value) {
             $this->{$column} = $value;
         }
+
+        // Run filters
+        $this->runFilters('after', 'construct');
 
         $this->_isNew = $isNew;
     }
@@ -216,6 +228,24 @@ class Model
     }
 
     /**
+     * Runs the filters for the specified action.
+     *
+     * @param string $action
+     */
+    protected function runFilters($when, $action)
+    {
+        $when = "_{$when}";
+        $filters = static::${$when};
+
+        // Anything to do?
+        if (array_key_exists($action, $filters)) {
+            foreach ($filters[$action] as $method) {
+                $this->{$method}();
+            }
+        }
+    }
+
+    /**
      * Updates the model attributes.
      *
      * @param array $attributes
@@ -244,6 +274,31 @@ class Model
     }
 
     /**
+     * Returns the errors array.
+     *
+     * @return array
+     */
+    public function errors()
+    {
+        return $this->errors;
+    }
+
+    /**
+     * Adds an error for the specified field.
+     *
+     * @param string $field
+     * @param string $message
+     */
+    public function addError($field, $message)
+    {
+        if (!array_key_exists($field, $this->errors)) {
+            $this->errors[$field] = [];
+        }
+
+        $this->errors[$field][] = $message;
+    }
+
+    /**
      * Validates the model data.
      *
      * @param array $data
@@ -252,9 +307,18 @@ class Model
      */
     public function validates($data = null)
     {
+        $this->errors = [];
+
+        // Get data if it wasn't passed
         if ($data === null) {
             $data = static::data();
         }
+
+        foreach (static::$_validates as $field => $validations) {
+            Validations::run($this, $field, $validations);
+        }
+
+        return count($this->errors) == 0;
     }
 
     /**
@@ -264,12 +328,15 @@ class Model
      */
     public function save()
     {
+        // Run filter
+        $this->runFilters('before', $this->_isNew ? 'create' : 'save');
+
         // Get data
         $data = static::data();
 
         // Validate
         if (!$this->validates($data)) {
-            //return false;
+            return false;
         }
 
         if ($this->_isNew) {
