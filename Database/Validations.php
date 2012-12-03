@@ -54,7 +54,20 @@ class Validations
     private static function unique($model, $field)
     {
         if ($model::find($field, $model->{$field})) {
-            $model->addError($field, 'errors.models.already_in_use');
+            $model->addError($field, 'errors.validations.already_in_use');
+        }
+    }
+
+    /**
+     * Checks if the field is set.
+     *
+     * @param object $model
+     * @param string $field
+     */
+    private static function required($model, $field)
+    {
+        if (!isset($model->{$field}) or empty($model->{$field})) {
+            $model->addError($field, 'errors.validations.required');
         }
     }
 }
