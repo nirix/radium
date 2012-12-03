@@ -96,7 +96,7 @@ class Query
 
             case "INSERT INTO":
             case "UPDATE":
-                $this->query['table'] = $data;
+                $this->query['data'] = $data;
                 break;
         }
 
@@ -313,6 +313,22 @@ class Query
             if (isset($this->query['order_by'])) {
                 $queryString[] = "ORDER BY " . implode(", ", $this->query['order_by']);
             }
+        }
+        // Insert
+        elseif ($this->query['type'] == "INSERT INTO") {
+            // Table
+            $queryString[] = "`{$this->prefix}{$this->query['table']}`";
+
+            // Get the columns and values
+            $columns = $values = [];
+            foreach ($this->query['data'] as $column => $value) {
+                $columns[] = $this->columnName($column);
+                $values[] = $this->processValue($value);
+            }
+
+            // Add columns and values to query
+            $queryString[] = "(" . implode(',', $columns) . ")";
+            $queryString[] = "VALUES (" . implode(',', $values) . ")";
         }
 
         return implode(" ", str_replace("%prefix%", $this->prefix, $queryString));
