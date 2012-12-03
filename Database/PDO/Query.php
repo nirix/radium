@@ -250,6 +250,21 @@ class Query
         return $this;
     }
 
+    /**
+     * Fetch first row.
+     *
+     * @return array
+     */
+    public function fetch()
+    {
+        return $this->exec()->fetch();
+    }
+
+    /**
+     * Fetch all rows.
+     *
+     * @return array
+     */
     public function fetchAll()
     {
         return $this->exec()->fetchAll();
