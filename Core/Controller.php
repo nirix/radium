@@ -56,7 +56,7 @@ class Controller
 
     public function __shutdown()
     {
-        if ($this->render['view']) {
+        if ($this->render['action'] and $this->render['view']) {
             View::render($this->render['view']);
         }
 

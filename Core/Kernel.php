@@ -93,7 +93,7 @@ class Kernel
         unset($filters, $filter);
 
         // Check if the action returned content
-        if ($output !== null) {
+        if (static::$app->render['action'] and $output !== null) {
             static::$app->render['view'] = false;
             Body::append($output);
 
