@@ -328,23 +328,26 @@ class Model
      */
     public function save()
     {
+        // Validate
+        if (!$this->validates()) {
+            return false;
+        }
+
         // Run filter
         $this->runFilters('before', $this->_isNew ? 'create' : 'save');
 
         // Get data
         $data = static::data();
 
-        // Validate
-        if (!$this->validates($data)) {
-            return false;
-        }
-
+        // Create
         if ($this->_isNew) {
             return static::connection()
                 ->insert($data)
                 ->into(static::$_table)
                 ->exec();
-        } else {
+        }
+        // Update
+        else {
             return static::connection()
                 ->update(static::$_table)
                 ->set($data)
