@@ -264,6 +264,10 @@ class Query
     {
         $result = $this->connection()->prepare($this->assemble());
 
+        foreach ($this->valuesToBind as $key => $value) {
+            $result->bindValue($key, $value);
+        }
+
         return $result->model($this->model)->exec();
     }
 
