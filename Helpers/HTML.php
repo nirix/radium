@@ -21,16 +21,14 @@
 
 namespace Radium\Helpers;
 
-use Radium\HTTP\Request;
+use Radium\Http\Request;
 
 /**
  * HTML Helper
  *
- * @since 0.1
+ * @author Jack P.
  * @package Radium
  * @subpackage Helpers
- * @author Jack P.
- * @copyright (C) Jack P.
  */
 class HTML
 {
@@ -74,7 +72,7 @@ class HTML
         if ($label === null) {
             $label = $url;
         }
-        
+
         // Is this a local link?
         if (substr($url, 0, 4) != 'http') {
             $url = Request::base(ltrim($url, '/'));
@@ -82,7 +80,7 @@ class HTML
 
         $attributes['href'] = $url;
         $attributes = static::buildAttributes($attributes);
-        
+
         return "<a {$attributes}>{$label}</a>";
     }
 
