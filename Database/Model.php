@@ -145,6 +145,24 @@ class Model
             $this->{$column} = $value;
         }
 
+        // Put belongsTo relations into their models
+        foreach (static::$_belongsTo as $relation => $options) {
+            if (is_integer($relation)) {
+                $relation = $options;
+            }
+
+            $relation = static::$_relationInfo[get_called_class() . ".{$relation}"];
+
+            $data = [];
+            foreach ($relation['model']::schema() as $column => $info) {
+                $key = Str::singular($relation['name']) . "_{$column}";
+                $data[$column] = isset($this->{$key}) ? $this->{$key} : $info['default'];
+            }
+
+            $this->{$relation['name']} = new $relation['model']($data, false);
+        }
+        unset($relation, $options, $column, $info, $data);
+
         // Run filters
         $this->runFilters('after', 'construct');
 
@@ -233,11 +251,27 @@ class Model
      */
     public static function select($fields = '*')
     {
-        return static::connection()
+        $query = static::connection()
             ->select()
             ->from(static::$_table)
             ->model(get_called_class());
 
+        foreach (static::$_belongsTo as $relation => $options) {
+            if (is_integer($relation)) {
+                $relation = $options;
+            }
+
+            $relationInfo = static::getRelationInfo($relation, $options);
+
+            $query->join(
+                $relationInfo['table'],
+                "`{$relationInfo['table']}`.`{$relationInfo['primaryKey']}` = `" . static::table() . "`.`{$relationInfo['foreignKey']}`",
+                $relationInfo['columns']
+            );
+        }
+
+        return $query;
+    }
 
     /**
      * Returns an array containing information about the
