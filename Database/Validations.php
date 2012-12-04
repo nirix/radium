@@ -119,15 +119,15 @@ class Validations
     }
 
     /**
-     * Checks if the field is an integer.
+     * Checks if the field is numeric.
      *
      * @param object $model
      * @param string $field
      */
-    private static function integer($model, $field)
+    private static function numeric($model, $field)
     {
-        if (!is_integer($model->{$field})) {
-            return 'errors.validations.must_be_integer';
+        if (!is_numeric($model->{$field})) {
+            return 'errors.validations.must_be_numeric';
         }
     }
 }
