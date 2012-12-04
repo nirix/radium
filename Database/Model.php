@@ -229,6 +229,15 @@ class Model
             ->select()
             ->from(static::$_table)
             ->model(get_called_class());
+
+    /**
+     * Returns the models table.
+     *
+     * @return string
+     */
+    protected static function table()
+    {
+        return static::$_table;
     }
 
     /**
