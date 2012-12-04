@@ -367,7 +367,7 @@ class Query
     {
         // Select all
         if ($column == '*') {
-            return '*';
+            return "`{$this->query['table']}`.*";
         }
         // Regular column name
         elseif (strpos($column, '(') === false) {
