@@ -127,9 +127,6 @@ class Model
      */
     public function __construct(array $data = [], $isNew = true)
     {
-        // Get table schema
-        static::loadSchema();
-
         // Set defaults
         foreach (static::schema() as $field => $properties) {
             $this->{$field} = $properties['default'];
@@ -153,6 +150,7 @@ class Model
      */
     protected static function loadSchema()
     {
+        // Make sure there's a place to store the schema
         if (!array_key_exists(static::$_table, static::$_schema)) {
             static::$_schema[static::$_table] = null;
         }
@@ -180,6 +178,7 @@ class Model
      */
     public static function schema()
     {
+        static::loadSchema();
         return array_key_exists(static::$_table, static::$_schema) ? static::$_schema[static::$_table] : null;
     }
 
