@@ -71,4 +71,17 @@ class Validations
             $model->addError($field, 'errors.validations.required');
         }
     }
+
+    /**
+     * Checks if the field is an email address.
+     *
+     * @param object $model
+     * @param string $field
+     */
+    private static function validateEmail($model, $field)
+    {
+        if (!filter_var($model->{$field}, FILTER_VALIDATE_EMAIL)) {
+            $model->addError($field, 'errors.validations.must_be_email');
+        }
+    }
 }
