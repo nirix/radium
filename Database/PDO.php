@@ -37,8 +37,8 @@ class PDO extends Driver
 {
     private $connection;
     private $connectionName;
-    private $query_count = 0;
-    protected $last_query;
+    private $queryCount = 0;
+    protected $lastQuery;
 
     public $prefix;
 
@@ -106,8 +106,8 @@ class PDO extends Driver
      */
     public function query($query)
     {
-        $this->query_count++;
-        $this->last_query = $query;
+        $this->queryCount++;
+        $this->lastQuery = $query;
 
         $rows = $this->connection->query($query);
         return $rows;
@@ -123,7 +123,8 @@ class PDO extends Driver
      */
     public function prepare($query, array $options = array())
     {
-        $this->last_query = $query;
+        $this->lastQuery = $query;
+        $this->queryCount++;
         return new Statement($this->connection->prepare($query, $options), $this->connectionName);
     }
 
@@ -184,5 +185,16 @@ class PDO extends Driver
     public function lastInsertId()
     {
         return $this->connection->lastInsertId();
+    }
+
+    /**
+     * Returns the number of queries that
+     * have been executed.
+     *
+     * @return integer
+     */
+    public function queryCount()
+    {
+        return $this->queryCount;
     }
 }
