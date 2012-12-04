@@ -41,6 +41,7 @@ class Validations
     public static function run($model, $field, $validations)
     {
         foreach ($validations as $validation => $value) {
+            $validation = "validate" . ucfirst($validation);
             static::{$validation}($model, $field, $value);
         }
     }
@@ -51,7 +52,7 @@ class Validations
      * @param object $model
      * @param string $field
      */
-    private static function unique($model, $field)
+    private static function validateUnique($model, $field)
     {
         if ($model::find($field, $model->{$field})) {
             $model->addError($field, 'errors.validations.already_in_use');
@@ -64,7 +65,7 @@ class Validations
      * @param object $model
      * @param string $field
      */
-    private static function required($model, $field)
+    private static function validateRequired($model, $field)
     {
         if (!isset($model->{$field}) or empty($model->{$field})) {
             $model->addError($field, 'errors.validations.required');
