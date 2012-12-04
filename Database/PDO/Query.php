@@ -377,6 +377,11 @@ class Query
         }
     }
 
+    /**
+     * Compiles the where conditions.
+     *
+     * @return string
+     */
     private function buildWhere()
     {
         $query = [];
