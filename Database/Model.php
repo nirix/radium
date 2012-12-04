@@ -230,6 +230,17 @@ class Model
             ->from(static::$_table)
             ->model(get_called_class());
 
+
+    /**
+     * Returns the models primary key.
+     *
+     * @return string
+     */
+    protected static function primaryKey()
+    {
+        return static::$_primaryKey;
+    }
+
     /**
      * Returns the models table.
      *
