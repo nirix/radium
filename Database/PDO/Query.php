@@ -251,6 +251,27 @@ class Query
     }
 
     /**
+     * Join another table.
+     *
+     * @param string $table
+     * @param string $on
+     * @param array  $columns
+     *
+     * @return object
+     */
+    public function join($table, $on, array $columns = [])
+    {
+        if (!array_key_exists('joins', $this->query)) {
+            $this->query['joins'] = [];
+        }
+
+        $this->query['select'] = array_merge($this->query['select'], $columns);
+        $this->query['joins'][] = [$table, $on];
+
+        return $this;
+    }
+
+    /**
      * Fetch first row.
      *
      * @return array
@@ -305,6 +326,11 @@ class Query
 
             // From
             $queryString[] = "FROM `{$this->prefix}{$this->query['table']}`";
+
+            // Joins
+            if (array_key_exists('joins', $this->query)) {
+                $queryString[] = $this->buildJoins();
+            }
 
             // Where
             $queryString[] = $this->buildWhere();
@@ -412,6 +438,22 @@ class Query
             // Return
             return "WHERE " . implode(" OR ", $query);
         }
+    }
+
+    /**
+     * Compiles the joins.
+     *
+     * @return string
+     */
+    private function buildJoins()
+    {
+        $joins = [];
+
+        foreach ($this->query['joins'] as $join) {
+            $joins[] = "JOIN `{$join[0]}` ON {$join[1]}";
+        }
+
+        return implode(" ", $joins);
     }
 
     /**
