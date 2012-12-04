@@ -24,6 +24,7 @@ namespace Radium\Database;
 use Radium\Database;
 use Radium\Database\Validations;
 use Radium\Helpers\Time;
+use Radium\Helpers\String as Str;
 use Radium\Core\Hook;
 
 /**
@@ -64,6 +65,13 @@ class Model
      * @var array
      */
     protected static $_hasMany = [];
+
+    /**
+     * Holds relation info.
+     *
+     * @var array
+     */
+    protected static $_relationInfo = [];
 
     /**
      * Field validations.
@@ -230,6 +238,66 @@ class Model
             ->from(static::$_table)
             ->model(get_called_class());
 
+
+    /**
+     * Returns an array containing information about the
+     * relation.
+     *
+     * @param string $name     Relation name
+     * @param array  $relation Relation info
+     *
+     * @return array
+     */
+    protected static function getRelationInfo($name, $relation)
+    {
+        // Current models class
+        $class = new \ReflectionClass(get_called_class());
+
+        if (isset(static::$_relationInfo["{$class->getName()}.{$name}"])) {
+            return static::$_relationInfo["{$class->getName()}.{$name}"];
+        }
+
+        if (!is_array($relation)) {
+            $relation = [];
+        }
+
+        // Name
+        $relation['name'] = $name;
+
+        // Model
+        if (!isset($relation['model'])) {
+            $namespace = $class->getNamespaceName();
+            $relation['model'] = "\\{$namespace}\\" . ucfirst($name);
+        }
+
+        // Primary key
+        if (!isset($relation['primaryKey'])) {
+            $relation['primaryKey'] = $relation['model']::primaryKey();
+        }
+
+        // Table
+        if (!isset($relation['table'])) {
+            $relation['table'] = $relation['model']::table();
+        }
+
+        // Foreign key
+        if (!isset($relation['foreignKey'])) {
+            $relation['foreignKey'] = Str::singular($relation['table']) . "_id";
+        }
+
+        // Columns
+        if (!isset($relation['columns'])) {
+            $relation['columns'] = [];
+
+            foreach (array_keys($relation['model']::schema()) as $column) {
+                $relation['columns']["{$relation['table']}.{$column}"] = "{$relation['name']}_{$column}";
+            }
+        }
+
+        static::$_relationInfo["{$class->getName()}.{$name}"] = $relation;
+
+        return $relation;
+    }
 
     /**
      * Returns the models primary key.
