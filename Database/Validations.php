@@ -97,4 +97,17 @@ class Validations
             $model->addError($field, 'errors.validations.field_too_short');
         }
     }
+
+    /**
+     * Validates the maximum length of the field.
+     *
+     * @param object $model
+     * @param string $field
+     */
+    private static function validateMaxLength($model, $field, $maxLength)
+    {
+        if (strlen($model->{$field}) > $maxLength) {
+            $model->addError($field, 'errors.validations.field_too_long');
+        }
+    }
 }
