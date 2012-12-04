@@ -345,10 +345,14 @@ class Model
 
         // Create
         if ($this->_isNew) {
-            return static::connection()
+            $result = static::connection()
                 ->insert($data)
                 ->into(static::$_table)
                 ->exec();
+
+            $this->id = static::connection()->lastInsertId();
+
+            return $result;
         }
         // Update
         else {
