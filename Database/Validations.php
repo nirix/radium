@@ -84,4 +84,17 @@ class Validations
             $model->addError($field, 'errors.validations.must_be_email');
         }
     }
+
+    /**
+     * Validates the minimum length of the field.
+     *
+     * @param object $model
+     * @param string $field
+     */
+    private static function validateMinLength($model, $field, $minLength)
+    {
+        if (strlen($model->{$field}) < $minLength) {
+            $model->addError($field, 'errors.validations.field_too_short');
+        }
+    }
 }
