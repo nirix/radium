@@ -40,9 +40,16 @@ class Validations
      */
     public static function run($model, $field, $validations)
     {
-        foreach ($validations as $validation => $value) {
-            $validation = "validate" . ucfirst($validation);
-            static::{$validation}($model, $field, $value);
+        // Run validations
+        foreach ($validations as $validation => $options) {
+            // Is this a validation without any options?
+            if (is_numeric($validation)) {
+                $validation = $options;
+            }
+
+            if ($message = static::{$validation}($model, $field, $options) and $message !== null) {
+                $model->addError($field, $message);
+            }
         }
     }
 
@@ -52,10 +59,10 @@ class Validations
      * @param object $model
      * @param string $field
      */
-    private static function validateUnique($model, $field)
+    private static function unique($model, $field)
     {
         if ($model::find($field, $model->{$field})) {
-            $model->addError($field, 'errors.validations.already_in_use');
+            return 'errors.validations.already_in_use';
         }
     }
 
@@ -65,10 +72,10 @@ class Validations
      * @param object $model
      * @param string $field
      */
-    private static function validateRequired($model, $field)
+    private static function required($model, $field)
     {
         if (!isset($model->{$field}) or empty($model->{$field})) {
-            $model->addError($field, 'errors.validations.required');
+            return 'errors.validations.required';
         }
     }
 
@@ -78,10 +85,10 @@ class Validations
      * @param object $model
      * @param string $field
      */
-    private static function validateEmail($model, $field)
+    private static function email($model, $field)
     {
         if (!filter_var($model->{$field}, FILTER_VALIDATE_EMAIL)) {
-            $model->addError($field, 'errors.validations.must_be_email');
+            return 'errors.validations.must_be_email';
         }
     }
 
@@ -91,10 +98,10 @@ class Validations
      * @param object $model
      * @param string $field
      */
-    private static function validateMinLength($model, $field, $minLength)
+    private static function minLength($model, $field, $minLength)
     {
         if (strlen($model->{$field}) < $minLength) {
-            $model->addError($field, 'errors.validations.field_too_short');
+            return 'errors.validations.field_too_short';
         }
     }
 
@@ -104,10 +111,23 @@ class Validations
      * @param object $model
      * @param string $field
      */
-    private static function validateMaxLength($model, $field, $maxLength)
+    private static function maxLength($model, $field, $maxLength)
     {
         if (strlen($model->{$field}) > $maxLength) {
-            $model->addError($field, 'errors.validations.field_too_long');
+            return 'errors.validations.field_too_long';
+        }
+    }
+
+    /**
+     * Checks if the field is an integer.
+     *
+     * @param object $model
+     * @param string $field
+     */
+    private static function integer($model, $field)
+    {
+        if (!is_integer($model->{$field})) {
+            return 'errors.validations.must_be_integer';
         }
     }
 }
