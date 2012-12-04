@@ -156,7 +156,7 @@ class Model
 
                 $data = [];
                 foreach ($relation['model']::schema() as $column => $info) {
-                    $key = Str::singular($relation['name']) . "_{$column}";
+                    $key = strtolower("{$relation['class']}_{$column}");
                     $data[$column] = isset($this->{$key}) ? $this->{$key} : $info['default'];
                 }
 
@@ -264,7 +264,6 @@ class Model
             }
 
             $relationInfo = static::getRelationInfo($relation, $options);
-
             $query->join(
                 $relationInfo['table'],
                 "`{$relationInfo['table']}`.`{$relationInfo['primaryKey']}` = `" . static::table() . "`.`{$relationInfo['foreignKey']}`",
@@ -306,6 +305,11 @@ class Model
             $relation['model'] = "\\{$namespace}\\" . ucfirst($name);
         }
 
+        // Class
+        if (!isset($relation['class'])) {
+            $relation['class'] = ucfirst($name);
+        }
+
         // Primary key
         if (!isset($relation['primaryKey'])) {
             $relation['primaryKey'] = $relation['model']::primaryKey();
@@ -318,7 +322,8 @@ class Model
 
         // Foreign key
         if (!isset($relation['foreignKey'])) {
-            $relation['foreignKey'] = Str::singular($relation['table']) . "_id";
+            $className = strtolower($name);
+            $relation['foreignKey'] = "{$className}_id";
         }
 
         // Columns
