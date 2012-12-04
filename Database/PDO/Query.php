@@ -292,6 +292,16 @@ class Query
     }
 
     /**
+     * Returns the row count.
+     *
+     * @return integer
+     */
+    public function rowCount()
+    {
+        return $this->exec()->rowCount();
+    }
+
+    /**
      * Executes the query and return the statement.
      *
      * @return object
