@@ -310,7 +310,7 @@ class Query
             $queryString[] = $this->buildWhere();
 
             // Order by
-            if (isset($this->query['order_by'])) {
+            if (array_key_exists('order_by', $this->query)) {
                 $queryString[] = "ORDER BY " . implode(", ", $this->query['order_by']);
             }
         }
