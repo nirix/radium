@@ -146,22 +146,24 @@ class Model
         }
 
         // Put belongsTo relations into their models
-        foreach (static::$_belongsTo as $relation => $options) {
-            if (is_integer($relation)) {
-                $relation = $options;
+        if (!$isNew) {
+            foreach (static::$_belongsTo as $relation => $options) {
+                if (is_integer($relation)) {
+                    $relation = $options;
+                }
+
+                $relation = static::$_relationInfo[get_called_class() . ".{$relation}"];
+
+                $data = [];
+                foreach ($relation['model']::schema() as $column => $info) {
+                    $key = Str::singular($relation['name']) . "_{$column}";
+                    $data[$column] = isset($this->{$key}) ? $this->{$key} : $info['default'];
+                }
+
+                $this->{$relation['name']} = new $relation['model']($data, false);
             }
-
-            $relation = static::$_relationInfo[get_called_class() . ".{$relation}"];
-
-            $data = [];
-            foreach ($relation['model']::schema() as $column => $info) {
-                $key = Str::singular($relation['name']) . "_{$column}";
-                $data[$column] = isset($this->{$key}) ? $this->{$key} : $info['default'];
-            }
-
-            $this->{$relation['name']} = new $relation['model']($data, false);
+            unset($relation, $options, $column, $info, $data);
         }
-        unset($relation, $options, $column, $info, $data);
 
         // Run filters
         $this->runFilters('after', 'construct');
