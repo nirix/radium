@@ -73,6 +73,21 @@ class Request
     }
 
     /**
+     * Check if the request matches the specified pattern.
+     *
+     * @param string $pattern
+     *
+     * @return boolean
+     */
+    public static function matches($pattern)
+    {
+        if (preg_match("#^{$pattern}?$#", static::$uri)) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Returns the request method if nothing
      * is passed, otherwise returns true/false
      * if the passed string matches the method.
