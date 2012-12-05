@@ -299,15 +299,15 @@ class Model
         // Name
         $relation['name'] = $name;
 
-        // Model
+        // Model and class
         if (!isset($relation['model'])) {
+            // Model
             $namespace = $class->getNamespaceName();
             $relation['model'] = "\\{$namespace}\\" . ucfirst($name);
-        }
 
-        // Class
-        if (!isset($relation['class'])) {
-            $relation['class'] = ucfirst($name);
+            // Class
+            $model = new \ReflectionClass($relation['model']);
+            $relation['class'] = $model->getShortName();
         }
 
         // Primary key
@@ -327,12 +327,9 @@ class Model
         }
 
         // Columns
-        if (!isset($relation['columns'])) {
-            $relation['columns'] = [];
-
-            foreach (array_keys($relation['model']::schema()) as $column) {
-                $relation['columns']["{$relation['table']}.{$column}"] = "{$relation['name']}_{$column}";
-            }
+        $relation['columns'] = [];
+        foreach (array_keys($relation['model']::schema()) as $column) {
+            $relation['columns']["{$relation['table']}.{$column}"] = "{$relation['name']}_{$column}";
         }
 
         static::$_relationInfo["{$class->getName()}.{$name}"] = $relation;
