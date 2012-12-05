@@ -130,11 +130,10 @@ class View
         $file = strtolower(preg_replace('/(?<=[a-z])([A-Z])/', '_' . '\\1', implode('/', $file)));
 
         // Get the path
-        $path = static::exists($file);
-
-        // Check if the file was found
-        if ($path === false) {
-            throw new Exception("Unable to load view '{$file}'");
+        try {
+            $path = static::find($file);
+        } catch (Exception $e) {
+            Error::halt("View Error", $e->getMessage(), $e->getTrace());
         }
 
         unset($file);
@@ -149,7 +148,7 @@ class View
      *
      * @return mixed
      */
-    public static function exists($file)
+    public static function find($file)
     {
         $dirs = [];
 
@@ -181,7 +180,23 @@ class View
         }
 
         // Not found
-        return false;
+        throw new Exception("Unable to load view '{$file}'");
+    }
+
+    /**
+     * Confirms or denies the existence of the view.
+     *
+     * @param string $file
+     *
+     * @return boolean
+     */
+    public static function exists($file)
+    {
+        try {
+            return static::find($file) !== false;
+        } catch (Exception $e) {
+            return false;
+        }
     }
 
     /**
