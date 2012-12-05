@@ -152,15 +152,30 @@ class Model
                     $relation = $options;
                 }
 
+                // Get the relation information
                 $relation = static::$_relationInfo[get_called_class() . ".{$relation}"];
 
+                // Get the table data for the relation
+                // and put it into its own model.
                 $data = [];
                 foreach ($relation['model']::schema() as $column => $info) {
                     $key = strtolower("{$relation['class']}_{$column}");
-                    $data[$column] = isset($this->{$key}) ? $this->{$key} : $info['default'];
+
+                    // Make sure the key is set
+                    if (isset($this->{$key})) {
+                        $data[$column] = $this->{$key};
+                    }
                 }
 
-                $this->{$relation['name']} = new $relation['model']($data, false);
+                // If the only thing in the data array is the relationships
+                // primary key, don't bother.
+                if (count($data) == 1 and isset($data[$relation['primaryKey']])) {
+                    continue;
+                }
+                // Create the relations model
+                else {
+                    $this->{$relation['name']} = new $relation['model']($data, false);
+                }
             }
             unset($relation, $options, $column, $info, $data);
         }
