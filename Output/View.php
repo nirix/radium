@@ -22,6 +22,7 @@
 namespace Radium\Output;
 
 use Radium\Error;
+use Radium\Exception;
 
 /**
  * Radium's View rendering class.
@@ -121,16 +122,19 @@ class View
      */
     private static function filePath($file)
     {
-        // Remove the namespace from the file path
-        $file = explode('\\', $file); // Stupid "pass by reference" shit
-        $file = str_replace('\\', '/', strtolower(array_pop($file)));
+        // Remove the App\Controllers namespace from the file path
+        $file = explode('\\', $file);
+        if (isset($file[1]) and $file[1] == 'Controllers') {
+            unset($file[0], $file[1]);
+        }
+        $file = strtolower(preg_replace('/(?<=[a-z])([A-Z])/', '_' . '\\1', implode('/', $file)));
 
         // Get the path
         $path = static::exists($file);
 
         // Check if the file was found
-        if (!$path) {
-            Error::halt("View Error", "Unable to load view '{$file}'");
+        if ($path === false) {
+            throw new Exception("Unable to load view '{$file}'");
         }
 
         unset($file);
