@@ -33,7 +33,14 @@ use Radium\Core\Kernel;
  */
 class Error
 {
-    public static function halt($title, $message = '')
+    /**
+     * Halts the executing of the script and displays the error.
+     *
+     * @param string $title   Error title
+     * @param string $message Error message
+     * @param array  $trace   Exception stack trace
+     */
+    public static function halt($title, $message = '', $trace = [])
     {
         @ob_end_clean();
 
@@ -44,7 +51,19 @@ class Error
             $body[] = "  <h1 style=\"margin: 0;\">{$title}</h1>";
         }
 
-        $body[] = "  {$message}";
+        $body[] = "  <div>{$message}</div>";
+
+        if (count($trace)) {
+            $body[] = "  <div style=\"margin-top:10px;\">";
+            $body[] = "    <strong>Stack trace</strong>";
+            $body[] = "    <ul style=\"margin-top:0px;\">";
+            foreach ($trace as $t) {
+                $body[] = "      <li>Line #{$t['line']} in <code>{$t['file']}</code></li>";
+            }
+            $body[] = "    </ul>";
+            $body[] = "  </div>";
+        }
+
         $body[] = "  <div style=\"margin-top:8px;\"><small>Powered by Radium " . Kernel::version() . "</small></div>";
         $body[] = "</blockquote>";
 
