@@ -23,9 +23,11 @@
 require __DIR__ . "/Autoloader.php";
 
 use Radium\Autoloader;
+use Radium\Loader;
 
 // Register the vendor directory
-Autoloader::vendorLocation(VENDORPATH);
+Loader::setVendorDirectory(VENDORPATH);
+Loader::registerNamespace('Radium', __DIR__);
 
 // Register common classes for ease of use
 Autoloader::aliasClasses([
