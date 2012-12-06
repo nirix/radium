@@ -119,7 +119,7 @@ class Autoloader
         }
         // Registered namespace
         elseif ($path = Loader::registeredNamespace($vendor)) {
-            $path = Loader::find(str_replace("{$vendor}\\", "", $class), $vendor);
+            $path = Loader::find($class, $vendor);
             if (file_exists($path)) {
                 require $path;
             }

@@ -122,6 +122,14 @@ class Loader
      */
     public static function find($class, $vendor = null)
     {
+        // Remove the vendor from the beginning of the class.
+        if (strpos(trim($class, "\\"), $vendor) === 0) {
+            $class = explode("\\", $class);
+            unset($class[0]);
+            $class = implode("\\", $class);
+        }
+
+        // Convert backslashes to forward slashes.
         $file = str_replace("\\", "/", $class) . ".php";
 
         // Check supplied vendor directory
