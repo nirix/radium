@@ -39,7 +39,7 @@ class Language
      */
     public function __construct($language)
     {
-        $filePath = APPPATH . "/Translations/{$language}.php";
+        $filePath = Loader::find("Translations\\{$language}", Loader::defaultNamespace());
 
         // Check if file exists
         if (file_exists($filePath)) {
