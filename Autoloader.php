@@ -22,6 +22,7 @@
 namespace Radium;
 
 require __DIR__ . '/Exception.php';
+require __DIR__ . '/Loader.php';
 
 /**
  * Radium's Autoloader, the magic behind the scenes.
@@ -33,7 +34,6 @@ require __DIR__ . '/Exception.php';
  */
 class Autoloader
 {
-    private static $vendorLocation;
     private static $classes = array();
 
     /**
@@ -42,6 +42,30 @@ class Autoloader
     public static function register()
     {
         spl_autoload_register('Radium\Autoloader::load', true, true);
+    }
+
+    /**
+     * Register multiple namespaces at once.
+     *
+     * @param array $namespaces
+     */
+    public static function registerNamespaces(array $namespaces)
+    {
+        foreach ($namespaces as $vendor => $location) {
+            static::registerNamespace($vendor, $location);
+        }
+    }
+
+    /**
+     * Registers a namespace location.
+     *
+     * @param string $vendor
+     * @param string $location
+     */
+    public static function registerNamespace($vendor, $location)
+    {
+        static::$namespaces[$vendor] = $location;
+        Loader::registerNamespace($vendor, $location);
     }
 
     /**
@@ -68,16 +92,6 @@ class Autoloader
     }
 
     /**
-     * Sets the vendor location.
-     *
-     * @param string $location
-     */
-    public static function vendorLocation($location)
-    {
-        static::$vendorLocation = $location;
-    }
-
-    /**
      * Loads a class
      *
      * @param string $class The class
@@ -87,37 +101,35 @@ class Autoloader
     public static function load($class)
     {
         $class = ltrim($class, '\\');
+        $namespace = explode('\\', $class);
+        $vendor = $namespace[0];
 
         // Aliased classes
         if (array_key_exists($class, static::$classes)) {
-            $file = static::filePath(static::$classes[$class]);
-
-            if (file_exists($file) and !class_exists(static::$classes[$class])) {
-                require $file;
+            // Make sure the class doesn't exist
+            // before trying to load it.
+            if (!class_exists(static::$classes[$class])) {
+                static::load(static::$classes[$class]);
             }
 
-            if (class_exists(static::$classes[$class])) {
+            // If the class exists, alias it if it won't conflict with anything.
+            if (!class_exists($class) and class_exists(static::$classes[$class])) {
                 class_alias(static::$classes[$class], $class);
+            }
+        }
+        // Registered namespace
+        elseif ($path = Loader::registeredNamespace($vendor)) {
+            $path = Loader::find(str_replace("{$vendor}\\", "", $class), $vendor);
+            if (file_exists($path)) {
+                require $path;
             }
         }
         // Everything else
         else {
-            $file = static::filePath($class);
+            $file = Loader::find($class);
             if (file_exists($file)) {
                 require $file;
             }
         }
-    }
-
-    /**
-     * Converts the class into the file path.
-     *
-     * @param string $class
-     *
-     * @return string
-     */
-    public static function filePath($class)
-    {
-        return static::$vendorLocation . str_replace(['\\', '_'], DIRECTORY_SEPARATOR, "/{$class}.php");
     }
 }
