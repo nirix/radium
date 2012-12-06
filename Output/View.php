@@ -21,6 +21,7 @@
 
 namespace Radium\Output;
 
+use Radium\Loader;
 use Radium\Error;
 use Radium\Exception;
 
@@ -154,7 +155,7 @@ class View
 
         // Add the theme directory if one is set
         if (static::$theme !== null) {
-            $dirs[] = APPPATH . '/views/' . static::$theme;
+            $dirs[] = Loader::defaultNamespacePath() . '/views/' . static::$theme;
         }
 
         // Add the registered search paths
@@ -166,7 +167,7 @@ class View
         }
 
         // And the root of the views path
-        $dirs[] = APPPATH . '/views';
+        $dirs[] = Loader::defaultNamespacePath() . '/views';
 
         // Search time
         foreach ($dirs as $dir) {
