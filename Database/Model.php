@@ -520,16 +520,21 @@ class Model
                 ->exec();
 
             $this->id = static::connection()->lastInsertId();
-
-            return $result;
         }
         // Update
         else {
-            return static::connection()
+            $result = static::connection()
                 ->update(static::$_table)
                 ->set($data)
                 ->where(static::$_primaryKey . ' = ?', $data[static::$_primaryKey])
                 ->exec();
+        }
+
+        // Run filters
+        $this->runFilters('after', $this->_isNew ? 'create' : 'save');
+
+        return $result;
+    }
 
     /**
      * Set the created_at value.
