@@ -152,7 +152,7 @@ class Model
         if (!$isNew) {
             // Convert timestamps to local
             foreach (['created_at', 'updated_at'] as $timestamp) {
-                if (array_key_exists($timestamp, $data)) {
+                if (array_key_exists($timestamp, $data) and $this->{$timestamp} !== null) {
                     $this->{$timestamp} = Time::gmtToLocal($this->{$timestamp});
                 }
             }
