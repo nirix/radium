@@ -135,6 +135,9 @@ class Model
      */
     public function __construct(array $data = [], $isNew = true)
     {
+        // Set isNew
+        $this->_isNew = $isNew;
+
         // Set defaults
         foreach (static::schema() as $field => $properties) {
             $this->{$field} = $properties['default'];
@@ -182,8 +185,6 @@ class Model
 
         // Run filters
         $this->runFilters('after', 'construct');
-
-        $this->_isNew = $isNew;
     }
 
     /**
