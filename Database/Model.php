@@ -181,6 +181,22 @@ class Model
                 }
             }
             unset($relation, $options, $column, $info, $data);
+
+        // Add filters
+        foreach (['create', 'save'] as $action) {
+            if (!array_key_exists($action, static::$_before)) {
+                static::$_before[$action] = [];
+            }
+        }
+
+        // Add before create filters
+        if (!in_array('beforeCreateTimestamps', static::$_before['create'])) {
+            static::$_before['create'][] = 'beforeCreateTimestamps';
+        }
+
+        // Add before save filters
+        if (!in_array('beforeSaveTimestamps', static::$_before['save'])) {
+            static::$_before['save'][] = 'beforeSaveTimestamps';
         }
 
         // Run filters
@@ -503,6 +519,30 @@ class Model
                 ->set($data)
                 ->where(static::$_primaryKey . ' = ?', $data[static::$_primaryKey])
                 ->exec();
+
+    /**
+     * Set the created_at value.
+     */
+    protected function beforeCreateTimestamps()
+    {
+        if (isset($this->created_at)) {
+            $this->created_at = 'NOW()';
+        }
+    }
+
+    /**
+     * Set the updated_at value.
+     */
+    protected function beforeSaveTimestamps()
+    {
+        // Convert created_at back to GMT for saving
+        if (isset($this->created_at)) {
+            $this->created_at = Time::localToGmt($this->created_at);
+        }
+
+        // Set updated at
+        if (isset($this->updated_at)) {
+            $this->updated_at = 'NOW()';
         }
     }
 }
