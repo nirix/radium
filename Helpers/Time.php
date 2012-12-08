@@ -21,6 +21,8 @@
 
 namespace Radium\Helpers;
 
+use Radium\Language;
+
 /**
  * Time Helper
  *
@@ -115,12 +117,12 @@ class Time
     /**
      * Returns time ago in words of the given date.
      *
-     * @param string $original
-     * @param bool $detailed
+     * @param string  $original
+     * @param boolean $detailed
      *
      * @return string
      */
-    public static function agoInWords($original, $detailed = true)
+    public static function agoInWords($original, $detailed = false)
     {
         // Check what kind of format we're dealing with, timestamp or datetime
         // and convert it to a timestamp if it is in datetime form.
@@ -131,18 +133,18 @@ class Time
         $now = time(); // Get the time right now...
 
         // Time chunks...
-        $chunks = array(
-            array(60 * 60 * 24 * 365, 'year', 'years'),
-            array(60 * 60 * 24 * 30, 'month', 'months'),
-            array(60 * 60 * 24 * 7, 'week', 'weeks'),
-            array(60 * 60 * 24, 'day', 'days'),
-            array(60 * 60, 'hour', 'hours'),
-            array(60, 'minute', 'minutes'),
-            array(1, 'second', 'seconds'),
-        );
+        $chunks = [
+            [60 * 60 * 24 * 365, 'year', 'years'],
+            [60 * 60 * 24 * 30, 'month', 'months'],
+            [60 * 60 * 24 * 7, 'week', 'weeks'],
+            [60 * 60 * 24, 'day', 'days'],
+            [60 * 60, 'hour', 'hours'],
+            [60, 'minute', 'minutes'],
+            [1, 'second', 'seconds'],
+        ];
 
         // Get the difference
-        $difference = ($now - $original);
+        $difference = $now > $original ? ($now - $original) : ($original - $now);
 
         // Loop around, get the time from
         for ($i = 0, $c = count($chunks); $i < $c; $i++) {
@@ -153,15 +155,15 @@ class Time
         }
 
         // Format the time from
-        $from = $count . " " . (1 == $count ? $name : $names);
+        $from = Language::link()->translate("time.x_{$name}", $count);
 
-        // Get the detailed time from if the detaile variable is true
+        // Get the detailed time from if the detail variable is true
         if ($detailed && $i + 1 < $c) {
             $seconds2 = $chunks[$i + 1][0];
             $name2 = $chunks[$i + 1][1];
             $names2 = $chunks[$i + 1][2];
             if (0 != $count2 = floor(($difference - $seconds * $count) / $seconds2)) {
-                $from = $from . " and " . $count2 . " " . (1 == $count2 ? $name2 : $names2);
+                $from = Language::link()->translate('time.x_and_x', $from, Language::link()->translate("time.x_{$name2}", $count2));
             }
         }
 
