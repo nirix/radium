@@ -73,6 +73,19 @@ class Time
     }
 
     /**
+     * Converts the given local time to GMT time.
+     *
+     * @param string $datetime
+     *
+     * @return string
+     */
+    public static function localToGmt($datetime)
+    {
+        $stamp = static::toUnix($datetime);
+        return date("Y-m-d H:i:s", $stamp - date("Z"));
+    }
+
+    /**
      * Converts a datetime timestamp into a unix timestamp.
      *
      * @param datetime $original
