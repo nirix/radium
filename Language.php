@@ -32,6 +32,9 @@ namespace Radium;
  */
 class Language
 {
+    protected static $link;
+    protected $language;
+
     /**
      * Constructor!
      *
@@ -39,6 +42,9 @@ class Language
      */
     public function __construct($language)
     {
+        static::$link = $this;
+
+        // Get the file path
         $filePath = Loader::find("Translations\\{$language}", Loader::defaultNamespace());
 
         // Check if file exists
@@ -79,5 +85,15 @@ class Language
     public function add($strings)
     {
         $this->language->add($strings);
+    }
+
+    /**
+     * Returns a link to itself.
+     *
+     * @return object
+     */
+    public static function link()
+    {
+        return static::$link;
     }
 }
