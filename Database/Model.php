@@ -148,8 +148,16 @@ class Model
             $this->{$column} = $value;
         }
 
-        // Put belongsTo relations into their models
+        // Run stuff for rows fetched from the database.
         if (!$isNew) {
+            // Convert timestamps to local
+            foreach (['created_at', 'updated_at'] as $timestamp) {
+                if (array_key_exists($timestamp, $data)) {
+                    $this->{$timestamp} = Time::gmtToLocal($this->{$timestamp});
+                }
+            }
+
+            // Put belongsTo relations into their models
             foreach (static::$_belongsTo as $relation => $options) {
                 if (is_integer($relation)) {
                     $relation = $options;
@@ -180,7 +188,10 @@ class Model
                     $this->{$relation['name']} = new $relation['model']($data, false);
                 }
             }
-            unset($relation, $options, $column, $info, $data);
+
+            // Clear everything
+            unset($relation, $options, $column, $info, $timestamp, $data);
+        }
 
         // Add filters
         foreach (['create', 'save'] as $action) {
