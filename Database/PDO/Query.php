@@ -393,6 +393,14 @@ class Query
 
             $queryString[] = $this->buildWhere();
         }
+        // Delete from
+        elseif ($this->query['type'] == "DELETE") {
+            // Table
+            $queryString[] = "FROM `{$this->query['table']}`";
+
+            // Where
+            $queryString[] = $this->buildWhere();
+        }
 
         return implode(" ", str_replace("%prefix%", $this->prefix, $queryString));
     }
