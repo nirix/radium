@@ -330,6 +330,7 @@ class Model
     {
         // Current models class
         $class = new \ReflectionClass(get_called_class());
+        $namespace = $class->getNamespaceName();
 
         if (isset(static::$_relationInfo["{$class->getName()}.{$name}"])) {
             return static::$_relationInfo["{$class->getName()}.{$name}"];
@@ -345,13 +346,17 @@ class Model
         // Model and class
         if (!isset($relation['model'])) {
             // Model
-            $namespace = $class->getNamespaceName();
-            $relation['model'] = "\\{$namespace}\\" . ucfirst($name);
-
-            // Class
-            $model = new \ReflectionClass($relation['model']);
-            $relation['class'] = $model->getShortName();
+            $relation['model'] = ucfirst($name);
         }
+
+        // Set model namespace
+        if (strpos($relation['model'], '\\') === false) {
+            $relation['model'] = "\\{$namespace}\\" . $relation['model'];
+        }
+
+        // Class
+        $model = new \ReflectionClass($relation['model']);
+        $relation['class'] = $model->getShortName();
 
         // Primary key
         if (!isset($relation['primaryKey'])) {
