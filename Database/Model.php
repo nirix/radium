@@ -567,6 +567,24 @@ class Model
                 $this->{$relation} = $info['model']::select()->where($info['foreignKey'] . " = ?", $this->{static::$_primaryKey});
             }
         }
+
+        // Belongs to
+        foreach (static::$_belongsTo as $relation => $options) {
+            // If this is an easy-mode relation,
+            // set the relation name.
+            if (is_integer($relation)) {
+                $relation = $options;
+            }
+
+            // Make sure we don't override anything
+            if (!isset($this->{$relation})) {
+                // Get relation info
+                $info = static::getRelationInfo($relation, $options);
+
+                // Set relation
+                $this->{$relation} = $info['model']::select()->where($info['primaryKey'] . " = ?", $this->{$info['foreignKey']})->fetch();
+            }
+        }
     }
 
     /**
