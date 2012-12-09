@@ -45,7 +45,7 @@ class HTML
         if (strpos($href, 'http') === false) {
             $href = Request::base($href);
         }
-        return '<link rel="stylesheet" href="' . $href . '" screen="' . $media . '">' . PHP_EOL;
+        return '<link rel="stylesheet" href="' . $href . '" media="' . $media . '">' . PHP_EOL;
     }
 
     /**
