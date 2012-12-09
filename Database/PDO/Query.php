@@ -405,8 +405,13 @@ class Query
         if ($column == '*') {
             return "`{$this->query['table']}`.*";
         }
+
+        if (strpos($column, '.') === false) {
+            $column = $this->query['table'] . ".{$column}";
+        }
+
         // Regular column name
-        elseif (strpos($column, '(') === false) {
+        if (strpos($column, '(') === false) {
             return str_replace(['.'], ['`.`'], "`{$column}`");
         } else {
             return trim(str_replace(['(', ')', '.'], ['(`', '`)', '`.`'], $column), '`');
@@ -429,12 +434,13 @@ class Query
                 foreach ($conditions as $condition) {
                     // Get column name
                     $column = str_replace('`', '', explode(" ", $condition[0])[0]); // PHP 5.4 array dereferencing, fuck yeah!
+                    $safeColumn = $this->columnName($column);
 
                     // Make the column name safe
-                    $condition[0] = str_replace($column, $this->columnName($column), $condition[0]);
+                    $condition[0] = str_replace($column, $safeColumn, $condition[0]);
 
                     // Add value to the bind queue
-                    $valueBindKey = str_replace('.', '_', $column);
+                    $valueBindKey = str_replace(['.', '`'], ['_', ''], $safeColumn);
                     $this->valuesToBind[$valueBindKey] = $condition[1];
 
                     // Add condition to group
