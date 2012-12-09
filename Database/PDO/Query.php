@@ -95,8 +95,11 @@ class Query
                 break;
 
             case "INSERT INTO":
-            case "UPDATE":
                 $this->query['data'] = $data;
+                break;
+
+            case "UPDATE":
+                $this->query['table'] = $data;
                 break;
         }
 
@@ -365,6 +368,30 @@ class Query
             // Add columns and values to query
             $queryString[] = "(" . implode(',', $columns) . ")";
             $queryString[] = "VALUES (" . implode(',', $values) . ")";
+        }
+        // Update
+        elseif ($this->query['type'] == "UPDATE") {
+            // Table
+            $queryString[] = "`{$this->prefix}{$this->query['table']}`";
+
+            // Set values
+            $values = [];
+            foreach ($this->query['data'] as $column => $value) {
+                // Process column name
+                $column = $this->columnName($column);
+
+                // Add value to bind queue
+                $valueBindKey = "new_" . str_replace(['.', '`'], ['_', ''], $column);
+                $this->valuesToBind[$valueBindKey] = $value;
+
+                // Add to values
+                $values[] = $column . " = :{$valueBindKey}";
+            }
+
+            // Add values to query
+            $queryString[] = "SET " . implode(", ", $values);
+
+            $queryString[] = $this->buildWhere();
         }
 
         return implode(" ", str_replace("%prefix%", $this->prefix, $queryString));
