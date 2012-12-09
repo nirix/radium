@@ -592,7 +592,7 @@ class Model
      */
     protected function beforeCreateTimestamps()
     {
-        if (isset($this->created_at)) {
+        if (!isset($this->created_at)) {
             $this->created_at = 'NOW()';
         }
     }
@@ -608,7 +608,7 @@ class Model
         }
 
         // Set updated at
-        if (isset($this->updated_at)) {
+        if (!isset($this->updated_at) or $this->updated_at === null) {
             $this->updated_at = 'NOW()';
         }
     }
