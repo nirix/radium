@@ -370,7 +370,7 @@ class Model
 
         // Foreign key
         if (!isset($relation['foreignKey'])) {
-            $className = strtolower($name);
+            $className = strtolower($relation['class']);
             $relation['foreignKey'] = "{$className}_id";
         }
 
