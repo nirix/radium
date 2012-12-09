@@ -193,6 +193,9 @@ class Model
             unset($relation, $options, $column, $info, $timestamp, $data);
         }
 
+        // Setup relations
+        $this->setupRelations();
+
         // Add filters
         foreach (['create', 'save'] as $action) {
             if (!array_key_exists($action, static::$_before)) {
@@ -539,6 +542,31 @@ class Model
         $this->runFilters('after', $this->_isNew ? 'create' : 'save');
 
         return $result;
+    }
+
+    /**
+     * Sets up relationships, better than using __get()
+     */
+    protected function setupRelations()
+    {
+        // Has many
+        foreach (static::$_hasMany as $relation => $options)
+        {
+            // If this is an easy-mode relation,
+            // set the relation name.
+            if (is_integer($relation)) {
+                $relation = $options;
+            }
+
+            // Make sure we don't override anything
+            if (!isset($this->{$relation})) {
+                // Get relation info
+                $info = static::getRelationInfo($relation, $options);
+
+                // Set relation
+                $this->{$relation} = $info['model']::select()->where($info['foreignKey'] . " = ?", $this->{static::$_primaryKey});
+            }
+        }
     }
 
     /**
