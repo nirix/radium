@@ -545,6 +545,29 @@ class Model
     }
 
     /**
+     * Deletes the row from the database.
+     *
+     * @return boolean
+     */
+    public function delete()
+    {
+        // Delete row
+        $result = static::connection()
+            ->delete()
+            ->from(static::$_table)
+            ->where(static::$_primaryKey . " = ?", $this->{static::$_primaryKey})
+            ->limit(1)
+            ->exec();
+
+        // Run filters
+        if ($result) {
+            $this->runFilters('after', 'delete');
+        }
+
+        return $result;
+    }
+
+    /**
      * Sets up relationships, better than using __get()
      */
     protected function setupRelations()
