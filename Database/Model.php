@@ -491,7 +491,7 @@ class Model
 
         // Get data if it wasn't passed
         if ($data === null) {
-            $data = static::data();
+            $data = $this->data();
         }
 
         foreach (static::$_validates as $field => $validations) {
