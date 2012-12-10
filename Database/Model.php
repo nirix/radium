@@ -24,6 +24,7 @@ namespace Radium\Database;
 use Radium\Database;
 use Radium\Database\Validations;
 use Radium\Helpers\Time;
+use Radium\Util\Inflector;
 use Radium\Core\Hook;
 
 /**
@@ -348,7 +349,7 @@ class Model
         // Model and class
         if (!isset($relation['model'])) {
             // Model
-            $relation['model'] = ucfirst($name);
+            $relation['model'] = Inflector::classify($name);
         }
 
         // Set model namespace
@@ -372,8 +373,7 @@ class Model
 
         // Foreign key
         if (!isset($relation['foreignKey'])) {
-            $className = strtolower($relation['class']);
-            $relation['foreignKey'] = "{$className}_id";
+            $relation['foreignKey'] = Inflector::foreignKey($relation['class']);
         }
 
         // Columns
