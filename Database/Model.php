@@ -24,7 +24,6 @@ namespace Radium\Database;
 use Radium\Database;
 use Radium\Database\Validations;
 use Radium\Helpers\Time;
-use Radium\Helpers\String as Str;
 use Radium\Core\Hook;
 
 /**
