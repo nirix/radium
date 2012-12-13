@@ -103,13 +103,22 @@ class Loader
         return (array_key_exists($vendor, static::$registeredNamespaces) ? static::$registeredNamespaces[$vendor] : false);
     }
 
+    /**
+     * Returns the path for the specified vendor.
+     *
+     * @param string $namespace
+     *
+     * @return string
+     */
     public static function pathForNamespace($namespace)
     {
         if ($path = static::registeredNamespace($namespace)) {
             return $path;
-        } else {
-            return static::$vendorDirectory . "/{$namespace}";
+        } elseif ($path = static::$vendorDirectory . "/{$namespace}" and is_dir($path)) {
+            return $path;
         }
+
+        return false;
     }
 
     /**
