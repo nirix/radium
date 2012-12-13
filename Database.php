@@ -52,7 +52,7 @@ class Database
         }
 
         // Set the class name, with the namespace
-        $className = '\radium\database\\'. $config['driver'];
+        $className = '\Radium\Database\\'. $config['driver'];
 
         // Connect to the database and return the object
         static::$connections[$name] = new $className($config, $name);
