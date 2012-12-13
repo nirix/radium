@@ -126,13 +126,15 @@ class View
         // Remove the App\Controllers namespace from the file path
         $file = explode('\\', $file);
         if (isset($file[1]) and $file[1] == 'Controllers') {
+            $namespace = "{$file[0]}/{$file[1]}";
             unset($file[0], $file[1]);
         }
+
         $file = strtolower(preg_replace('/(?<=[a-z])([A-Z])/', '_' . '\\1', implode('/', $file)));
 
         // Get the path
         try {
-            $path = static::find($file);
+            $path = static::find((isset($namespace) ? "{$namespace}/" : '') . "{$file}");
         } catch (Exception $e) {
             Error::halt("View Error", $e->getMessage(), $e->getTrace());
         }
@@ -151,36 +153,44 @@ class View
      */
     public static function find($file)
     {
-        $dirs = [];
+        $searchFor = [];
+        $ofile = $file;
+
+        // If the path includes a vendor name
+        // add the path for it.
+        $vendor = explode('/', $file)[0];
+        if ($path = Loader::pathForNamespace($vendor)) {
+            // With theme
+            if (static::$theme !== null) {
+                $searchFor[] = str_replace("{$vendor}/Controllers", 'views/' . static::$theme, "{$path}/{$file}");
+            }
+            $searchFor[] = str_replace("{$vendor}/Controllers", 'views/', "{$path}/{$file}");
+        }
 
         // Add the theme directory if one is set
         if (static::$theme !== null) {
-            $dirs[] = Loader::defaultNamespacePath() . '/views/' . static::$theme;
+            $searchFor[] = Loader::defaultNamespacePath() . '/views/' . static::$theme . "/{$file}";
         }
-
-        // Add the registered search paths
-        $dirs = array_merge($dirs, static::$searchPaths);
 
         // Add the inheritance path, if set
         if (static::$inheritFrom !== null) {
-            $dirs[] = static::$inheritFrom;
+            $searchFor[] = static::$inheritFrom . "/{$file}";
         }
 
         // And the root of the views path
-        $dirs[] = Loader::defaultNamespacePath() . '/views';
+        $searchFor[] = Loader::defaultNamespacePath() . "/views/{$file}";
 
-        // Search time
-        foreach ($dirs as $dir) {
+        foreach ($searchFor as $path) {
             foreach (static::$viewExtensions as $ext) {
-                $path = "{$dir}/{$file}.{$ext}";
+                $path = "{$path}.{$ext}";
                 if (file_exists($path)) {
-                    // Found!
                     return $path;
                 }
             }
         }
 
         // Not found
+        $file = str_replace('Controllers', 'views', $file);
         throw new Exception("Unable to load view '{$file}'");
     }
 
