@@ -62,7 +62,7 @@ class Translation
         $string = func_get_arg(0);
         $vars = array_slice(func_get_args(), 1);
 
-        return $this->_compile_string($this->get_string($string), $vars);
+        return $this->compileString($this->getString($string), $vars);
     }
 
     /**
@@ -93,7 +93,7 @@ class Translation
      *
      * @return string
      */
-    public function get_string($string)
+    public function getString($string)
     {
         // Exact match?
         if (array_key_exists($string, static::$strings)) {
@@ -110,7 +110,7 @@ class Translation
      *
      * @return integer
      */
-    public function calculate_numeral($numeral)
+    public function calculateNumeral($numeral)
     {
         return ($numeral > 1 or $numeral < -1 or $numeral == 0) ? 1 : 0;
     }
@@ -119,7 +119,7 @@ class Translation
      * Compiles the translated string with the variables.
      *
      * @example
-     *     _compile_string('{plural:$1, {$1 post|$1 posts}}', array(1));
+     *     compileString('{plural:$1, {$1 post|$1 posts}}', array(1));
      *     will become "1 post"
      *
      * @param string $string
@@ -127,7 +127,7 @@ class Translation
      *
      * @return string
      */
-    protected function _compile_string($string, $vars)
+    protected function compileString($string, $vars)
     {
         $translation = $string;
 
@@ -151,7 +151,7 @@ class Translation
                 $value = $matches['value'][$id];
 
                 // Check what replacement to use...
-                $replacement_id = $this->calculate_numeral($value);
+                $replacement_id = $this->calculateNumeral($value);
                 if ($replacement_id !== false) {
                     $translation = str_replace($match, $replacements[$replacement_id], $translation);
                 }
