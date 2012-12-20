@@ -392,7 +392,7 @@ class Model
      *
      * @return string
      */
-    protected static function primaryKey()
+    public static function primaryKey()
     {
         return static::$_primaryKey;
     }
