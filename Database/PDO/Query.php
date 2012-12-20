@@ -348,6 +348,11 @@ class Query
             // Where
             $queryString[] = $this->buildWhere();
 
+            // Custom SQL
+            if (array_key_exists('sql', $this->query)) {
+                $queryString[] = $this->query['sql'];
+            }
+
             // Order by
             if (array_key_exists('order_by', $this->query)) {
                 $queryString[] = "ORDER BY " . implode(", ", $this->query['order_by']);
