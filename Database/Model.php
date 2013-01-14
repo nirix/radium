@@ -232,7 +232,7 @@ class Model
         // Make sure we haven't already fetched
         // the tables schema.
         if (static::$_schema[static::$_table] === null) {
-            $result = static::connection()->prepare("DESCRIBE `" . static::$_table . "`")->exec();
+            $result = static::connection()->prepare("DESCRIBE `{prefix}" . static::$_table . "`")->exec();
             foreach ($result->fetchAll(\PDO::FETCH_COLUMN) as $column) {
                 static::$_schema[static::$_table][$column['Field']] = [
                     'type'    => $column['Type'],
