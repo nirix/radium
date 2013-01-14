@@ -86,6 +86,9 @@ class Query
 
         $this->query['type'] = $type;
 
+        // Set the prefix
+        $this->prefix = $this->connection()->prefix;
+
         // Figure out what to do with the
         // $data parameter.
         switch ($type) {
@@ -99,14 +102,9 @@ class Query
                 break;
 
             case "UPDATE":
-                $this->query['table'] = $data;
+                $this->tableName($data);
                 break;
         }
-
-        // Set the prefix
-        //$this->prefix = $this->connection()->prefix;
-
-        return $this;
     }
 
     /**
@@ -123,6 +121,20 @@ class Query
     }
 
     /**
+     * Sets the table name with the prefix.
+     *
+     * @param string $name
+     */
+    private function tableName($name = null)
+    {
+        if ($name) {
+            $this->query['table'] = "{$this->prefix}{$name}";
+        }
+
+        return $this->query['table'];
+    }
+
+    /**
      * Set the table to select/delete from.
      *
      * @param string $table
@@ -131,7 +143,7 @@ class Query
      */
     public function from($table)
     {
-        $this->query['table'] = $table;
+        $this->tableName($table);
         return $this;
     }
 
@@ -144,7 +156,7 @@ class Query
      */
     public function into($table)
     {
-        $this->query['table'] = $table;
+        $this->tableName($table);
         return $this;
     }
 
@@ -338,7 +350,7 @@ class Query
             $queryString[] = $this->buildSelectColumns();
 
             // From
-            $queryString[] = "FROM `{$this->prefix}{$this->query['table']}`";
+            $queryString[] = "FROM `{$this->query['table']}`";
 
             // Joins
             if (array_key_exists('joins', $this->query)) {
@@ -361,7 +373,7 @@ class Query
         // Insert
         elseif ($this->query['type'] == "INSERT INTO") {
             // Table
-            $queryString[] = "`{$this->prefix}{$this->query['table']}`";
+            $queryString[] = "`{$this->query['table']}`";
 
             // Get the columns and values
             $columns = $values = [];
@@ -377,7 +389,7 @@ class Query
         // Update
         elseif ($this->query['type'] == "UPDATE") {
             // Table
-            $queryString[] = "`{$this->prefix}{$this->query['table']}`";
+            $queryString[] = "`{$this->query['table']}`";
 
             // Set values
             $values = [];
@@ -407,7 +419,7 @@ class Query
             $queryString[] = $this->buildWhere();
         }
 
-        return implode(" ", str_replace("%prefix%", $this->prefix, $queryString));
+        return implode(" ", str_replace("{prefix}", $this->prefix, $queryString));
     }
 
     /**
