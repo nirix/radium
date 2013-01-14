@@ -49,6 +49,6 @@ class Driver
             $error = 'Unknown error. ' . implode('/', $error);
         }
 
-        Error::halt("Database Error", $error . '<br />' . $this->last_query);
+        Error::halt("Database Error", $error . '<br />' . $this->lastQuery);
     }
 }
