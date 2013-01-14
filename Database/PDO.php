@@ -106,11 +106,15 @@ class PDO extends Driver
      */
     public function query($query)
     {
-        $this->queryCount++;
-        $this->lastQuery = $query;
+        // Replace prefix placeholder with prefix
+        $query = str_replace("{prefix}", $this->prefix, $query);
 
-        $rows = $this->connection->query($query);
-        return $rows;
+        // Log last query and query count
+        $this->lastQuery = $query;
+        $this->queryCount++;
+
+        // Query database
+        return $this->connection->query($query);
     }
 
     /**
@@ -123,8 +127,14 @@ class PDO extends Driver
      */
     public function prepare($query, array $options = array())
     {
+        // Replace prefix placeholder with prefix
+        $query = str_replace("{prefix}", $this->prefix, $query);
+
+        // Log last query and query count
         $this->lastQuery = $query;
         $this->queryCount++;
+
+        // Statement time
         return new Statement($this->connection->prepare($query, $options), $this->connectionName);
     }
 
