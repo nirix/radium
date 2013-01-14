@@ -36,10 +36,10 @@ class Request
 {
     private static $uri;
     private static $segments = array();
-    private static $method;
     private static $requested_with;
     public static $request = array();
     public static $post = array();
+    public static $method;
 
     public function __construct()
     {
@@ -63,11 +63,21 @@ class Request
     }
 
     /**
+     * Returns the URI.
+     *
+     * @return string
+     */
+    public function getUri()
+    {
+        return static::$uri;
+    }
+
+    /**
      * Static method for returning the relative URI.
      *
      * @return string
      */
-    public function uri()
+    public static function uri()
     {
         return static::$uri;
     }
@@ -88,24 +98,13 @@ class Request
     }
 
     /**
-     * Returns the request method if nothing
-     * is passed, otherwise returns true/false
-     * if the passed string matches the method.
-     *
-     * @param string $matches
+     * Returns the request method.
      *
      * @return string
      */
-    public static function method($matches = false)
+    public static function method()
     {
-        // Return the request method
-        if (!$matches) {
-            return static::$method;
-        }
-        // Match the request method
-        else {
-            return static::$method == $matches;
-        }
+        return static::$method;
     }
 
     /**
