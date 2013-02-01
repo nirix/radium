@@ -183,9 +183,8 @@ class View
 
         foreach ($searchFor as $path) {
             foreach (static::$viewExtensions as $ext) {
-                $path = "{$path}.{$ext}";
-                if (file_exists($path)) {
-                    return $path;
+                if (file_exists("{$path}.{$ext}")) {
+                    return "{$path}.{$ext}";
                 }
             }
         }
