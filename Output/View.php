@@ -41,7 +41,7 @@ class View
     public static $inheritFrom;
     private static $searchPaths = array();
     private static $vars = array();
-    private static $viewExtensions = ['phtml', 'php', 'js.php', 'json.php'];
+    private static $viewExtensions = array('phtml', 'php', 'js.php', 'json.php');
 
     /**
      * Renders the specified file.
@@ -158,7 +158,8 @@ class View
 
         // If the path includes a vendor name
         // add the path for it.
-        $vendor = explode('/', $file)[0];
+        $vendor = explode('/', $file);
+        $vendor = $vendor[0];
         if ($path = Loader::pathForNamespace($vendor)) {
             // With theme
             if (static::$theme !== null) {

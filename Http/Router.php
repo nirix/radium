@@ -22,6 +22,7 @@
 namespace Radium\Http;
 
 use Radium\Exception as Exception;
+use Radium\Error;
 
 /**
  * Radium's Router.
@@ -100,7 +101,7 @@ class Router
         }
         // No 404 route, Exception time! FUN :D
         else {
-            throw new Exception("No routes found for '{$uri}'");
+            Error::halt("Routing Error", "No routes found for '{$uri}'");
         }
     }
 
