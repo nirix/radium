@@ -72,7 +72,7 @@ class HTML
      *
      * @return string
      */
-    public static function link($label, $url = null, array $attributes = [])
+    public static function link($label, $url = null, array $attributes = array())
     {
         // If the label is null, use the URL
         if ($label === null) {

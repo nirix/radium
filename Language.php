@@ -61,9 +61,9 @@ class Language
      *
      * @return string
      */
-    public function translate($string, $vars = [])
+    public function translate($string, $vars = array())
     {
-        return call_user_func_array([$this->language, 'translate'], func_get_args());
+        return call_user_func_array(array($this->language, 'translate'), func_get_args());
     }
 
     /**
@@ -74,7 +74,7 @@ class Language
      */
     public function date($format, $timestamp = null)
     {
-        return call_user_func_array([$this->language, 'date'], func_get_args());
+        return call_user_func_array(array($this->language, 'date'), func_get_args());
     }
 
     /**

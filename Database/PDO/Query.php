@@ -54,7 +54,7 @@ class Query
      *
      * @var array
      */
-    private $query = [];
+    private $query = array();
 
     /**
      * Table prefix
@@ -68,7 +68,7 @@ class Query
      *
      * @var array
      */
-    private $valuesToBind = [];
+    private $valuesToBind = array();
 
     /**
      * PDO Query builder constructor.
@@ -94,7 +94,7 @@ class Query
         switch ($type) {
             case "SELECT":
             case "SELECT DISTINCT":
-                $this->query['select'] = ($data) ? $data : ['*'];
+                $this->query['select'] = ($data) ? $data : array('*');
                 break;
 
             case "INSERT INTO":
@@ -184,7 +184,7 @@ class Query
     public function orderBy($column, $how = 'ASC')
     {
         if (!array_key_exists('order_by', $this->query)) {
-            $this->query['order_by'] = [];
+            $this->query['order_by'] = array();
         }
 
         // Multiple?
@@ -227,14 +227,14 @@ class Query
     public function where($column, $value = null)
     {
         if (!array_key_exists('where', $this->query)) {
-            $this->query['where'] = [];
+            $this->query['where'] = array();
         }
 
         // Array? too easy
         if (is_array($column)) {
             $this->query['where'][] = $column;
         } else {
-            $this->query['where'][] = [[$column, $value]];
+            $this->query['where'][] = array(array($column, $value));
         }
 
         return $this;
@@ -274,14 +274,14 @@ class Query
      *
      * @return object
      */
-    public function join($table, $on, array $columns = [])
+    public function join($table, $on, array $columns = array())
     {
         if (!array_key_exists('joins', $this->query)) {
-            $this->query['joins'] = [];
+            $this->query['joins'] = array();
         }
 
         $this->query['select'] = array_merge($this->query['select'], $columns);
-        $this->query['joins'][] = [$table, $on];
+        $this->query['joins'][] = array($table, $on);
 
         return $this;
     }
@@ -339,7 +339,7 @@ class Query
      */
     public function assemble()
     {
-        $queryString = [];
+        $queryString = array();
 
         $queryString[] = $this->query['type'];
 
@@ -376,7 +376,7 @@ class Query
             $queryString[] = "`{$this->query['table']}`";
 
             // Get the columns and values
-            $columns = $values = [];
+            $columns = $values = array();
             foreach ($this->query['data'] as $column => $value) {
                 $columns[] = $this->columnName($column);
                 $values[] = $this->processValue($value);
@@ -392,13 +392,13 @@ class Query
             $queryString[] = "`{$this->query['table']}`";
 
             // Set values
-            $values = [];
+            $values = array();
             foreach ($this->query['data'] as $column => $value) {
                 // Process column name
                 $column = $this->columnName($column);
 
                 // Add value to bind queue
-                $valueBindKey = "new_" . str_replace(['.', '`'], ['_', ''], $column);
+                $valueBindKey = "new_" . str_replace(array('.', '`'), array('_', ''), $column);
                 $this->valuesToBind[$valueBindKey] = $value;
 
                 // Add to values
@@ -429,7 +429,7 @@ class Query
      */
     private function buildSelectColumns()
     {
-        $columns = [];
+        $columns = array();
 
         foreach ($this->query['select'] as $column => $as) {
             // Normal column select
@@ -464,9 +464,9 @@ class Query
 
         // Regular column name
         if (strpos($column, '(') === false) {
-            return str_replace(['.'], ['`.`'], "`{$column}`");
+            return str_replace(array('.'), array('`.`'), "`{$column}`");
         } else {
-            return trim(str_replace(['(', ')', '.'], ['(`', '`)', '`.`'], $column), '`');
+            return trim(str_replace(array('(', ')', '.'), array('(`', '`)', '`.`'), $column), '`');
         }
     }
 
@@ -477,22 +477,23 @@ class Query
      */
     private function buildWhere()
     {
-        $query = [];
+        $query = array();
 
         // Make sure there's something to do
         if (isset($this->query['where']) and count($this->query['where'])) {
             foreach ($this->query['where'] as $group => $conditions) {
-                $group = []; // Yes, because the $group above is not used, get over it.
+                $group = array(); // Yes, because the $group above is not used, get over it.
                 foreach ($conditions as $condition) {
                     // Get column name
-                    $column = str_replace('`', '', explode(" ", $condition[0])[0]); // PHP 5.4 array dereferencing, fuck yeah!
+                    $cond = explode(" ", $condition[0]);
+                    $column = str_replace('`', '', $cond[0]);
                     $safeColumn = $this->columnName($column);
 
                     // Make the column name safe
                     $condition[0] = str_replace($column, $safeColumn, $condition[0]);
 
                     // Add value to the bind queue
-                    $valueBindKey = str_replace(['.', '`'], ['_', ''], $safeColumn);
+                    $valueBindKey = str_replace(array('.', '`'), array('_', ''), $safeColumn);
                     $this->valuesToBind[$valueBindKey] = $condition[1];
 
                     // Add condition to group
@@ -515,7 +516,7 @@ class Query
      */
     private function buildJoins()
     {
-        $joins = [];
+        $joins = array();
 
         foreach ($this->query['joins'] as $join) {
             $joins[] = "JOIN `{$join[0]}` ON {$join[1]}";

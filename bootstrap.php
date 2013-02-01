@@ -30,7 +30,7 @@ Loader::setVendorDirectory(VENDORPATH);
 Loader::registerNamespace('Radium', __DIR__);
 
 // Register common classes for ease of use
-Autoloader::aliasClasses([
+Autoloader::aliasClasses(array(
     // Core classes
     '\Radium\Http\Request' => 'Request',
     '\Radium\Output\View'  => 'View',
@@ -42,7 +42,7 @@ Autoloader::aliasClasses([
 
     // Utilities
     '\Radium\Util\Str' => 'Str'
-]);
+));
 
 // Register the autoloader
 Autoloader::register();

@@ -57,21 +57,21 @@ class Model
      *
      * @var array
      */
-    protected static $_belongsTo = [];
+    protected static $_belongsTo = array();
 
     /**
      * Has many relationships.
      *
      * @var array
      */
-    protected static $_hasMany = [];
+    protected static $_hasMany = array();
 
     /**
      * Holds relation info.
      *
      * @var array
      */
-    protected static $_relationInfo = [];
+    protected static $_relationInfo = array();
 
     /**
      * Field validations.
@@ -83,14 +83,14 @@ class Model
      *
      * @var array
      */
-    protected static $_validates = [];
+    protected static $_validates = array();
 
     /**
      * Model errors.
      *
      * @var array
      */
-    protected $errors = [];
+    protected $errors = array();
 
     /**
      * Name of the connection name if not the default one.
@@ -111,21 +111,21 @@ class Model
      *
      * @var array
      */
-    protected static $_schema =[];
+    protected static $_schema = array();
 
     /**
      * Filters to process data before certain events.
      *
      * @var array
      */
-    protected static $_before = [];
+    protected static $_before = array();
 
     /**
      * Filters to process data after certain events.
      *
      * @var array
      */
-    protected static $_after  = [];
+    protected static $_after = array();
 
     /**
      * Model constructor.
@@ -133,7 +133,7 @@ class Model
      * @param array $data
      * @param bool  $isNew
      */
-    public function __construct(array $data = [], $isNew = true)
+    public function __construct(array $data = array(), $isNew = true)
     {
         // Set isNew
         $this->_isNew = $isNew;
@@ -151,7 +151,7 @@ class Model
         // Run stuff for rows fetched from the database.
         if (!$isNew) {
             // Convert timestamps to local
-            foreach (['created_at', 'updated_at'] as $timestamp) {
+            foreach (array('created_at', 'updated_at') as $timestamp) {
                 if (array_key_exists($timestamp, $data) and $this->{$timestamp} !== null) {
                     $this->{$timestamp} = Time::gmtToLocal($this->{$timestamp});
                 }
@@ -168,7 +168,7 @@ class Model
 
                 // Get the table data for the relation
                 // and put it into its own model.
-                $data = [];
+                $data = array();
                 foreach ($relation['model']::schema() as $column => $info) {
                     $key = strtolower("{$relation['class']}_{$column}");
 
@@ -197,9 +197,9 @@ class Model
         $this->setupRelations();
 
         // Add filters
-        foreach (['create', 'save'] as $action) {
+        foreach (array('create', 'save') as $action) {
             if (!array_key_exists($action, static::$_before)) {
-                static::$_before[$action] = [];
+                static::$_before[$action] = array();
             }
         }
 
@@ -234,13 +234,13 @@ class Model
         if (static::$_schema[static::$_table] === null) {
             $result = static::connection()->prepare("DESCRIBE `{prefix}" . static::$_table . "`")->exec();
             foreach ($result->fetchAll(\PDO::FETCH_COLUMN) as $column) {
-                static::$_schema[static::$_table][$column['Field']] = [
+                static::$_schema[static::$_table][$column['Field']] = array(
                     'type'    => $column['Type'],
                     'default' => $column['Default'],
                     'null'    => $column['Null'] == 'NO' ? false : true,
                     'key'     => $column['Key'],
                     'extra'   => $column['Extra']
-                ];
+                );
             }
         }
     }
@@ -279,7 +279,7 @@ class Model
             $find = static::$_primaryKey;
         }
 
-        return static::select()->where($find. " = ?", $value)->fetch();
+        return static::select()->where($find . " = ?", $value)->fetch();
     }
 
     /**
@@ -340,7 +340,7 @@ class Model
         }
 
         if (!is_array($relation)) {
-            $relation = [];
+            $relation = array();
         }
 
         // Name
@@ -377,7 +377,7 @@ class Model
         }
 
         // Columns
-        $relation['columns'] = [];
+        $relation['columns'] = array();
         foreach (array_keys($relation['model']::schema()) as $column) {
             $relation['columns']["{$relation['table']}.{$column}"] = "{$relation['name']}_{$column}";
         }
@@ -444,7 +444,7 @@ class Model
      */
     public function data()
     {
-        $data = [];
+        $data = array();
         foreach (array_keys(static::schema()) as $column) {
             if (isset($this->{$column})) {
                 $data[$column] = $this->{$column};
@@ -472,7 +472,7 @@ class Model
     public function addError($field, $message)
     {
         if (!array_key_exists($field, $this->errors)) {
-            $this->errors[$field] = [];
+            $this->errors[$field] = array();
         }
 
         $this->errors[$field][] = $message;
@@ -487,7 +487,7 @@ class Model
      */
     public function validates($data = null)
     {
-        $this->errors = [];
+        $this->errors = array();
 
         // Get data if it wasn't passed
         if ($data === null) {

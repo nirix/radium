@@ -29,7 +29,7 @@ namespace Radium\Core;
  */
 class Hook
 {
-    private static $plugins = [];
+    private static $plugins = array();
 
     /**
      * Adds a plugin to the library
@@ -41,7 +41,7 @@ class Hook
     {
         // Make sure the hook index exists
         if (!isset(static::$plugins[$hook])) {
-            static::$plugins[$hook] = [];
+            static::$plugins[$hook] = array();
         }
 
         // Add the plugin
@@ -54,7 +54,7 @@ class Hook
      * @param string $hook
      * @param array $params Parameters to be passed to the plugins method.
      */
-    public static function run($hook, $params = [])
+    public static function run($hook, $params = array())
     {
         // Make sure the hook index exists
         if (!isset(static::$plugins[$hook])) {

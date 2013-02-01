@@ -64,13 +64,10 @@ class Kernel
         // Start the app
         static::$app = new Router::$controller;
 
-        // Filters
-        static::$app->filters();
-
         // Before filters
         $filters = array_merge(
-            isset(static::$app->before['*']) ? static::$app->before['*'] : [],
-            isset(static::$app->before[Router::$method]) ? static::$app->before[Router::$method] : []
+            isset(static::$app->before['*']) ? static::$app->before['*'] : array(),
+            isset(static::$app->before[Router::$method]) ? static::$app->before[Router::$method] : array()
         );
         foreach ($filters as $filter) {
             static::$app->{$filter}(Router::$method);
@@ -79,13 +76,13 @@ class Kernel
 
         // Call the method
         if (static::$app->render['action']) {
-            $output = call_user_func_array([static::$app, Router::$method . 'Action'], Router::$vars);
+            $output = call_user_func_array(array(static::$app, Router::$method . 'Action'), Router::$vars);
         }
 
         // After filters
         $filters = array_merge(
-            isset(static::$app->after['*']) ? static::$app->after['*'] : [],
-            isset(static::$app->after[Router::$method]) ? static::$app->after[Router::$method] : []
+            isset(static::$app->after['*']) ? static::$app->after['*'] : array(),
+            isset(static::$app->after[Router::$method]) ? static::$app->after[Router::$method] : array()
         );
         foreach ($filters as $filter) {
             static::$app->{$filter}(Router::$method);

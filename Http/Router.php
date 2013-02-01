@@ -34,15 +34,15 @@ use Radium\Exception as Exception;
  */
 class Router
 {
-    private static $routes = [];
+    private static $routes = array();
 
     // Routed values
     public static $controller;
     public static $method;
-    public static $params = [];
-    public static $vars = [];
+    public static $params = array();
+    public static $vars = array();
     public static $extension;
-    public static $extensions = ['.json', '.atom'];
+    public static $extensions = array('.json', '.atom');
 
     /**
      * Adds a route to be routed.
@@ -51,15 +51,15 @@ class Router
      * @param string $value  Controller/method to route to
      * @param array  $params Default params to pass to the method
      */
-    public static function add($route, $value, array $params = [])
+    public static function add($route, $value, array $params = array())
     {
         // Don't overwrite the route
         if (!isset(static::$routes[$route])) {
-            static::$routes[$route] = [
+            static::$routes[$route] = array(
                 'route'  => $route,
                 'value'  => $value,
                 'params' => $params
-            ];
+            );
         }
     }
 
@@ -119,7 +119,7 @@ class Router
     {
         $value = explode('.', $route['value']);
         $method = explode('/', implode('.', array_slice($value, 1)));
-        $vars = isset($method[1]) ? explode(',', $method[1]) : [];
+        $vars = isset($method[1]) ? explode(',', $method[1]) : array();
 
         static::$controller = str_replace('::', '\\', '\\'.$value[0]);
         static::$method = $method[0];

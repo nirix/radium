@@ -32,8 +32,8 @@ namespace Radium\Language;
  */
 class Translation
 {
-    protected static $info = [];
-    protected static $strings = [];
+    protected static $info = array();
+    protected static $strings = array();
 
     public function __construct()
     {

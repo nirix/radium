@@ -33,8 +33,8 @@ class Loader
 {
     private static $defaultNamespace;
     private static $vendorDirectory;
-    private static $registeredPaths = [];
-    private static $registeredNamespaces = [];
+    private static $registeredPaths = array();
+    private static $registeredNamespaces = array();
 
     /**
      * Returns the default namespace name.
@@ -86,7 +86,7 @@ class Loader
     public static function registerNamespace($vendor, $path, $default = false)
     {
         if ($default) {
-            static::$defaultNamespace = ['name' => $vendor, 'path' => $path];
+            static::$defaultNamespace = array('name' => $vendor, 'path' => $path);
         }
         static::$registeredNamespaces[$vendor] = $path;
     }

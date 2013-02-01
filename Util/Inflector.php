@@ -35,7 +35,7 @@ class Inflector
      *
      * @var array
      */
-    protected static $pluralRules = [
+    protected static $pluralRules = array(
         '/^(ox)$/i'                => '\1\2en',
         '/([m|l])ouse$/i'          => '\1ice',
         '/(matr|vert|ind)ix|ex$/i' => '\1ices',
@@ -55,14 +55,14 @@ class Inflector
         '/(ax|cris|test)is$/i'     => '\1es',
         '/s$/'                     => 's',
         '/$/'                      => 's',
-    ];
+    );
 
     /**
      * Singular rules
      *
      * @var array
      */
-    protected static $singularRules = [
+    protected static $singularRules = array(
         '/(matr)ices$/i'        => '\1ix',
         '/(vert|ind)ices$/i'    => '\1ex',
         '/^(ox)en/i'            => '\1',
@@ -90,7 +90,7 @@ class Inflector
         '/(n)ews$/i'            => '\1\2ews',
         '/([^us])s$/i'          => '\1',
         '/((a)naly|(b)a|(d)iagno|(p)arenthe|(p)rogno|(s)ynop|(t)he)ses$/i' => '\1\2sis',
-    ];
+    );
 
     /**
      * Converts the string to a class name.

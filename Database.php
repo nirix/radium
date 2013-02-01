@@ -34,7 +34,7 @@ use Radium\Exception;
  */
 class Database
 {
-    protected static $connections = [];
+    protected static $connections = array();
 
     /**
      * Creates a new database connection.

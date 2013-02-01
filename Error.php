@@ -40,7 +40,7 @@ class Error
      * @param string $message Error message
      * @param array  $trace   Exception stack trace
      */
-    public static function halt($title, $message = '', $trace = [])
+    public static function halt($title, $message = '', $trace = array())
     {
         @ob_end_clean();
 

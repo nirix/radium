@@ -36,22 +36,18 @@ use Radium\Output\View;
  */
 class Controller
 {
-    public $render = [
+    public $render = array(
         'action' => true,     // Call the routed action, or not
         'view'   => false,    // View to render, set in __construct()
         'layout' => 'default' // Layout to render
-    ];
+    );
 
-    public $before = [];
-    public $after = [];
+    public $before = array();
+    public $after = array();
 
     public function __construct()
     {
         $this->render['view'] = get_called_class() . '/' . Router::$method;
-    }
-
-    public function filters()
-    {
     }
 
     public function __shutdown()
@@ -64,11 +60,11 @@ class Controller
         if ($this->render['layout']) {
             $content = Body::$content;
             Body::clear();
-            View::render("layouts/{$this->render['layout']}", ['output' => $content]);
+            View::render("layouts/{$this->render['layout']}", array('content' => $content));
         }
 
         // Set the X-Powered-By header and render the layout with the content
-        header("X-Powered-By: Radium/" . Kernel::version());
+        header("X-Powered-By: Avalon/" . Kernel::version());
         print(Body::content());
     }
 }

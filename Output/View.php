@@ -39,8 +39,8 @@ class View
     private static $obLevel;
     public static $theme;
     public static $inheritFrom;
-    private static $searchPaths = [];
-    private static $vars = [];
+    private static $searchPaths = array();
+    private static $vars = array();
     private static $viewExtensions = ['phtml', 'php', 'js.php', 'json.php'];
 
     /**
@@ -49,7 +49,7 @@ class View
      * @param string $file
      * @param array $vars Variables to be passed to the view.
      */
-    public static function render($file, array $vars = [])
+    public static function render($file, array $vars = array())
     {
         // Get the view content
         $content = static::get($file, $vars);
@@ -73,7 +73,7 @@ class View
      *
      * @return string
      */
-    public static function get($file, array $vars = [])
+    public static function get($file, array $vars = array())
     {
         // Get the file name/path
         $file = static::filePath($file);
@@ -153,7 +153,7 @@ class View
      */
     public static function find($file)
     {
-        $searchFor = [];
+        $searchFor = array();
         $ofile = $file;
 
         // If the path includes a vendor name
@@ -220,7 +220,7 @@ class View
     public static function pathForNamespace($namespace)
     {
         // Convert the namespace and method to a directory structure
-        $namespace = str_replace(['\\', '::'], '/', $namespace);
+        $namespace = str_replace(array('\\', '::'), '/', $namespace);
 
         // Change the controllers segment to views
         $namespace = str_replace('controllers', 'views', $namespace);

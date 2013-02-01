@@ -46,6 +46,6 @@ class Body
 
     public static function clear()
     {
-    	static::$content = '';
+        static::$content = '';
     }
 }
