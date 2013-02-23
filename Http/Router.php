@@ -45,23 +45,28 @@ class Router
     public static $extension;
     public static $extensions = array('.json', '.atom');
 
+
     /**
-     * Adds a route to be routed.
-     *
-     * @param string $route  URI to match
-     * @param string $value  Controller/method to route to
-     * @param array  $params Default params to pass to the method
+     * Sets the root route.
      */
-    public static function add($route, $value, array $params = array())
+    public static function root()
     {
-        // Don't overwrite the route
-        if (!isset(static::$routes[$route])) {
-            static::$routes[$route] = array(
-                'route'  => $route,
-                'value'  => $value,
-                'params' => $params
-            );
+        return static::$routes['root'] = new Route('root');
+    }
+
+    /**
+     * Adds a new route.
+     *
+     * @param string $route URI to route
+     */
+    public static function route($route)
+    {
+        // 404 Route
+        if ($route == '404') {
+            return static::$routes['404'] = new Route('404');
         }
+
+        return static::$routes[] = new Route($route);
     }
 
     /**
@@ -69,29 +74,27 @@ class Router
      *
      * @param Request $request
      */
-    public static function route(Request $request)
+    public static function process(Request $request)
     {
-        $uri = "/" . trim($request->getUri(), '/');
+        $uri = "/" . trim($request->uri(), '/');
 
-        // Is this the root route?
-        if ($uri === '/' and isset(static::$routes['root'])) {
+        // Check if this is root page
+        if (isset(static::$routes['root']) and Request::$uri == '/') {
             return static::setRoute(static::$routes['root']);
-        }
-
-        // Do we have an exact match?
-        if (isset(static::$routes[$uri])) {
-            return static::setRoute(static::$routes[$uri]);
         }
 
         // The fun begins
         foreach (static::$routes as $route) {
             // Does the route match the request?
-            $pattern = "#^{$route['route']}" . '(?<extension>' . implode('|', static::$extensions) . ")?$#";
+            $pattern = "#^{$route->route}" . '(?<extension>' . implode('|', static::$extensions) . ")?$#";
             if (preg_match($pattern, $uri, $params)) {
                 unset($params[0]);
-                $route['params'] = array_merge($route['params'], $params);
-                $route['value'] = preg_replace($pattern, $route['value'], $uri);
-                return static::setRoute($route);
+                $route->params = array_merge($route->params, $params);
+                $route->destination = preg_replace($pattern, $route->destination, $uri);
+
+                if (in_array(Request::$method, $route->method)) {
+                    return static::setRoute($route);
+                }
             }
         }
 
@@ -111,21 +114,21 @@ class Router
     public static function set404()
     {
         if (!isset(static::$routes['404'])) {
-            throw new Exception("There is no 404 route set.");
+            Error::halt("Route Error", "There is no 404 route set.");
         }
         return static::setRoute(static::$routes['404']);
     }
 
     private static function setRoute($route)
     {
-        $value = explode('.', $route['value']);
-        $method = explode('/', implode('.', array_slice($value, 1)));
+        $destination = explode('.', $route->destination);
+        $method = explode('/', implode('.', array_slice($destination, 1)));
         $vars = isset($method[1]) ? explode(',', $method[1]) : array();
 
-        static::$controller = str_replace('::', '\\', '\\'.$value[0]);
+        static::$controller = str_replace('::', "\\", $destination[0]);
         static::$method = $method[0];
-        static::$params = $route['params'];
+        static::$params = $route->params;
         static::$vars = $vars;
-        static::$extension = (isset($route['params']['extension']) ? $route['params']['extension'] : null);
+        static::$extension = (isset($route->params['extension']) ? $route->params['extension'] : null);
     }
 }

@@ -48,7 +48,7 @@ class Kernel
         session_start();
 
         // Route the request
-        Router::route(new Request);
+        Router::process(new Request);
 
         // Check if the routed controller and method exists
         if (!class_exists(Router::$controller) or !method_exists(Router::$controller, Router::$method . 'Action')) {
