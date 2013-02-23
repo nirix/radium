@@ -44,59 +44,6 @@ class View
     private static $viewExtensions = array('phtml', 'php', 'js.php', 'json.php');
 
     /**
-     * Renders the specified file.
-     *
-     * @param string $file
-     * @param array $vars Variables to be passed to the view.
-     */
-    public static function render($file, array $vars = array())
-    {
-        // Get the view content
-        $content = static::get($file, $vars);
-
-        // Check if we need to flush or append
-        if(ob_get_level() > static::$obLevel + 1) {
-            ob_end_flush();
-        }
-        // Append it to the output
-        else {
-            Body::append($content);
-            @ob_end_clean();
-        }
-    }
-
-    /**
-     * Private function to handle the rendering of files.
-     *
-     * @param string $file
-     * @param array $vars Variables to be passed to the view.
-     *
-     * @return string
-     */
-    public static function get($file, array $vars = array())
-    {
-        // Get the file name/path
-        $file = static::filePath($file);
-
-        // Make sure the ob_level is set
-        if (static::$obLevel === null) {
-            static::$obLevel = ob_get_level();
-        }
-
-        // Make the variables available to the view
-        foreach (array_merge(static::$vars, $vars) as $_var => $_val) {
-            $$_var = $_val;
-        }
-
-        // Load up the view and get the contents
-        ob_start();
-        include($file);
-        $content = ob_get_contents();
-
-        return $content;
-    }
-
-    /**
      * Sends the variable to the view.
      *
      * @param string $var The variable name.
@@ -112,6 +59,46 @@ class View
         } else {
             self::$vars[$var] = $val;
         }
+    }
+
+    /**
+     * Renders the specified file.
+     *
+     * @param string $file
+     * @param array $vars Variables to be passed to the view.
+     */
+    public static function render($file, array $vars = array())
+    {
+        return static::getView($file, $vars);
+    }
+
+    /**
+     * Private function to handle the rendering of files.
+     *
+     * @param string $file
+     * @param array  $vars Variables to be passed to the view.
+     *
+     * @return string
+     */
+    private static function getView($file, array $vars = array())
+    {
+        // Get the file name/path
+        $file = self::filePath($file);
+
+        // Make the set variables accessible
+        foreach (self::$vars as $_var => $_val) {
+            $$_var = $_val;
+        }
+
+        // Make the vars for this view accessible
+        foreach($vars as $_var => $_val) {
+            $$_var = $_val;
+        }
+
+        // Load up the view and get the contents
+        ob_start();
+        include($file);
+        return ob_get_clean();
     }
 
     /**
@@ -133,11 +120,7 @@ class View
         $file = strtolower(preg_replace('/(?<=[a-z])([A-Z])/', '_' . '\\1', implode('/', $file)));
 
         // Get the path
-        try {
-            $path = static::find((isset($namespace) ? "{$namespace}/" : '') . "{$file}");
-        } catch (Exception $e) {
-            Error::halt("View Error", $e->getMessage(), $e->getTrace());
-        }
+        $path = static::find((isset($namespace) ? "{$namespace}/" : '') . "{$file}");
 
         unset($file);
         return $path;
@@ -191,7 +174,7 @@ class View
 
         // Not found
         $file = str_replace('Controllers', 'views', $file);
-        throw new Exception("Unable to load view '{$file}'");
+        Error::halt("View Error", "Unable to load view '{$file}'");
     }
 
     /**
