@@ -1,7 +1,7 @@
 <?php
 /*!
  * Radium
- * Copyright (C) 2011-2012 Jack P.
+ * Copyright (C) 2011-2013 Jack P.
  * https://github.com/nirix
  *
  * This file is part of Radium.
