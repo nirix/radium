@@ -59,7 +59,7 @@ class Controller
 
         // Render the view
         $content = '';
-        if ($this->render['view']) {
+        if ($this->render['action'] and $this->render['view']) {
             Body::append(View::render($this->render['view']));
         }
 
