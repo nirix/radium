@@ -52,19 +52,18 @@ class Controller
 
     public function __shutdown()
     {
-        if ($this->render['action'] and $this->render['view']) {
-            View::render($this->render['view']);
+        $content = '';
+        if ($this->render['view']) {
+            $content = View::render($this->render['view']);
         }
 
         // Are we wrapping the view in a layout?
         if ($this->render['layout']) {
-            $content = Body::$content;
-            Body::clear();
-            View::render("layouts/{$this->render['layout']}", array('content' => $content));
+            Body::append(View::render("layouts/{$this->render['layout']}", array('output' => $content)));
         }
 
         // Set the X-Powered-By header and render the layout with the content
-        header("X-Powered-By: Avalon/" . Kernel::version());
+        header("X-Powered-By: Radium/" . Kernel::version());
         print(Body::content());
     }
 }
