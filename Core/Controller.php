@@ -52,14 +52,24 @@ class Controller
 
     public function __shutdown()
     {
+        // Don't render the layout for json content
+        if (Router::$extension == 'json') {
+            $this->render['layout'] = false;
+        }
+
+        // Render the view
         $content = '';
         if ($this->render['view']) {
-            $content = View::render($this->render['view']);
+            Body::append(View::render($this->render['view']));
         }
 
         // Are we wrapping the view in a layout?
         if ($this->render['layout']) {
+            $content = Body::content();
+            Body::clear();
             Body::append(View::render("layouts/{$this->render['layout']}", array('output' => $content)));
+        } else {
+            Body::append($content);
         }
 
         // Set the X-Powered-By header and render the layout with the content
