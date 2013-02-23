@@ -217,7 +217,7 @@ class Query
      * @example
      *    where("count = ?", 5)
      *    // or
-     *    where([["count = ?", 5], ["name LIKE 'Radium%'"]]);
+     *    where(["count = ?" => 5], ["name LIKE 'Radium%'"]);
      *
      * @param string $columm Column name
      * @param mixed  $value  Column value
@@ -226,7 +226,7 @@ class Query
      */
     public function where($column, $value = null)
     {
-        if (!array_key_exists('where', $this->query)) {
+        if (!isset($this->query['where'])) {
             $this->query['where'] = array();
         }
 
@@ -234,10 +234,29 @@ class Query
         if (is_array($column)) {
             $this->query['where'][] = $column;
         } else {
-            $this->query['where'][] = array(array($column, $value));
+            $this->query['where'][] = array($column => $value);
         }
 
         return $this;
+    }
+
+    /**
+     * Adds a filter to the last condition group.
+     *
+     * @param string $columm Column name
+     * @param mixed  $value  Column value
+     *
+     * @return object
+     */
+    public function _and($column, $value = null) {
+        if (!is_array($column)) {
+            $column = array($column => $value);
+        }
+
+        $this->query['where'][count($this->query['where']) - 1] = array_merge(
+            $this->query['where'][count($this->query['where']) - 1],
+            $column
+        );
     }
 
     /**
@@ -483,21 +502,21 @@ class Query
         if (isset($this->query['where']) and count($this->query['where'])) {
             foreach ($this->query['where'] as $group => $conditions) {
                 $group = array(); // Yes, because the $group above is not used, get over it.
-                foreach ($conditions as $condition) {
+                foreach ($conditions as $condition => $value) {
                     // Get column name
-                    $cond = explode(" ", $condition[0]);
+                    $cond = explode(" ", $condition);
                     $column = str_replace('`', '', $cond[0]);
                     $safeColumn = $this->columnName($column);
 
                     // Make the column name safe
-                    $condition[0] = str_replace($column, $safeColumn, $condition[0]);
+                    $condition = str_replace($column, $safeColumn, $condition);
 
                     // Add value to the bind queue
                     $valueBindKey = str_replace(array('.', '`'), array('_', ''), $safeColumn);
-                    $this->valuesToBind[$valueBindKey] = $condition[1];
+                    $this->valuesToBind[$valueBindKey] = $value;
 
                     // Add condition to group
-                    $group[] = str_replace("?", ":{$valueBindKey}", $condition[0]);
+                    $group[] = str_replace("?", ":{$valueBindKey}", $condition);
                 }
 
                 // Add the group
