@@ -34,17 +34,43 @@ use Radium\Exception as Exception;
  */
 class Request
 {
-    private static $uri;
-    private static $segments = array();
-    private static $requested_with;
+    public static $requestUri;
+    public static $uri;
+    public static $method;
     public static $request = array();
     public static $post = array();
-    public static $method;
+    public static $scheme;
+    public static $host;
+
+    private static $requestedWith;
+    private static $base;
+    private static $segments = array();
+
+    /**
+     * Initialize the class to get request
+     * information statically.
+     */
+    public static function init()
+    {
+        return new static;
+    }
 
     public function __construct()
     {
-        // Get the request path
-        static::$uri = ($uri = static::requestPath() and $uri != '') ? $uri : '/';
+        // Set request scheme
+        static::$scheme = static::isSecure() ? 'https' : 'http';
+
+        // Set host
+        static::$host = strtolower(preg_replace('/:\d+$/', '', trim($_SERVER['SERVER_NAME'])));
+
+        // Set base url
+        static::$base = static::baseUrl();
+
+        // Set the request path
+        static::$requestUri = static::requestUri();
+
+        // Set relative uri
+        static::$uri = str_replace(static::$base, '', static::$requestUri);
 
         // Request segments
         static::$segments = explode('/', trim(static::$uri, '/'));
@@ -53,7 +79,7 @@ class Request
         static::$method = strtolower($_SERVER['REQUEST_METHOD']);
 
         // Requested with
-        static::$requested_with = @$_SERVER['HTTP_X_REQUESTED_WITH'];
+        static::$requestedWith = @$_SERVER['HTTP_X_REQUESTED_WITH'];
 
         // _REQUEST
         static::$request = $_REQUEST;
@@ -67,17 +93,7 @@ class Request
      *
      * @return string
      */
-    public function getUri()
-    {
-        return static::$uri;
-    }
-
-    /**
-     * Static method for returning the relative URI.
-     *
-     * @return string
-     */
-    public static function uri()
+    public function uri()
     {
         return static::$uri;
     }
@@ -98,23 +114,17 @@ class Request
     }
 
     /**
-     * Returns the request method.
+     * Returns the value of the key from the POST array,
+     * if it's not set, returns null by default.
      *
-     * @return string
-     */
-    public static function method()
-    {
-        return static::$method;
-    }
-
-    /**
-     * Returns the full requested URI.
+     * @param string $key     Key to get from POST array
+     * @param mixed  $not_set Value to return if not set
      *
-     * @return string
+     * @return mixed
      */
-    public static function requestUri()
+    public static function post($key, $not_set = null)
     {
-        return $_SERVER['REQUEST_URI'];
+        return isset(static::$post[$key]) ? static::$post[$key] : $not_set;
     }
 
     /**
@@ -154,11 +164,11 @@ class Request
     /**
      * Checks if the request was made via Ajax.
      *
-     * @return bool
+     * @return boolean
      */
     public static function isAjax()
     {
-        return strtolower(static::$requested_with) == 'xmlhttprequest';
+        return strtolower(static::$requestedWith) == 'xmlhttprequest';
     }
 
     /**
@@ -168,47 +178,71 @@ class Request
      */
     public static function base($path = '')
     {
-        return str_replace(basename($_SERVER['SCRIPT_NAME']), '', $_SERVER['SCRIPT_NAME']) . trim($path, '/');
+        return static::$base . '/' . trim($path, '/');
     }
 
-    private function requestPath()
+    /**
+     * Determines if the request is secure.
+     *
+     * @return boolean
+     */
+    public static function isSecure()
     {
-        // Check if there is a PATH_INFO variable
-        // Note: some servers seem to have trouble with getenv()
-        $path = isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : @getenv('PATH_INFO');
-        if (trim($path, '/') != '' && $path != "/index.php") {
-            return $path;
+        if (!isset($_SERV['HTTPS']) or empty($_SERVER['HTTPS'])) {
+            return false;
         }
 
-        // Check if ORIG_PATH_INFO exists
-        $path = str_replace($_SERVER['SCRIPT_NAME'], '', (isset($_SERVER['ORIG_PATH_INFO'])) ? $_SERVER['ORIG_PATH_INFO'] : @getenv('ORIG_PATH_INFO'));
-        if (trim($path, '/') != '' && $path != "/index.php") {
-            return $path;
+        return $_SERVER['HTTPS'] == 'on' or $_SERVER['HTTPS'] == 1;
+    }
+
+    private function baseUrl()
+    {
+        $filename = basename($_SERVER['SCRIPT_FILENAME']);
+
+        if (basename($_SERVER['SCRIPT_NAME']) === $filename) {
+            $baseUrl = $_SERVER['SCRIPT_NAME'];
+        } elseif (basename($_SERVER['PHP_SELF']) === $filename) {
+            $baseUrl = $_SERVER['PHP_SELF'];
+        } elseif (basename($_SERVER['ORIG_SCRIPT_NAME']) === $filename) {
+            $baseUrl = $_SERVER['ORIG_SCRIPT_NAME'];
         }
 
-        // Check for ?uri=x/y/z
-        if (isset($_REQUEST['url'])) {
-            return $_REQUEST['url'];
+        $baseUrl = rtrim(str_replace($filename, '', $baseUrl), '/');
+
+        return $baseUrl;
+    }
+
+    private function requestUri()
+    {
+        $requestUri = '';
+
+        if (isset($_SERVER['HTTP_X_ORIGINAL_URL'])) {
+            $requestUri = $_SERVER['HTTP_X_ORIGINAL_URL'];
+        } elseif (isset($_SERVER['HTTP_X_REWRITE_URL'])) {
+            $requestUri = $_SERVER['HTTP_X_REWRITE_URL'];
+        } elseif (isset($_SERVER['IIS_WasUrlRewritten'])
+                  and $_SERVER['IIS_WasUrlRewritten'] = 1
+                  and isset($_SERVER['UNENCODED_URL'])
+                  and $_SERVER['UNENCODED_URL'] != '')
+        {
+            $requestUri = $_SERVER['UNENCODED_URL'];
+        } elseif (isset($_SERVER['REQUEST_URI'])) {
+            $requestUri = $_SERVER['REQUEST_URI'];
+
+            $schemeAndHost = static::$scheme . '://' . static::$host;
+            if (strpos($requestUri, $schemeAndHost)) {
+                $requestUri = substr($requestUri, strlen($schemeAndHost));
+            }
+        } elseif (isset($_SERVER['ORIG_PATH_INFO'])) {
+            $requestUri = $_SERVER['ORIG_PATH_INFO'];
         }
 
-        // Check the _GET variable
-        if (is_array($_GET) && count($_GET) == 1 && trim(key($_GET), '/') != '') {
-            return key($_GET);
+        // Remove query string
+        if (strpos($requestUri, '?') !== false) {
+            $requestUri = explode('?', $requestUri);
+            $requestUri = $requestUri[0];
         }
 
-        // Check for QUERY_STRING
-        $path = (isset($_SERVER['QUERY_STRING'])) ? $_SERVER['QUERY_STRING'] : @getenv('QUERY_STRING');
-        if (trim($path, '/') != '') {
-            return $path;
-        }
-
-        // Check for REQUEST_URI
-        $path = str_replace($_SERVER['SCRIPT_NAME'], '', $_SERVER['REQUEST_URI']);
-        if (trim($path, '/') != '' && $path != "/index.php") {
-            return str_replace(str_replace(basename($_SERVER['SCRIPT_NAME']), '', $_SERVER['SCRIPT_NAME']), '', $path);
-        }
-
-        // I dont know what else to try, screw it..
-        return '';
+        return $requestUri;
     }
 }
