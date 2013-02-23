@@ -129,6 +129,11 @@ class Router
         static::$method = $method[0];
         static::$params = $route->params;
         static::$vars = $vars;
-        static::$extension = (isset($route->params['extension']) ? $route->params['extension'] : null);
+        static::$extension = (isset($route->params['extension']) ? $route->params['extension'] : 'html');
+
+        // Remove the first dot from the extension
+        if (static::$extension[0] == '.') {
+            static::$extension = substr(static::$extension, 1);
+        }
     }
 }
