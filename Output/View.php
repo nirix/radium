@@ -83,7 +83,12 @@ class View
     private static function getView($file, array $vars = array())
     {
         // Get the file name/path
-        $file = self::filePath($file);
+        $path = self::filePath($file);
+
+        if (!$path) {
+            $file = str_replace('Controllers', 'Views', $file);
+            Error::halt("View Error", "Unable to load view '{$file}'");
+        }
 
         // Make the set variables accessible
         foreach (self::$vars as $_var => $_val) {
@@ -97,7 +102,7 @@ class View
 
         // Load up the view and get the contents
         ob_start();
-        include($file);
+        include($path);
         return ob_get_clean();
     }
 
@@ -173,24 +178,7 @@ class View
         }
 
         // Not found
-        $file = str_replace('Controllers', 'views', $file);
-        Error::halt("View Error", "Unable to load view '{$file}'");
-    }
-
-    /**
-     * Confirms or denies the existence of the view.
-     *
-     * @param string $file
-     *
-     * @return boolean
-     */
-    public static function exists($file)
-    {
-        try {
-            return static::find($file) !== false;
-        } catch (Exception $e) {
-            return false;
-        }
+        return false;
     }
 
     /**
