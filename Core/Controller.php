@@ -67,7 +67,7 @@ class Controller
         if ($this->render['layout']) {
             $content = Body::content();
             Body::clear();
-            Body::append(View::render("layouts/{$this->render['layout']}", array('output' => $content)));
+            Body::append(View::render("layouts/{$this->render['layout']}", array('content' => $content)));
         } else {
             Body::append($content);
         }
