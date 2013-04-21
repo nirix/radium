@@ -89,8 +89,13 @@ class Kernel
         }
         unset($filters, $filter);
 
-        // Check if the action returned content
-        if (static::$app->render['action'] and $output !== null and (is_object($output) and $output->response !== null)) {
+        // If an object is returned, use the `response` variable if it's set.
+        if (is_object($output)) {
+            $output = isset($output->response) ? $output->response : null;
+        }
+
+        // Check if we have any content
+        if (static::$app->render['action'] and $output !== null) {
             static::$app->render['view'] = false;
             Body::append($output);
 
