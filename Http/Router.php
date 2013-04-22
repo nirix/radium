@@ -45,6 +45,7 @@ class Router
     public static $extension;
     public static $extensions = array('.json', '.atom');
 
+    protected static $tokens = array();
 
     /**
      * Sets the root route.
@@ -85,6 +86,9 @@ class Router
 
         // The fun begins
         foreach (static::$routes as $route) {
+            // Replace tokens
+            $route->route = str_replace(array_keys(static::$tokens), array_values(static::$tokens), $route->route);
+
             // Does the route match the request?
             $pattern = "#^{$route->route}" . '(?<extension>' . implode('|', static::$extensions) . ")?$#";
             if (preg_match($pattern, $uri, $params)) {
@@ -117,6 +121,20 @@ class Router
             Error::halt("Route Error", "There is no 404 route set.");
         }
         return static::setRoute(static::$routes['404']);
+    }
+
+    /**
+     * Registers a token to replace in routes.
+     *
+     * @param string $token Token name
+     * @param string $value Regex value
+     *
+     * @example
+     *     Router::registerToken('post_id', "(?P<post_id>[0-9]+)");
+     */
+    public static function registerToken($token, $value)
+    {
+        static::$tokens[":{$token}"] = $value;
     }
 
     private static function setRoute($route)
