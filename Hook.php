@@ -17,7 +17,7 @@
  * along with FishHook. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Radium\Core;
+namespace Radium;
 
 /**
  * The FishHook plugin library
