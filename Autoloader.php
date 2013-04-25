@@ -62,9 +62,9 @@ class Autoloader
      * @param string $vendor
      * @param string $location
      */
-    public static function registerNamespace($vendor, $location)
+    public static function registerNamespace($vendor, $location, $default = false)
     {
-        Loader::registerNamespace($vendor, $location);
+        Loader::registerNamespace($vendor, $location, $default);
     }
 
     /**
