@@ -19,7 +19,7 @@
  * along with Radium. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Radium\Core;
+namespace Radium\Action;
 
 use Radium\Http\Router;
 use Radium\Output\Body;
@@ -29,8 +29,7 @@ use Radium\Output\View;
  * Controller
  *
  * @since 0.3
- * @package Radium
- * @subpackage Core
+ * @package Radium/Action
  * @author Jack P.
  * @copyright (C) Jack P.
  */
