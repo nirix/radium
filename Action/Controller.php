@@ -21,6 +21,7 @@
 
 namespace Radium\Action;
 
+use Radium\Kernel;
 use Radium\Http\Router;
 use Radium\Output\Body;
 use Radium\Output\View;

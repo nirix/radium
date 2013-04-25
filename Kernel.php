@@ -19,7 +19,7 @@
  * along with Radium. If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Radium\Core;
+namespace Radium;
 
 use Radium\Http\Router;
 use Radium\Http\Request;
@@ -31,13 +31,12 @@ use Radium\Output\View;
  *
  * @since 0.1
  * @package Radium
- * @subpackage Core
  * @author Jack P.
  * @copyright (C) Jack P.
  */
 class Kernel
 {
-    private static $version = '0.2';
+    private static $version = '0.3';
     private static $app;
 
     /**

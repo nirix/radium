@@ -21,7 +21,7 @@
 
 namespace Radium;
 
-use Radium\Core\Kernel;
+use Radium\Kernel;
 
 /**
  * Error class
