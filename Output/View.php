@@ -100,6 +100,11 @@ class View
             $$_var = $_val;
         }
 
+        // Shortcut for escaping HTML
+        $e = function($string) {
+            return htmlspecialchars($string);
+        };
+
         // Load up the view and get the contents
         ob_start();
         include($path);
