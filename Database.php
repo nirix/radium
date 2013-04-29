@@ -39,12 +39,12 @@ class Database
     /**
      * Creates a new database connection.
      *
-     * @param string $name   Connection name
      * @param array  $config Connection configuration
+     * @param string $name   Connection name
      *
      * @return object
      */
-    public static function factory($name = 'default', array $config)
+    public static function factory(array $config, $name = 'default')
     {
         // Make sure a connection with same name doesn't exist
         if (array_key_exists($name, static::$connections)) {
