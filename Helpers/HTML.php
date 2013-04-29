@@ -79,6 +79,11 @@ class HTML
             $label = $url;
         }
 
+        // If the URL parameter is an object, call its `href()` method.
+        if (is_object($url) and method_exists($url, 'href')) {
+            $url = $url->href();
+        }
+
         // Is this a local link?
         if (substr($url, 0, 4) != 'http') {
             $url = Request::base(ltrim($url, '/'));
