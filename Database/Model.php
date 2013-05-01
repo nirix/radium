@@ -1,7 +1,7 @@
 <?php
 /*!
  * Radium
- * Copyright (C) 2011-2012 Jack P.
+ * Copyright (C) 2011-2013 Jack P.
  * https://github.com/nirix
  *
  * This file is part of Radium.
@@ -26,6 +26,7 @@ use Radium\Database\Validations;
 use Radium\Helpers\Time;
 use Radium\Util\Inflector;
 use Radium\Core\Hook;
+use Radium\Language;
 
 /**
  * Database Model class
@@ -464,18 +465,45 @@ class Model
     }
 
     /**
+     * Returns the models errors with proper messages.
+     *
+     * @return array
+     */
+    public function errorMessages()
+    {
+        $messages = array();
+
+        // Loop over each field
+        foreach ($this->errors as $field => $errors) {
+            $messages[$field] = array();
+
+            // Loop over the fields errors
+            foreach ($errors as $validation => $error) {
+                $vars = array_merge(
+                    array('field' => Language::translate($field)),
+                    $error
+                );
+                unset($vars['message']);
+                $messages[$field][] = Language::translate($error['message'], $vars);
+            }
+        }
+
+        return $messages;
+    }
+
+    /**
      * Adds an error for the specified field.
      *
      * @param string $field
      * @param string $message
      */
-    public function addError($field, $message)
+    public function addError($field, $validation, $data)
     {
-        if (!array_key_exists($field, $this->errors)) {
+        if (!isset($this->errors[$field])) {
             $this->errors[$field] = array();
         }
 
-        $this->errors[$field][] = $message;
+        $this->errors[$field][$validation] = $data;
     }
 
     /**

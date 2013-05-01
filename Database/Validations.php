@@ -1,7 +1,7 @@
 <?php
 /*!
  * Radium
- * Copyright (C) 2011-2012 Jack P.
+ * Copyright (C) 2011-2013 Jack P.
  * https://github.com/nirix
  *
  * This file is part of Radium.
@@ -20,6 +20,8 @@
  */
 
 namespace Radium\Database;
+
+use Radium\Language;
 
 /**
  * Validations class.
@@ -47,8 +49,11 @@ class Validations
                 $validation = $options;
             }
 
-            if ($message = static::{$validation}($model, $field, $options) and $message !== null) {
-                $model->addError($field, $message);
+            if ($data = call_user_func_array(array(get_called_class(), $validation), array($model, $field, $options)) and $data !== null) {
+                if (is_string($data)) {
+                    $data = array('message' => $data);
+                }
+                $model->addError($field, $validation, array_merge($data, array('validation' => $validation)));
             }
         }
     }
@@ -62,7 +67,7 @@ class Validations
     private static function unique($model, $field)
     {
         if ($row = $model::find($field, $model->{$field}) and $row->{$model::primaryKey()} != $model->{$model::primaryKey()}) {
-            return 'errors.validations.already_in_use';
+            return static::translateMessage('errors.validations.already_in_use', compact('field'));
         }
     }
 
@@ -101,7 +106,7 @@ class Validations
     private static function minLength($model, $field, $minLength)
     {
         if (strlen($model->{$field}) < $minLength) {
-            return 'errors.validations.field_too_short';
+            return array('message' => "errors.validations.field_too_short", 'minLength' => $minLength);
         }
     }
 
@@ -114,7 +119,7 @@ class Validations
     private static function maxLength($model, $field, $maxLength)
     {
         if (strlen($model->{$field}) > $maxLength) {
-            return 'errors.validations.field_too_long';
+            return array('message' => "errors.validations.field_too_long", 'maxLength' => $maxLength);
         }
     }
 
