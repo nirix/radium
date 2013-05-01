@@ -1,7 +1,7 @@
 <?php
 /*!
  * Radium
- * Copyright (C) 2011-2012 Jack P.
+ * Copyright (C) 2011-2013 Jack P.
  * https://github.com/nirix
  *
  * This file is part of Radium.
@@ -21,6 +21,10 @@
 
 namespace Radium;
 
+use Radium\Language\Translation;
+
+require __DIR__ . "/Translations/enAU.php";
+
 /**
  * Language class.
  *
@@ -33,58 +37,73 @@ namespace Radium;
 class Language
 {
     protected static $link;
-    protected $language;
+    protected static $registered;
+    protected static $current = 'enAU';
 
     /**
-     * Constructor!
+     * Registers a new translation.
      *
-     * @param string $language
+     * @param function $language
      */
     public function __construct($language)
     {
         static::$link = $this;
 
-        // Get the file path
-        $filePath = Loader::find("Translations\\{$language}", Loader::defaultNamespace());
+        if (!is_callable($language)) {
+            throw new \Radium\Exception("Unable to call '\$language'");
+        }
 
-        // Check if file exists
-        if (file_exists($filePath)) {
-            require $filePath;
-            $this->language = new $language;
-        } else {
-            Error::halt('Translation Error', "Unable to load language file '<code>{$language}</code>'.");
+        // Create translation
+        $translation = new Translation();
+        $language($translation);
+
+        // Register translation
+        if (!isset(static::$registered[$translation->locale])) {
+            static::$registered[$translation->locale] = $translation;
+        }
+        // Merge strings
+        else {
+            static::$registered[$translation->locale]->strings = array_merge(
+                static::$registered[$translation->locale]->strings,
+                $translation->strings
+            );
         }
     }
 
-    /**
-     * Translates the specified string.
-     *
-     * @return string
-     */
-    public function translate($string, $vars = array())
+    public static function set($locale)
     {
-        return call_user_func_array(array($this->language, 'translate'), func_get_args());
+        if (isset(static::$registered[$locale])) {
+            static::$current = $locale;
+        }
+    }
+
+    public static function current()
+    {
+        return static::$registered[static::$current];
     }
 
     /**
-     * Date localization method
+     * Translates the string.
+     *
+     * @param string $string
+     * @param array  $vars
+     *
+     * @return string
+     */
+    public static function translate($string, $vars = array())
+    {
+        return call_user_func_array(array(static::current(), 'translate'), func_get_args());
+    }
+
+    /**
+     * Date localization method.
      *
      * @param string $format
      * @param mixed  $timestamp
      */
-    public function date($format, $timestamp = null)
+    public static function date($format, $timestamp = null)
     {
-        return call_user_func_array(array($this->language, 'date'), func_get_args());
-    }
-
-    /**
-     * Adds extra locale strings.
-     *
-     * @param array $strings
-     */
-    public function add($strings)
-    {
-        $this->language->add($strings);
+        return call_user_func_array(array(static::current(), 'date'), func_get_args());
     }
 
     /**

@@ -1,7 +1,7 @@
 <?php
 /*!
  * Radium
- * Copyright (C) 2011-2012 Jack P.
+ * Copyright (C) 2011-2013 Jack P.
  * https://github.com/nirix
  *
  * This file is part of Radium.
@@ -32,15 +32,9 @@ namespace Radium\Language;
  */
 class Translation
 {
-    protected static $info = array();
-    protected static $strings = array();
-
-    public function __construct()
-    {
-        if (method_exists($this, 'strings')) {
-            static::$strings = $this->strings();
-        }
-    }
+    public $name;
+    public $locale;
+    public $strings = array();
 
     /**
      * Returns the locale information.
@@ -57,11 +51,8 @@ class Translation
      *
      * @return string
      */
-    public function translate()
+    public function translate($string, Array $vars = array())
     {
-        $string = func_get_arg(0);
-        $vars = array_slice(func_get_args(), 1);
-
         return $this->compileString($this->getString($string), $vars);
     }
 
@@ -77,16 +68,6 @@ class Translation
     }
 
     /**
-     * Adds extra locale strings
-     *
-     * @param array $strings
-     */
-    public function add($strings)
-    {
-        $this->strings = array_merge($this->strings, $strings);
-    }
-
-    /**
      * Fetches the translation for the specified string.
      *
      * @param string $string
@@ -96,8 +77,8 @@ class Translation
     public function getString($string)
     {
         // Exact match?
-        if (array_key_exists($string, static::$strings)) {
-            return static::$strings[$string];
+        if (isset($this->strings[$string])) {
+            return $this->strings[$string];
         } else {
             return $string;
         }
@@ -131,12 +112,21 @@ class Translation
     {
         $translation = $string;
 
-        // Loop through and replace {x}, ${x} or $x
+        // Loop through and replace the placeholders
         // with the values from the $vars array.
-        $v = 1;
-        foreach ($vars as $var) {
-            $translation = str_replace(array("{{$v}}", "\${{$v}}", "\${$v}"), $vars[$v - 1], $translation);
-            $v++;
+        $count = 0;
+        foreach ($vars as $key => $val) {
+            $count++;
+
+            // If array key is an integer,
+            // use the counter to avoid clashes
+            // with numbered placeholders.
+            if (is_integer($key)) {
+                $key = $count;
+            }
+
+            // Replace placeholder with value
+            $translation = str_replace(array("{{$key}}", "{{$count}}"), $val, $translation);
         }
 
         // Match plural:n,{x, y}
