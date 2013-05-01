@@ -35,6 +35,8 @@ class Translation
     public $name;
     public $locale;
     public $strings = array();
+    public $translator;
+    public $enumerator;
 
     /**
      * Returns the locale information.
@@ -53,6 +55,11 @@ class Translation
      */
     public function translate($string, Array $vars = array())
     {
+        // Use custom translator
+        if ($this->translator) {
+            return $this->translator($this->getString($string), $vars);
+        }
+
         return $this->compileString($this->getString($string), $vars);
     }
 
@@ -93,6 +100,11 @@ class Translation
      */
     public function calculateNumeral($numeral)
     {
+        // Use custom enumerator
+        if ($this->enumerator) {
+            return $this->enumerator($numeral);
+        }
+
         return ($numeral > 1 or $numeral < -1 or $numeral == 0) ? 1 : 0;
     }
 
