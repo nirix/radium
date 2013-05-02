@@ -67,7 +67,7 @@ class Validations
     private static function unique($model, $field)
     {
         if ($row = $model::find($field, $model->{$field}) and $row->{$model::primaryKey()} != $model->{$model::primaryKey()}) {
-            return static::translateMessage('errors.validations.already_in_use', compact('field'));
+            return 'errors.validations.already_in_use';
         }
     }
 
