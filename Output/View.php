@@ -24,6 +24,7 @@ namespace Radium\Output;
 use Radium\Loader;
 use Radium\Error;
 use Radium\Exception;
+use Radium\Language;
 
 /**
  * Radium's View rendering class.
@@ -103,6 +104,11 @@ class View
         // Shortcut for escaping HTML
         $e = function($string) {
             return htmlspecialchars($string);
+        };
+
+        // Shortcut for Language::translate()
+        $t = function($string, Array $vars = array()) {
+            return Language::translate($string, $vars);
         };
 
         // Load up the view and get the contents
