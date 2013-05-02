@@ -41,7 +41,7 @@ class Router
     public static $controller;
     public static $method;
     public static $params = array();
-    public static $vars = array();
+    public static $args = array();
     public static $extension;
     public static $extensions = array('.json', '.atom');
 
@@ -96,6 +96,11 @@ class Router
                 $route->params = array_merge($route->params, $params);
                 $route->destination = preg_replace($pattern, $route->destination, $uri);
 
+                // Routed method arguments
+                foreach ($route->args as $index => $arg) {
+                    $route->args[$index] = $params[$arg];
+                }
+
                 if (in_array(Request::$method, $route->method)) {
                     return static::setRoute($route);
                 }
@@ -140,13 +145,11 @@ class Router
     private static function setRoute($route)
     {
         $destination = explode('.', $route->destination);
-        $method = explode('/', implode('.', array_slice($destination, 1)));
-        $vars = isset($method[1]) ? explode(',', $method[1]) : array();
 
         static::$controller = str_replace('::', "\\", $destination[0]);
-        static::$method = $method[0];
+        static::$method = $destination[1];
         static::$params = $route->params;
-        static::$vars = $vars;
+        static::$args = $route->args;
         static::$extension = (isset($route->params['extension']) ? $route->params['extension'] : 'html');
 
         // Remove the first dot from the extension

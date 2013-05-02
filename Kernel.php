@@ -75,7 +75,7 @@ class Kernel
 
         // Call the method
         if (static::$app->render['action']) {
-            $output = call_user_func_array(array(static::$app, Router::$method . 'Action'), Router::$vars);
+            $output = call_user_func_array(array(static::$app, Router::$method . 'Action'), Router::$args);
         }
 
         // After filters

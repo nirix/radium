@@ -38,6 +38,7 @@ class Route
     public $destination;
     public $method = array('get', 'post');
     public $params = array();
+    public $args = array();
 
     /**
      * Creates a new route.
@@ -52,18 +53,20 @@ class Route
     /**
      * Destination class and method of route.
      *
-     * @param string $destination
+     * @param string $destination Class and method to route to
+     * @param array  $args        Arguments to pass to the routed method
      *
      * @example
      *     to('Admin/Settings.index')
      */
-    public function to($destination)
+    public function to($destination, Array $args = array())
     {
         if (strpos('\\', $destination) === false) {
             $destination = Loader::defaultNamespace() . "\\Controllers\\{$destination}";
         }
 
         $this->destination = str_replace("\\", "::", $destination);
+        $this->args = $args;
         return $this;
     }
 
