@@ -98,7 +98,9 @@ class Router
 
                 // Routed method arguments
                 foreach ($route->args as $index => $arg) {
-                    $route->args[$index] = $params[$arg];
+                    if (($arg !== true or $arg !== false) and isset($params[$arg])) {
+                        $route->args[$index] = $params[$arg];
+                    }
                 }
 
                 if (in_array(Request::$method, $route->method)) {
