@@ -56,6 +56,28 @@ class Router
     }
 
     /**
+     * Shortcut for `Router::route(...)->method('get')`
+     *
+     * @param string $route
+     */
+    public static function get($route)
+    {
+        $route = new Route($route);
+        return static::$routes[] = $route->method('get');
+    }
+
+    /**
+     * Shortcut for `Router::route(...)->method('post')`
+     *
+     * @param string $route
+     */
+    public static function post($route)
+    {
+        $route = new Route($route);
+        return static::$routes[] = $route->method('post');
+    }
+
+    /**
      * Adds a new route.
      *
      * @param string $route URI to route
