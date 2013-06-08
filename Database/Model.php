@@ -165,28 +165,31 @@ class Model
                 }
 
                 // Get the relation information
-                $relation = static::$_relationInfo[get_called_class() . ".{$relation}"];
+                $key = get_called_class() . ".{$relation}";
+                    if (isset(static::$_relationInfo[$key])) {
+                    $relation = static::$_relationInfo[$key];
 
-                // Get the table data for the relation
-                // and put it into its own model.
-                $data = array();
-                foreach ($relation['model']::schema() as $column => $info) {
-                    $key = strtolower("{$relation['class']}_{$column}");
+                    // Get the table data for the relation
+                    // and put it into its own model.
+                    $data = array();
+                    foreach ($relation['model']::schema() as $column => $info) {
+                        $key = strtolower("{$relation['class']}_{$column}");
 
-                    // Make sure the key is set
-                    if (isset($this->{$key})) {
-                        $data[$column] = $this->{$key};
+                        // Make sure the key is set
+                        if (isset($this->{$key})) {
+                            $data[$column] = $this->{$key};
+                        }
                     }
-                }
 
-                // If the only thing in the data array is the relationships
-                // primary key, don't bother.
-                if (count($data) == 1 and isset($data[$relation['primaryKey']])) {
-                    continue;
-                }
-                // Create the relations model
-                else {
-                    $this->{$relation['name']} = new $relation['model']($data, false);
+                    // If the only thing in the data array is the relationships
+                    // primary key, don't bother.
+                    if (count($data) == 1 and isset($data[$relation['primaryKey']])) {
+                        continue;
+                    }
+                    // Create the relations model
+                    else {
+                        $this->{$relation['name']} = new $relation['model']($data, false);
+                    }
                 }
             }
 
