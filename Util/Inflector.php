@@ -100,7 +100,7 @@ class Inflector
      *
      * @return string
      */
-    public static function classify($string, $singularize = true)
+    public static function classify($string, $singularize = false)
     {
         $class = ($singularize) ? static::singularize($string) : $string;
         return static::camelize($class);
