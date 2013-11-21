@@ -25,6 +25,11 @@ require __DIR__ . "/Autoloader.php";
 use Radium\Autoloader;
 use Radium\Loader;
 
+// Set VENDORPATH to the directory Radium is in.
+if (!defined('VENDORPATH')) {
+    define('VENDORPATH', dirname(__DIR__));
+}
+
 // Register the vendor directory
 Loader::setVendorDirectory(VENDORPATH);
 Loader::registerNamespace('Radium', __DIR__);
