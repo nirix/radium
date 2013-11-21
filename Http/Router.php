@@ -49,10 +49,18 @@ class Router
 
     /**
      * Sets the root route.
+     *
+     * @param string $to Controller to route the root URL to.
      */
-    public static function root()
+    public static function root($to = null)
     {
-        return static::$routes['root'] = new Route('root');
+        static::$routes['root'] = new Route('root');
+
+        if ($to) {
+            static::$routes['root']->to($to);
+        }
+
+        return static::$routes['root'];
     }
 
     /**
