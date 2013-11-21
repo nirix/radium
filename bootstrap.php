@@ -41,7 +41,7 @@ Autoloader::aliasClasses(array(
     '\Radium\Helpers\Time' => 'Time',
 
     // Utilities
-    '\Radium\Util\Str' => 'Str'
+    '\Radium\Util\Inflector' => 'Inflector'
 ));
 
 // Register the autoloader
