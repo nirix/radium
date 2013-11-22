@@ -155,7 +155,7 @@ class Time
         }
 
         // Format the time from
-        $from = Language::link()->translate("time.x_{$name}", $count);
+        $from = Language::current()->translate("time.x_{$name}", array($count));
 
         // Get the detailed time from if the detail variable is true
         if ($detailed && $i + 1 < $c) {
@@ -163,7 +163,7 @@ class Time
             $name2 = $chunks[$i + 1][1];
             $names2 = $chunks[$i + 1][2];
             if (0 != $count2 = floor(($difference - $seconds * $count) / $seconds2)) {
-                $from = Language::link()->translate('time.x_and_x', $from, Language::link()->translate("time.x_{$name2}", $count2));
+                $from = Language::current()->translate('time.x_and_x', $from, Language::current()->translate("time.x_{$name2}", array($count2)));
             }
         }
 
