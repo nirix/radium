@@ -107,6 +107,30 @@ class Inflector
     }
 
     /**
+     * Converts the string to controller class name format.
+     *
+     * @param string $string
+     *
+     * @return string
+     */
+    public static function controllerise($string)
+    {
+        return static::camelise(static::pluralise($string));
+    }
+
+    /**
+     * Converts the string to model class name format.
+     *
+     * @param string $string
+     *
+     * @return string
+     */
+    public static function modelise($string)
+    {
+        return static::camelise(static::singularise($string));
+    }
+
+    /**
      * Converts the string to CamelCase.
      *
      * @param string $string
