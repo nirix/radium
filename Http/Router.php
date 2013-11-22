@@ -48,6 +48,18 @@ class Router
     protected static $tokens = array();
 
     /**
+     * Closure style routing.
+     *
+     * @example
+     *     Router::map(funtion($r)) {
+     *         $r->root('Controller.action');
+     *     });
+     */
+    public static function map($block) {
+        $block(new static);
+    }
+
+    /**
      * Sets the root route.
      *
      * @param string $to Controller to route the root URL to.
