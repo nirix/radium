@@ -23,6 +23,7 @@ namespace Radium\Http;
 
 use Radium\Exception as Exception;
 use Radium\Error;
+use Radium\Util\Inflector;
 
 /**
  * Radium's Router.
@@ -95,6 +96,32 @@ class Router
     {
         $route = new Route($route);
         return static::$routes[] = $route->method('post');
+    }
+
+    /**
+     * Shortcut for setting up the routes for a resource.
+     *
+     * @param string $resource
+     */
+    public static function resources($resource) {
+        $controller = Inflector::controllerise($resource);
+        $uri = strtolower($controller);
+
+        // Index, view
+        static::get("/{$uri}")->to("{$controller}.index");
+        static::get("/{$uri}/(?P<id>[0-9]+)")->to("{$controller}.view", array('id'));
+
+        // New
+        static::get("/{$uri}/new")->to("{$controller}.new");
+        static::post("/{$uri}/new")->to("{$controller}.create");
+
+        // Edit
+        static::get("/{$uri}/(?P<id>[0-9]+)/edit")->to("{$controller}.edit", array('id'));
+        static::post("/{$uri}/(?P<id>[0-9]+)/edit")->to("{$controller}.save", array('id'));
+
+        // Delete
+        static::get("/{$uri}/(?P<id>[0-9]+)/delete")->to("{$controller}.delete", array('id'));
+        static::post("/{$uri}/(?P<id>[0-9]+)/delete")->to("{$controller}.destroy", array('id'));
     }
 
     /**
