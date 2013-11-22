@@ -162,9 +162,9 @@ class View
         if ($path = Loader::pathForNamespace($vendor)) {
             // With theme
             if (static::$theme !== null) {
-                $searchFor[] = str_replace("{$vendor}/Controllers", 'views/' . static::$theme, "{$path}/{$file}");
+                $searchFor[] = str_replace("{$vendor}/Controllers/", 'views/' . static::$theme, "{$path}/{$file}");
             }
-            $searchFor[] = str_replace("{$vendor}/Controllers", 'views/', "{$path}/{$file}");
+            $searchFor[] = str_replace("{$vendor}/Controllers/", 'views/', "{$path}/{$file}");
         }
 
         // Add the theme directory if one is set
