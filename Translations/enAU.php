@@ -37,6 +37,17 @@ $enAU = new Language(function($t){
         'errors.validations.must_be_email'   => "{field} is not a valid email",
         'errors.validations.field_too_short' => "{field} must be at least {minLength} characters long",
         'errors.validations.field_too_long'  => "{field} must be under {maxLength} characters long",
-        'errors.validations.must_be_numeric' => "{field} must be a number"
+        'errors.validations.must_be_numeric' => "{field} must be a number",
+
+        // Time helper
+        'time.x_second' => "{plural:{1}, {{1} second|{1} seconds}}",
+        'time.x_minute' => "{plural:{1}, {{1} minute|{1} minutes}}",
+        'time.x_hour'   => "{plural:{1}, {{1} hour|{1} hours}}",
+        'time.x_day'    => "{plural:{1}, {{1} day|{1} days}}",
+        'time.x_week'   => "{plural:{1}, {{1} week|{1} weeks}}",
+        'time.x_month'  => "{plural:{1}, {{1} month|{1} months}}",
+        'time.x_year'   => "{plural:{1}, {{1} year|{1} years}}",
+        'time.x_and_x'  => "{1} and {2}",
+        'time.x_ago'    => "{1} ago"
     );
 });
