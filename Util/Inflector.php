@@ -100,10 +100,10 @@ class Inflector
      *
      * @return string
      */
-    public static function classify($string, $singularize = false)
+    public static function classify($string, $singularise = false)
     {
-        $class = ($singularize) ? static::singularize($string) : $string;
-        return static::camelize($class);
+        $class = ($singularise) ? static::singularise($string) : $string;
+        return static::camelise($class);
     }
 
     /**
@@ -113,7 +113,7 @@ class Inflector
      *
      * @return string
      */
-    public static function camelize($string)
+    public static function camelise($string)
     {
         return preg_replace_callback(
             '/(^|_)(.)/',
@@ -145,7 +145,7 @@ class Inflector
      */
     public static function foreignKey($string)
     {
-        return static::singularize(static::underscore($string)) . "_id";
+        return static::singularise(static::underscore($string)) . "_id";
     }
 
     /**
@@ -155,7 +155,7 @@ class Inflector
      *
      * @return string
      */
-    public static function singularize($word)
+    public static function singularise($word)
     {
         // Run each rule over the word
         foreach (static::$singularRules as $rule => $replacement) {
@@ -174,7 +174,7 @@ class Inflector
      *
      * @return string
      */
-    public static function pluralize($word)
+    public static function pluralise($word)
     {
         // Run each rule over the word
         foreach (static::$pluralRules as $rule => $replacement) {
