@@ -115,7 +115,13 @@ class Inflector
      */
     public static function camelize($string)
     {
-        return preg_replace('/(^|_)(.)/e', "strtoupper('\\2')", $string);
+        return preg_replace_callback(
+            '/(^|_)(.)/',
+            function($matches) {
+                return strtoupper($matches[0]);
+            },
+            $string
+        );
     }
 
     /**
