@@ -90,13 +90,19 @@ class Form
      * Creates a form submit button.
      *
      * @param string $text
-     * @param string $name
      * @param string $attributes
      *
      * @return string
      */
-    public static function submit($text, $name = 'submit', $attributes = array())
+    public static function submit($text, $attributes = array())
     {
+        if (isset($attributes['name'])) {
+            $name = $attributes['name'];
+            unset($attributes['name']);
+        } else {
+            $name = 'submit';
+        }
+
         return self::input('submit', $name, array_merge(array('value' => $text), $attributes));
     }
 
