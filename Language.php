@@ -92,7 +92,7 @@ class Language
      */
     public static function translate($string, $vars = array())
     {
-        return call_user_func_array(array(static::current(), 'translate'), func_get_args());
+        return static::current()->translate($string, $vars);
     }
 
     /**
