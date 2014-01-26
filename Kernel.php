@@ -1,7 +1,7 @@
 <?php
 /*!
  * Radium
- * Copyright (C) 2011-2013 Jack P.
+ * Copyright (C) 2011-2014 Jack P.
  * https://github.com/nirix
  *
  * This file is part of Radium.
@@ -64,14 +64,7 @@ class Kernel
         static::$app = new Router::$controller;
 
         // Before filters
-        $filters = array_merge(
-            isset(static::$app->before['*']) ? static::$app->before['*'] : array(),
-            isset(static::$app->before[Router::$method]) ? static::$app->before[Router::$method] : array()
-        );
-        foreach ($filters as $filter) {
-            static::$app->{$filter}(Router::$method);
-        }
-        unset($filters, $filter);
+        static::runFilters('before');
 
         // Call the method
         if (static::$app->render['action']) {
@@ -79,14 +72,7 @@ class Kernel
         }
 
         // After filters
-        $filters = array_merge(
-            isset(static::$app->after['*']) ? static::$app->after['*'] : array(),
-            isset(static::$app->after[Router::$method]) ? static::$app->after[Router::$method] : array()
-        );
-        foreach ($filters as $filter) {
-            static::$app->{$filter}(Router::$method);
-        }
-        unset($filters, $filter);
+        static::runFilters('after');
 
         // If an object is returned, use the `response` variable if it's set.
         if (is_object($output)) {
@@ -106,6 +92,25 @@ class Kernel
         }
 
         static::$app->__shutdown();
+    }
+
+    /**
+     * Runs the filters filters for the app.
+     *
+     * @param string $type
+     */
+    protected static function runFilters($type)
+    {
+        $filters = static::$app->{$type};
+
+        $filters = array_merge(
+            isset($filters['*']) ? $filters['*'] : array(),
+            isset($filters[Router::$method]) ? $filters[Router::$method] : array()
+        );
+
+        foreach ($filters as $filter) {
+            static::$app->{$filter}(Router::$method);
+        }
     }
 
     /**
