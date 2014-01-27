@@ -68,6 +68,16 @@ class Loader
     }
 
     /**
+     * Returns the vendor directory path.
+     *
+     * @return string
+     */
+    public static function vendorDirectory()
+    {
+        return static::$vendorDirectory;
+    }
+
+    /**
      * Registers a path to search in.
      *
      * @param string $path

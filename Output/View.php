@@ -153,33 +153,40 @@ class View
     public static function find($file)
     {
         $searchFor = array();
-        $ofile = $file;
+        $original  = $file;
 
-        // If the path includes a vendor name
-        // add the path for it.
-        $vendor = explode('/', $file);
-        $vendor = $vendor[0];
-        if ($path = Loader::pathForNamespace($vendor)) {
+        // Split into segments
+        $segments = explode('/', $file);
+
+        // Strip `Vendor/Controller`
+        $view = preg_replace("/^[\w\d]+\/Controllers\/([\w\d\/]+)/", "$1", $file);
+
+        // If the path includes a vendor name, add the path for it
+        if ($path = Loader::pathForNamespace($segments[0])) {
             // With theme
             if (static::$theme !== null) {
-                $searchFor[] = str_replace("{$vendor}/Controllers/", 'views/' . static::$theme . '/', "{$path}/{$file}");
+                $searchFor[] = str_replace("{$segments[0]}/Controllers/", "views/" . static::$theme . "/", "{$path}/{$file}");
             }
-            $searchFor[] = str_replace("{$vendor}/Controllers/", 'views/', "{$path}/{$file}");
+            $searchFor[] = str_replace("{$segments[0]}/Controllers/", "views/", "{$path}/{$file}");
         }
 
-        // Add the theme directory if one is set
+        // Add the theme directory for the default namespace
         if (static::$theme !== null) {
-            $searchFor[] = Loader::defaultNamespacePath() . '/views/' . static::$theme . "/{$file}";
+            $searchFor[] = Loader::defaultNamespacePath() . "/views/" . static::$theme . "/{$view}";
         }
 
-        // Add the inheritance path, if set
+        // Add inheritance path
         if (static::$inheritFrom !== null) {
-            $searchFor[] = static::$inheritFrom . "/{$file}";
+            $searchFor[] = static::$inheritFrom . "/{$view}";
         }
 
-        // And the root of the views path
-        $searchFor[] = Loader::defaultNamespacePath() . "/views/{$file}";
+        // Add default namespace views directory
+        $searchFor[] = Loader::defaultNamespacePath() . "/views/{$view}";
 
+        // Add vendor directory
+        $searchFor[] = str_replace("Controllers/", "views/", Loader::vendorDirectory() . "/{$file}");
+
+        // Loop over search paths and and view extensions
         foreach ($searchFor as $path) {
             foreach (static::$viewExtensions as $ext) {
                 if (file_exists("{$path}.{$ext}")) {
