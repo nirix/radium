@@ -229,16 +229,16 @@ class Model
     protected static function loadSchema()
     {
         // Make sure there's a place to store the schema
-        if (!array_key_exists(static::$_table, static::$_schema)) {
-            static::$_schema[static::$_table] = null;
+        if (!array_key_exists(static::table(), static::$_schema)) {
+            static::$_schema[static::table()] = null;
         }
 
         // Make sure we haven't already fetched
         // the tables schema.
-        if (static::$_schema[static::$_table] === null) {
-            $result = static::connection()->prepare("DESCRIBE `{prefix}" . static::$_table . "`")->exec();
+        if (static::$_schema[static::table()] === null) {
+            $result = static::connection()->prepare("DESCRIBE `{prefix}" . static::table() . "`")->exec();
             foreach ($result->fetchAll(\PDO::FETCH_COLUMN) as $column) {
-                static::$_schema[static::$_table][$column['Field']] = array(
+                static::$_schema[static::table()][$column['Field']] = array(
                     'type'    => $column['Type'],
                     'default' => $column['Default'],
                     'null'    => $column['Null'] == 'NO' ? false : true,
@@ -257,7 +257,7 @@ class Model
     public static function schema()
     {
         static::loadSchema();
-        return array_key_exists(static::$_table, static::$_schema) ? static::$_schema[static::$_table] : null;
+        return array_key_exists(static::table(), static::$_schema) ? static::$_schema[static::table()] : null;
     }
 
     /**
@@ -305,7 +305,7 @@ class Model
     {
         $query = static::connection()
             ->select()
-            ->from(static::$_table)
+            ->from(static::table())
             ->model(get_called_class());
 
         foreach (static::$_belongsTo as $relation => $options) {
@@ -353,7 +353,7 @@ class Model
         // Model and class
         if (!isset($relation['model'])) {
             // Model
-            $relation['model'] = Inflector::classify($name);
+            $relation['model'] = Inflector::modelise($name);
         }
 
         // Set model namespace
@@ -408,7 +408,8 @@ class Model
      */
     protected static function table()
     {
-        return static::$_table;
+        $class = new \ReflectionClass(get_called_class());
+        return static::$_table !== null ? static::$_table : Inflector::tablise($class->getShortName());
     }
 
     /**
@@ -554,7 +555,7 @@ class Model
         if ($this->_isNew) {
             $result = static::connection()
                 ->insert($data)
-                ->into(static::$_table)
+                ->into(static::table())
                 ->exec();
 
             $this->id = static::connection()->lastInsertId();
@@ -562,7 +563,7 @@ class Model
         // Update
         else {
             $result = static::connection()
-                ->update(static::$_table)
+                ->update(static::table())
                 ->set($data)
                 ->where(static::$_primaryKey . ' = ?', $data[static::$_primaryKey])
                 ->exec();
@@ -584,7 +585,7 @@ class Model
         // Delete row
         $result = static::connection()
             ->delete()
-            ->from(static::$_table)
+            ->from(static::table())
             ->where(static::$_primaryKey . " = ?", $this->{static::$_primaryKey})
             ->limit(1)
             ->exec();
@@ -617,7 +618,7 @@ class Model
                 $info = static::getRelationInfo($relation, $options);
 
                 // Set relation
-                $this->{$relation} = $info['model']::select()->where(Inflector::foreignKey(static::$_table) . " = ?", $this->{static::$_primaryKey});
+                $this->{$relation} = $info['model']::select()->where(Inflector::foreignKey(static::table()) . " = ?", $this->{static::$_primaryKey});
             }
         }
 
