@@ -131,6 +131,18 @@ class Inflector
     }
 
     /**
+     * Converts the string to a database table name.
+     *
+     * @param string $string
+     *
+     * @return string
+     */
+    public static function tablise($string)
+    {
+        return static::pluralise(static::underscore($string));
+    }
+
+    /**
      * Converts the string to CamelCase.
      *
      * @param string $string
