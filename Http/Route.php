@@ -1,7 +1,7 @@
 <?php
 /*!
  * Radium
- * Copyright (C) 2011-2013 Jack P.
+ * Copyright (C) 2011-2014 Jack P.
  * https://github.com/nirix
  *
  * This file is part of Radium.
@@ -27,8 +27,7 @@ use Radium\Loader;
  * Route class.
  *
  * @since 0.2
- * @package Radium
- * @subpackage HTTP
+ * @package Radium/Http
  * @author Jack P.
  * @copyright (C) Jack P.
  */
@@ -59,14 +58,10 @@ class Route
      * @example
      *     to('Admin/Settings.index')
      */
-    public function to($destination, Array $args = array())
+    public function to($destination, array $args = array())
     {
-        if (strpos('\\', $destination) === false) {
-            $destination = Loader::defaultNamespace() . "\\Controllers\\{$destination}";
-        }
-
-        $this->destination = str_replace("\\", "::", $destination);
-        $this->args = $args;
+        $this->destination = $destination;
+        $this->args        = $args;
         return $this;
     }
 
