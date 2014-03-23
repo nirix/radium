@@ -100,28 +100,28 @@ class Router
     /**
      * Shortcut for setting up the routes for a resource.
      *
-     * @param string $resource
+     * @param string $resource   Resource/model name.
+     * @param string $controller Controller to use for the resource.
      */
-    public static function resources($resource)
+    public static function resources($resource, $controller)
     {
-        $controller = Inflector::controllerise($resource);
-        $uri = strtolower($controller);
+        $uri = strtolower(Inflector::controllerise($resource));
 
-        // Index, view
-        static::get("/{$uri}")->to("{$controller}.index");
-        static::get("/{$uri}/(?P<id>[0-9]+)")->to("{$controller}.view", array('id'));
+        // Index, show
+        static::get("/{$uri}")->to("{$controller}::index");
+        static::get("/{$uri}/(?P<id>[0-9]+)")->to("{$controller}::show", array('id'));
 
         // New
-        static::get("/{$uri}/new")->to("{$controller}.new");
-        static::post("/{$uri}/new")->to("{$controller}.create");
+        static::get("/{$uri}/new")->to("{$controller}::new");
+        static::post("/{$uri}/new")->to("{$controller}::create");
 
         // Edit
-        static::get("/{$uri}/(?P<id>[0-9]+)/edit")->to("{$controller}.edit", array('id'));
-        static::post("/{$uri}/(?P<id>[0-9]+)/edit")->to("{$controller}.save", array('id'));
+        static::get("/{$uri}/(?P<id>[0-9]+)/edit")->to("{$controller}::edit", array('id'));
+        static::post("/{$uri}/(?P<id>[0-9]+)/edit")->to("{$controller}::save", array('id'));
 
         // Delete
-        static::get("/{$uri}/(?P<id>[0-9]+)/delete")->to("{$controller}.delete", array('id'));
-        static::post("/{$uri}/(?P<id>[0-9]+)/delete")->to("{$controller}.destroy", array('id'));
+        static::get("/{$uri}/(?P<id>[0-9]+)/delete")->to("{$controller}::delete", array('id'));
+        static::post("/{$uri}/(?P<id>[0-9]+)/delete")->to("{$controller}::destroy", array('id'));
     }
 
     /**
