@@ -1,7 +1,7 @@
 <?php
 /*!
  * Radium
- * Copyright (C) 2011-2012 Jack P.
+ * Copyright (C) 2011-2014 Jack P.
  * https://github.com/nirix
  *
  * This file is part of Radium.
@@ -21,7 +21,7 @@
 
 namespace Radium\Helpers;
 
-use Radium\Http\Request;
+use Radium\Kernel;
 
 /**
  * HTML Helper
@@ -43,7 +43,7 @@ class HTML
     public static function cssLinkTag($href, $media = 'screen')
     {
         if (strpos($href, 'http') === false) {
-            $href = Request::base($href);
+            $href = Kernel::request()->base($href);
         }
         return '<link rel="stylesheet" href="' . $href . '" media="' . $media . '">' . PHP_EOL;
     }
@@ -58,7 +58,7 @@ class HTML
     public static function jsIncTag($path)
     {
         if (strpos($path, 'http') === false) {
-            $path = Request::base($path);
+            $path = Kernel::request()->base($path);
         }
         return '<script src="' . $path . '" type="text/javascript"></script>' . PHP_EOL;
     }
@@ -86,7 +86,7 @@ class HTML
 
         // Is this a local link?
         if (substr($url, 0, 4) != 'http') {
-            $url = Request::base(ltrim($url, '/'));
+            $url = Kernel::request()->base(ltrim($url, '/'));
         }
 
         $attributes['href'] = $url;
