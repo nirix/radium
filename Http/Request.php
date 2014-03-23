@@ -1,7 +1,7 @@
 <?php
 /*!
  * Radium
- * Copyright (C) 2011-2012 Jack P.
+ * Copyright (C) 2011-2014 Jack P.
  * https://github.com/nirix
  *
  * This file is part of Radium.
@@ -27,65 +27,55 @@ use Radium\Exception as Exception;
  * Radium's HTTP request class.
  *
  * @since 0.1
- * @package Radium
- * @subpackage HTTP
+ * @package Radium/Http
  * @author Jack P.
  * @copyright (C) Jack P.
  */
 class Request
 {
-    public static $requestUri;
-    public static $uri;
-    public static $method;
-    public static $request = array();
-    public static $post = array();
-    public static $scheme;
-    public static $host;
+    public $requestUri;
+    public $uri;
+    public $method;
+    public $request = array();
+    public $post = array();
+    public $scheme;
+    public $host;
 
-    private static $requestedWith;
-    private static $base;
-    private static $segments = array();
-
-    /**
-     * Initialize the class to get request
-     * information statically.
-     */
-    public static function init()
-    {
-        return new static;
-    }
+    protected $requestedWith;
+    protected $base;
+    protected $segments = array();
 
     public function __construct()
     {
         // Set request scheme
-        static::$scheme = static::isSecure() ? 'https' : 'http';
+        $this->scheme = $this->isSecure() ? 'https' : 'http';
 
         // Set host
-        static::$host = strtolower(preg_replace('/:\d+$/', '', trim($_SERVER['SERVER_NAME'])));
+        $this->host = strtolower(preg_replace('/:\d+$/', '', trim($_SERVER['SERVER_NAME'])));
 
         // Set base url
-        static::$base = static::baseUrl();
+        $this->base = $this->baseUrl();
 
         // Set the request path
-        static::$requestUri = static::requestUri();
+        $this->requestUri = $this->requestUri();
 
         // Set relative uri
-        static::$uri = str_replace(static::$base, '', static::$requestUri);
+        $this->uri = str_replace($this->base, '', $this->requestUri);
 
         // Request segments
-        static::$segments = explode('/', trim(static::$uri, '/'));
+        $this->segments = explode('/', trim($this->uri, '/'));
 
         // Set the request method
-        static::$method = strtolower($_SERVER['REQUEST_METHOD']);
+        $this->method = strtolower($_SERVER['REQUEST_METHOD']);
 
         // Requested with
-        static::$requestedWith = @$_SERVER['HTTP_X_REQUESTED_WITH'];
+        $this->requestedWith = @$_SERVER['HTTP_X_REQUESTED_WITH'];
 
         // _REQUEST
-        static::$request = $_REQUEST;
+        $this->request = $_REQUEST;
 
         // _POST
-        static::$post = $_POST;
+        $this->post = $_POST;
     }
 
     /**
@@ -95,7 +85,7 @@ class Request
      */
     public function uri()
     {
-        return static::$uri;
+        return $this->uri;
     }
 
     /**
@@ -107,7 +97,7 @@ class Request
      */
     public static function matches($pattern)
     {
-        if (preg_match("#^{$pattern}?$#", static::$uri)) {
+        if (preg_match("#^{$pattern}?$#", $this->uri)) {
             return true;
         }
         return false;
@@ -122,9 +112,9 @@ class Request
      *
      * @return mixed
      */
-    public static function post($key, $not_set = null)
+    public static function post($key, $fallBack = null)
     {
-        return isset(static::$post[$key]) ? static::$post[$key] : $not_set;
+        return isset($this->post[$key]) ? $this->post[$key] : $fallBack;
     }
 
     /**
@@ -136,7 +126,7 @@ class Request
      */
     public static function seg($segment)
     {
-        return (isset(static::$segments[$segment]) ? static::$segments[$segment] : false);
+        return (isset($this->segments[$segment]) ? $this->segments[$segment] : false);
     }
 
     /**
@@ -158,7 +148,7 @@ class Request
      */
     public static function redirectTo($path)
     {
-        static::redirect(static::base($path));
+        $this->redirect($this->base($path));
     }
 
     /**
@@ -168,7 +158,7 @@ class Request
      */
     public static function isAjax()
     {
-        return strtolower(static::$requestedWith) == 'xmlhttprequest';
+        return strtolower($this->requestedWith) == 'xmlhttprequest';
     }
 
     /**
@@ -178,7 +168,7 @@ class Request
      */
     public static function base($path = '')
     {
-        return static::$base . '/' . trim($path, '/');
+        return $this->base . '/' . trim($path, '/');
     }
 
     /**
@@ -195,7 +185,12 @@ class Request
         return $_SERVER['HTTPS'] == 'on' or $_SERVER['HTTPS'] == 1;
     }
 
-    private function baseUrl()
+    /**
+     * Returns the base URI.
+     *
+     * @return string
+     */
+    protected function baseUrl()
     {
         $filename = basename($_SERVER['SCRIPT_FILENAME']);
 
@@ -212,7 +207,12 @@ class Request
         return $baseUrl;
     }
 
-    private function requestUri()
+    /**
+     * Determines the request URI.
+     *
+     * @return string
+     */
+    protected function requestUri()
     {
         $requestUri = '';
 
@@ -229,7 +229,7 @@ class Request
         } elseif (isset($_SERVER['REQUEST_URI'])) {
             $requestUri = $_SERVER['REQUEST_URI'];
 
-            $schemeAndHost = static::$scheme . '://' . static::$host;
+            $schemeAndHost = $this->scheme . '://' . $this->host;
             if (strpos($requestUri, $schemeAndHost)) {
                 $requestUri = substr($requestUri, strlen($schemeAndHost));
             }
