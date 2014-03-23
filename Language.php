@@ -1,7 +1,7 @@
 <?php
 /*!
  * Radium
- * Copyright (C) 2011-2013 Jack P.
+ * Copyright (C) 2011-2014 Jack P.
  * https://github.com/nirix
  *
  * This file is part of Radium.
@@ -50,7 +50,7 @@ class Language
         static::$link = $this;
 
         if (!is_callable($language)) {
-            throw new \Radium\Exception("Unable to call '\$language'");
+            throw new \Radium\Exception("Expected callable argument");
         }
 
         // Create translation
@@ -70,13 +70,23 @@ class Language
         }
     }
 
-    public static function set($locale)
+    /**
+     * Sets the specified language as the currently active one.
+     *
+     * @param string $locale
+     */
+    public static function setCurrent($locale)
     {
         if (isset(static::$registered[$locale])) {
             static::$current = $locale;
         }
     }
 
+    /**
+     * Returns the currently active locale.
+     *
+     * @return object
+     */
     public static function current()
     {
         return static::$registered[static::$current];
