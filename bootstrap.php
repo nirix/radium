@@ -1,7 +1,7 @@
 <?php
 /*!
  * Radium
- * Copyright (C) 2011-2012 Jack P.
+ * Copyright (C) 2011-2014 Jack P.
  * https://github.com/nirix
  *
  * This file is part of Radium.
@@ -19,28 +19,21 @@
  * along with Radium. If not, see <http://www.gnu.org/licenses/>.
  */
 
-// Fetch the autoloader class
-require __DIR__ . "/Autoloader.php";
+require __DIR__ . '/Autoloader.php';
 
 use Radium\Autoloader;
 use Radium\Loader;
 
-// Set VENDORPATH to the directory Radium is in.
-if (!defined('VENDORPATH')) {
-    define('VENDORPATH', dirname(__DIR__));
-}
+// Set vendor directory
+Loader::setVendorDirectory(defined('VENDOR_PATH') ? VENDOR_PATH : dirname(__DIR__));
 
-// Register the vendor directory
-Loader::setVendorDirectory(VENDORPATH);
-Loader::registerNamespace('Radium', __DIR__);
-
-// Register common classes for ease of use
+// Alias common classes
 Autoloader::aliasClasses(array(
     // Core classes
     '\Radium\Http\Request' => 'Request',
-    '\Radium\Output\View'  => 'View',
+    '\Radium\Action\View'  => 'View',
 
-    // Helpres
+    // Helpers
     '\Radium\Helpers\HTML' => 'HTML',
     '\Radium\Helpers\Form' => 'Form',
     '\Radium\Helpers\Time' => 'Time',
