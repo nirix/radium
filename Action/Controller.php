@@ -62,7 +62,11 @@ class Controller
 
         $this->setView(get_called_class() . "\\{$route['method']}");
 
+        // Create response
         $this->response = new Response;
+
+        // Allow views to access the request object
+        $this->set('request', $this->request);
     }
 
     /**
