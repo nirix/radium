@@ -1,7 +1,7 @@
 <?php
 /*!
  * Radium
- * Copyright (C) 2011-2013 Jack P.
+ * Copyright (C) 2011-2014 Jack P.
  * https://github.com/nirix
  *
  * This file is part of Radium.
@@ -22,9 +22,8 @@
 namespace Radium\Action;
 
 use Radium\Kernel;
-use Radium\Http\Router;
-use Radium\Output\Body;
-use Radium\Output\View;
+use Radium\Http\Request;
+use Radium\Http\Response;
 
 /**
  * Controller
@@ -36,44 +35,131 @@ use Radium\Output\View;
  */
 class Controller
 {
-    public $render = array(
-        'action' => true,     // Call the routed action, or not
-        'view'   => false,    // View to render, set in __construct()
-        'layout' => 'default' // Layout to render
-    );
+    public $view;
 
-    public $before = array();
-    public $after = array();
+    /**
+     * Name of the layout to render.
+     */
+    public $layout = 'default';
 
-    public function __construct()
+    /**
+     * Whether or not to execute the routed action.
+     */
+    public $executeAction = true;
+
+    public $route;
+    public $request;
+    public $response;
+
+    /**
+     * Sets the request, route, database, view and response variables.
+     */
+    public function __construct(Request $request, Array $route, $database = null)
     {
-        $this->render['view'] = get_called_class() . '/' . Router::$method;
+        $this->request = $request;
+        $this->route   = $route;
+        $this->db      = $database;
+
+        $this->setView(get_called_class() . "\\{$route['method']}");
+
+        $this->response = new Response;
     }
 
+    /**
+     * Sends the variable to the view.
+     *
+     * @param string $name  Variable name.
+     * @param mixed  $value Value.
+     */
+    public function set($name, $value = null)
+    {
+        View::set($name, $value);
+    }
+
+    /**
+     * Sets the view.
+     *
+     * @param string $view
+     */
+    public function setView($view)
+    {
+        $this->view = str_replace(
+            array("\\", "/"),
+            DIRECTORY_SEPARATOR,
+            $view
+        );
+    }
+
+    /**
+     * Renders the view.
+     *
+     * @param string $view   View to render.
+     * @param array  $locals Variables for the view.
+     *
+     * @return string
+     */
+    public function render($view, array $locals = array())
+    {
+        return View::render($view, $locals);
+    }
+
+    /**
+     * Sets the response to a 404 Not Found
+     */
+    public function show404()
+    {
+        return $this->response = new Response(function($resp){
+            $resp->status = 404;
+            $resp->body   = View::render('Errors/404');
+        });
+    }
+
+    /**
+     * Filters to run before executing the action.
+     *
+     * @return array
+     */
+    public function filtersBefore() {
+        return array(
+            '*' => array()
+        );
+    }
+
+    /**
+     * Filters to run after executing the action.
+     *
+     * @return array
+     */
+    public function filtersAfter() {
+        return array(
+            '*' => array()
+        );
+    }
+
+    /**
+     * Renders the view and layout then sends the response.
+     */
     public function __shutdown()
     {
-        // Don't render the layout for json content
-        if (Router::$extension == 'json') {
-            $this->render['layout'] = false;
+        // Is this a .json request?
+        if ($this->route['extension'] == 'json') {
+            $this->layout = false;
+            $this->view = "{$this->view}.json";
         }
 
-        // Render the view
-        $content = '';
-        if ($this->render['action'] and $this->render['view']) {
-            Body::append(View::render($this->render['view']));
+        // Does the view need to be rendered?
+        if ($this->response->body === null and $this->executeAction and $this->view) {
+            $this->response->body = $this->render($this->view);
         }
 
-        // Are we wrapping the view in a layout?
-        if ($this->render['layout']) {
-            $content = Body::content();
-            Body::clear();
-            Body::append(View::render("layouts/{$this->render['layout']}", array('content' => $content)));
-        } else {
-            Body::append($content);
+        // Render the layout
+        if ($this->layout) {
+            $this->response->body = $this->render(
+                "Layouts/{$this->layout}",
+                array('content' => $this->response->body)
+            );
         }
 
-        // Set the X-Powered-By header and render the layout with the content
-        header("X-Powered-By: Radium/" . Kernel::version());
-        print(Body::content());
+        $this->response->send();
     }
 }
