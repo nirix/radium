@@ -1,7 +1,7 @@
 <?php
 /*!
  * Radium
- * Copyright (C) 2011-2013 Jack P.
+ * Copyright (C) 2011-2014 Jack P.
  * https://github.com/nirix
  *
  * This file is part of Radium.
@@ -29,24 +29,22 @@ use Radium\Util\Inflector;
  * Radium's Router.
  *
  * @since 0.1
- * @package Radium
- * @subpackage HTTP
+ * @package Radium/Http
  * @author Jack P.
  * @copyright (C) Jack P.
  */
 class Router
 {
-    private static $routes = array();
+    // Registered routes
+    protected static $routes = array();
 
-    // Routed values
-    public static $controller;
-    public static $method;
-    public static $params = array();
-    public static $args = array();
-    public static $extension;
+    // Registered tokens
+    protected static $tokens = array(
+        ':id' => "(?<id>\d+)"
+    );
+
+    // Extensions
     public static $extensions = array('.json', '.atom');
-
-    protected static $tokens = array();
 
     /**
      * Closure style routing.
@@ -56,7 +54,8 @@ class Router
      *         $r->root('Controller.action');
      *     });
      */
-    public static function map($block) {
+    public static function map($block)
+    {
         $block(new static);
     }
 
@@ -103,7 +102,8 @@ class Router
      *
      * @param string $resource
      */
-    public static function resources($resource) {
+    public static function resources($resource)
+    {
         $controller = Inflector::controllerise($resource);
         $uri = strtolower($controller);
 
@@ -149,7 +149,7 @@ class Router
         $uri = "/" . trim($request->uri(), '/');
 
         // Check if this is root page
-        if (isset(static::$routes['root']) and Request::$uri == '/') {
+        if (isset(static::$routes['root']) and $request->uri == '/') {
             return static::setRoute(static::$routes['root']);
         }
 
@@ -172,7 +172,7 @@ class Router
                     }
                 }
 
-                if (in_array(Request::$method, $route->method)) {
+                if (in_array($request->method, $route->method)) {
                     return static::setRoute($route);
                 }
             }
@@ -213,19 +213,23 @@ class Router
         static::$tokens[":{$token}"] = $value;
     }
 
-    private static function setRoute($route)
+    protected static function setRoute($route)
     {
-        $destination = explode('.', $route->destination);
+        $destination = explode('::', $route->destination);
 
-        static::$controller = str_replace('::', "\\", $destination[0]);
-        static::$method = $destination[1];
-        static::$params = $route->params;
-        static::$args = $route->args;
-        static::$extension = (isset($route->params['extension']) ? $route->params['extension'] : 'html');
+        $info = array(
+            'controller' => $destination[0],
+            'method'     => $destination[1],
+            'params'     => $route->params,
+            'args'       => $route->args,
+            'extension'  => (isset($route->params['extension']) ? $route->params['extension'] : 'html')
+        );
 
         // Remove the first dot from the extension
-        if (static::$extension[0] == '.') {
-            static::$extension = substr(static::$extension, 1);
+        if ($info['extension'][0] == '.') {
+            $info['extension'] = substr($info['extension'], 1);
         }
+
+        return $info;
     }
 }
