@@ -1,7 +1,7 @@
 <?php
 /*!
  * Radium
- * Copyright (C) 2011-2013 Jack P.
+ * Copyright (C) 2011-2014 Jack P.
  * https://github.com/nirix
  *
  * This file is part of Radium.
@@ -21,7 +21,6 @@
 
 namespace Radium;
 
-require __DIR__ . '/Exception.php';
 require __DIR__ . '/Loader.php';
 
 /**
@@ -62,9 +61,9 @@ class Autoloader
      * @param string $vendor
      * @param string $location
      */
-    public static function registerNamespace($vendor, $location, $default = false)
+    public static function registerNamespace($vendor, $location)
     {
-        Loader::registerNamespace($vendor, $location, $default);
+        Loader::registerNamespace($vendor, $location);
     }
 
     /**

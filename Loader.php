@@ -1,7 +1,7 @@
 <?php
 /*!
  * Radium
- * Copyright (C) 2011-2012 Jack P.
+ * Copyright (C) 2011-2014 Jack P.
  * https://github.com/nirix
  *
  * This file is part of Radium.
@@ -31,30 +31,9 @@ namespace Radium;
  */
 class Loader
 {
-    private static $defaultNamespace;
     private static $vendorDirectory;
     private static $registeredPaths = array();
     private static $registeredNamespaces = array();
-
-    /**
-     * Returns the default namespace name.
-     *
-     * @return string
-     */
-    public static function defaultNamespace()
-    {
-        return static::$defaultNamespace['name'];
-    }
-
-    /**
-     * Returns the default namespace path.
-     *
-     * @return string
-     */
-    public static function defaultNamespacePath()
-    {
-        return static::$defaultNamespace['path'];
-    }
 
     /**
      * Sets the vendor directory location.
@@ -93,11 +72,8 @@ class Loader
      * @param string $vendor
      * @param string $path
      */
-    public static function registerNamespace($vendor, $path, $default = false)
+    public static function registerNamespace($vendor, $path)
     {
-        if ($default) {
-            static::$defaultNamespace = array('name' => $vendor, 'path' => $path);
-        }
         static::$registeredNamespaces[$vendor] = $path;
     }
 
