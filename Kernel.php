@@ -23,8 +23,7 @@ namespace Radium;
 
 use Radium\Http\Router;
 use Radium\Http\Request;
-use Radium\Output\Body;
-use Radium\Output\View;
+use Radium\Http\Response;
 
 /**
  * Radium's Kernel, the heart of it all.
@@ -36,99 +35,73 @@ use Radium\Output\View;
  */
 class Kernel
 {
-    private static $version = '0.3';
-    private static $app;
+    protected static $version = '2.0.0';
 
     /**
-     * Initializes the the kernel and routes the request.
-     */
-    public static function init()
-    {
-        session_start();
-
-        // Route the request
-        Router::process(new Request);
-
-        // Check if the routed controller and method exists
-        if (!class_exists(Router::$controller) or !method_exists(Router::$controller, Router::$method . 'Action')) {
-            Router::set404();
-        }
-    }
-
-    /**
-     * Executes the routed request.
-     */
-    public static function run()
-    {
-        // Start the app
-        static::$app = new Router::$controller;
-
-        // Before filters
-        static::runFilters('before');
-
-        // Call the method
-        if (static::$app->render['action']) {
-            $output = call_user_func_array(array(static::$app, Router::$method . 'Action'), Router::$args);
-        }
-
-        // After filters
-        static::runFilters('after');
-
-        // If an object is returned, use the `response` variable if it's set.
-        if (is_object($output)) {
-            $output = isset($output->response) ? $output->response : null;
-        }
-
-        // Check if we have any content
-        if (static::$app->render['action'] and $output !== null) {
-            static::$app->render['view'] = false;
-            Body::append($output);
-
-            // Get the content, clear the body
-            // and append content to a clean slate.
-            $content = Body::content();
-            Body::clear();
-            Body::append($content);
-        }
-
-        static::$app->__shutdown();
-    }
-
-    /**
-     * Runs the filters filters for the app.
+     * Runs the application and routes the request.
      *
-     * @param string $type
+     * @param object $app Instantiated application object.
      */
-    protected static function runFilters($type)
+    public static function run($app)
     {
-        $filters = static::$app->{$type};
+        $request = new Request;
+        $route = Router::process($request);
 
+        $controller = new $route['controller']($request, $route, $app->databaseConnection());
+
+        // Run before filters
+        static::runFilters($route['method'], $controller->filtersBefore());
+
+        // Execute action
+        if ($controller->executeAction) {
+            $response = call_user_func_array(
+                array($controller, $route['method'] . 'Action'),
+                $route['params']
+            );
+        }
+
+        // Run after filters
+        static::runFilters($route['method'], $controller->filtersBefore());
+
+        // If the action returned something, pass it back to the application
+        if ($response !== null) {
+            // Response object
+            if (is_object($response)) {
+                $controller->response = $response;
+            }
+            // Plain text
+            else {
+                $controller->response->body = $response;
+            }
+        }
+
+        // Shutdown the controller
+        $controller->__shutdown();
+    }
+
+    /**
+     * Runs the filters for the specified action.
+     *
+     * @param string $action  Routed method/action.
+     * @param array  $filters Array containing controller filters.
+     */
+    protected static function runFilters($action, $filters)
+    {
         $filters = array_merge(
-            isset($filters['*']) ? $filters['*'] : array(),
-            isset($filters[Router::$method]) ? $filters[Router::$method] : array()
+            $filters['*'],
+            isset($filters[$action]) ? $filters[$action] : array()
         );
 
         foreach ($filters as $filter) {
-            static::$app->{$filter}(Router::$method);
+            static::$app->{$filter}();
         }
     }
 
     /**
-     * Returns the app object.
-     *
-     * @return object
-     */
-    public static function app()
-    {
-        return static::$app;
-    }
-
-    /**
-     * Returns the version of Avalon.
-     *
      * @return string
      */
-    public static function version() {
+    public static function version()
+    {
         return static::$version;
     }
 }
