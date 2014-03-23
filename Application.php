@@ -70,7 +70,7 @@ class Application
      */
     protected function connectDatabase()
     {
-        if (!$this->databaseConnection) {
+        if (!$this->databaseConfig) {
             return null;
         }
 
