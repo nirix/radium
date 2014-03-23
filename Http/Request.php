@@ -95,7 +95,7 @@ class Request
      *
      * @return boolean
      */
-    public static function matches($pattern)
+    public function matches($pattern)
     {
         if (preg_match("#^{$pattern}?$#", $this->uri)) {
             return true;
@@ -112,7 +112,7 @@ class Request
      *
      * @return mixed
      */
-    public static function post($key, $fallBack = null)
+    public function post($key, $fallBack = null)
     {
         return isset($this->post[$key]) ? $this->post[$key] : $fallBack;
     }
@@ -124,7 +124,7 @@ class Request
      *
      * @return mixed
      */
-    public static function seg($segment)
+    public function seg($segment)
     {
         return (isset($this->segments[$segment]) ? $this->segments[$segment] : false);
     }
@@ -134,7 +134,7 @@ class Request
      *
      * @param string $url
      */
-    public static function redirect($url)
+    public function redirect($url)
     {
         header("Location: " . $url);
         exit;
@@ -146,7 +146,7 @@ class Request
      *
      * @param string $path
      */
-    public static function redirectTo($path)
+    public function redirectTo($path)
     {
         $this->redirect($this->base($path));
     }
@@ -156,7 +156,7 @@ class Request
      *
      * @return boolean
      */
-    public static function isAjax()
+    public function isAjax()
     {
         return strtolower($this->requestedWith) == 'xmlhttprequest';
     }
@@ -166,7 +166,7 @@ class Request
      *
      * @return string
      */
-    public static function base($path = '')
+    public function base($path = '')
     {
         return $this->base . '/' . trim($path, '/');
     }
@@ -176,7 +176,7 @@ class Request
      *
      * @return boolean
      */
-    public static function isSecure()
+    public function isSecure()
     {
         if (!isset($_SERV['HTTPS']) or empty($_SERVER['HTTPS'])) {
             return false;
