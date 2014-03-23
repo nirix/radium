@@ -57,7 +57,7 @@ class Kernel
         if ($controller->executeAction) {
             $response = call_user_func_array(
                 array($controller, $route['method'] . 'Action'),
-                $route['params']
+                $route['args']
             );
         }
 
