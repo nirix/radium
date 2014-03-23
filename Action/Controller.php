@@ -108,6 +108,14 @@ class Controller
     }
 
     /**
+     * Redirects to the specified path.
+     */
+    public function redirectTo($path)
+    {
+        $this->request->redirectTo($pat);
+    }
+
+    /**
      * Sets the response to a 404 Not Found
      */
     public function show404()
