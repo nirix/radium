@@ -24,6 +24,7 @@ namespace Radium\Action;
 use Radium\Kernel;
 use Radium\Http\Request;
 use Radium\Http\Response;
+use Radium\Language;
 
 /**
  * Controller
@@ -105,6 +106,17 @@ class Controller
     public function render($view, array $locals = array())
     {
         return View::render($view, $locals);
+    }
+
+    /**
+     * Translates the passed string.
+     *
+     * @param string $string       String to translate.
+     * @param array  $replacements Replacements to be inserted into the string.
+     */
+    public function translate($string, array $replacements = array())
+    {
+        return Language::translate($string, $replacements);
     }
 
     /**
