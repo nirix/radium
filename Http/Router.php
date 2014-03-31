@@ -35,6 +35,9 @@ use Radium\Util\Inflector;
  */
 class Router
 {
+    // Current route
+    protected static $currentRoute;
+
     // Registered routes
     protected static $routes = array();
 
@@ -149,7 +152,7 @@ class Router
         $uri = "/" . trim($request->uri(), '/');
 
         // Check if this is root page
-        if (isset(static::$routes['root']) and $request->uri == '/') {
+        if (isset(static::$routes['root']) and $request->uri() == '/') {
             return static::setRoute(static::$routes['root']);
         }
 
@@ -172,7 +175,7 @@ class Router
                     }
                 }
 
-                if (in_array($request->method, $route->method)) {
+                if (in_array($request->method(), $route->method)) {
                     return static::setRoute($route);
                 }
             }
@@ -213,6 +216,16 @@ class Router
         static::$tokens[":{$token}"] = $value;
     }
 
+    /**
+     * Returns the current route.
+     *
+     * @return object
+     */
+    public static function currentRoute()
+    {
+        return static::$currentRoute;
+    }
+
     protected static function setRoute($route)
     {
         $destination = explode('::', $route->destination);
@@ -230,6 +243,6 @@ class Router
             $info['extension'] = substr($info['extension'], 1);
         }
 
-        return $info;
+        return static::$currentRoute = $info;
     }
 }

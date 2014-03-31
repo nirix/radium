@@ -22,6 +22,7 @@
 namespace Radium\Action;
 
 use Radium\Kernel;
+use Radium\Http\Router;
 use Radium\Http\Request;
 use Radium\Http\Response;
 use Radium\Language;
@@ -36,38 +37,31 @@ use Radium\Language;
  */
 class Controller
 {
-    public $view;
-
     /**
      * Name of the layout to render.
      */
     public $layout = 'default';
 
     /**
+     * The view to be rendered.
+     */
+    public $view;
+
+    /**
      * Whether or not to execute the routed action.
      */
     public $executeAction = true;
 
-    public $route;
-    public $request;
-    public $response;
-
     /**
      * Sets the request, route, database, view and response variables.
      */
-    public function __construct(Request $request, Array $route, $database = null)
+    public function __construct()
     {
-        $this->request = $request;
-        $this->route   = $route;
-        $this->db      = $database;
-
+        $route = Router::currentRoute();
         $this->setView(get_called_class() . "\\{$route['method']}");
 
         // Create response
         $this->response = new Response;
-
-        // Allow views to access the request object
-        $this->set('request', $this->request);
     }
 
     /**
@@ -124,7 +118,7 @@ class Controller
      */
     public function redirectTo($path)
     {
-        $this->request->redirectTo($pat);
+        Request::redirectTo($pat);
     }
 
     /**
@@ -165,8 +159,10 @@ class Controller
      */
     public function __shutdown()
     {
+        $route = Router::currentRoute();
+
         // Is this a .json request?
-        if ($this->route['extension'] == 'json') {
+        if ($route['extension'] == 'json') {
             $this->layout = false;
             $this->view = "{$this->view}.json";
         }

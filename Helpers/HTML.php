@@ -21,7 +21,7 @@
 
 namespace Radium\Helpers;
 
-use Radium\Kernel;
+use Radium\Http\Request;
 
 /**
  * HTML Helper
@@ -43,7 +43,7 @@ class HTML
     public static function cssLinkTag($href, $media = 'screen')
     {
         if (strpos($href, 'http') === false) {
-            $href = Kernel::request()->base($href);
+            $href = Request::base($href);
         }
         return '<link rel="stylesheet" href="' . $href . '" media="' . $media . '">' . PHP_EOL;
     }
@@ -58,7 +58,7 @@ class HTML
     public static function jsIncTag($path)
     {
         if (strpos($path, 'http') === false) {
-            $path = Kernel::request()->base($path);
+            $path = Request::base($path);
         }
         return '<script src="' . $path . '" type="text/javascript"></script>' . PHP_EOL;
     }
@@ -86,7 +86,7 @@ class HTML
 
         // Is this a local link?
         if (substr($url, 0, 4) != 'http') {
-            $url = Kernel::request()->base(ltrim($url, '/'));
+            $url = Request::base(ltrim($url, '/'));
         }
 
         $attributes['href'] = $url;

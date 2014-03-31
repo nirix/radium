@@ -36,7 +36,6 @@ use Radium\Http\Response;
 class Kernel
 {
     protected static $version = '2.0.0';
-    protected static $request;
 
     /**
      * Runs the application and routes the request.
@@ -45,10 +44,9 @@ class Kernel
      */
     public static function run($app)
     {
-        static::$request = new Request;
-        $route = Router::process(static::$request);
+        $route = Router::process(new Request);
 
-        $controller = new $route['controller'](static::$request, $route, $app->databaseConnection());
+        $controller = new $route['controller']();
 
         // Run before filters
         static::runFilters($route['method'], $controller->filtersBefore());
@@ -104,15 +102,5 @@ class Kernel
     public static function version()
     {
         return static::$version;
-    }
-
-    /**
-     * Returns the request object.
-     *
-     * @return object
-     */
-    public static function request()
-    {
-        return static::$request;
     }
 }
