@@ -76,4 +76,12 @@ class Application
 
         $this->databaseConnection = Database::factory($this->databaseConfig);
     }
+
+    /**
+     * Runs the application.
+     */
+    public function run()
+    {
+        Kernel::run($this);
+    }
 }
