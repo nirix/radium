@@ -22,6 +22,7 @@
 namespace Radium;
 
 use Radium\Database;
+use Radium\Action\View;
 
 /**
  * Application base class.
@@ -33,6 +34,9 @@ use Radium\Database;
  */
 class Application
 {
+    // Application path.
+    protected $path;
+
     protected $routesFile = "Config/Routes.php";
     protected $databaseConfig;
     protected $databaseConnection;
@@ -41,8 +45,14 @@ class Application
      * Connects to the database and loads the routes.
      */
     public function __construct() {
+        $classInfo   = new \ReflectionObject($this);
+        $this->path  = dirname($classInfo->getFilename());
+
         $this->connectDatabase();
         $this->loadRoutes();
+
+        // Add views directory
+        View::addSearchPath("{$this->path}/Views");
     }
 
     /**
