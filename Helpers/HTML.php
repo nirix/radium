@@ -96,6 +96,24 @@ class HTML
     }
 
     /**
+     * Returns the code for a link unless the current request matches the URL.
+     *
+     * @param string $label   The label
+     * @param string $url     The URL
+     * @param array  $options Options for the URL code (class, title, etc)
+     *
+     * @return string
+     */
+    public static function LinkToUnlessCurrent($label, $url, array $attributes = array())
+    {
+        if (Request::matches($url)) {
+            return $label;
+        } else {
+            return static::link($label, $url, $attributes);
+        }
+    }
+
+    /**
      * Builds the attributes for HTML elements.
      *
      * @param array $attributes An array of attributes and their values
