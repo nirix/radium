@@ -128,15 +128,6 @@ class View
             }
         }
 
-        // Check vendors
-        foreach (Loader::getVendors() as $vendor => $path) {
-            if (file_exists("{$path}/{$view}.phtml")) {
-                return "{$path}/{$view}.phtml";
-            } elseif (file_exists("{$path}/{$view}.php")) {
-                return "{$path}/{$view}.php";
-            }
-        }
-
         return false;
     }
 
