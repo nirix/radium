@@ -37,7 +37,13 @@ class Application
     // Application path.
     protected $path;
 
+    // Routes file location.
     protected $routesFile = "Config/Routes.php";
+
+    // Database config file location.
+    protected $databaseConfigFile = "Config/Database.php";
+
+    // Database config array and connection object.
     protected $databaseConfig;
     protected $databaseConnection;
 
@@ -48,7 +54,11 @@ class Application
         $classInfo   = new \ReflectionObject($this);
         $this->path  = dirname($classInfo->getFilename());
 
+        // Load the database configuration and connect
+        $this->loadDatabaseConfig();
         $this->connectDatabase();
+
+        // Load the routes
         $this->loadRoutes();
 
         // Add views directory
@@ -70,9 +80,30 @@ class Application
      */
     protected function loadRoutes()
     {
-        $classInfo = new \ReflectionObject($this);
-        $path      = dirname($classInfo->getFilename());
-        require "{$path}/{$this->routesFile}";
+        $routesFile = "{$this->path}/{$this->routesFile}";
+
+        if (file_exists($routesFile)) {
+            require $routesFile;
+        } else {
+            Error::halt("Unable to load routes.");
+        }
+    }
+
+    /**
+     * Loads the database configuration file.
+     */
+    protected function loadDatabaseConfig()
+    {
+        if (!$this->databaseConfigFile) {
+            return null;
+        }
+
+        $configPath = "{$this->path}/{$this->databaseConfigFile}";
+        if (file_exists($configPath)) {
+            $this->databaseConfig = require $configPath;
+        } else {
+            Error::halt("Unable to load database configuration.");
+        }
     }
 
     /**
