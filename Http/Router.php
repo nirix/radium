@@ -170,7 +170,7 @@ class Router
 
                 // Routed method arguments
                 foreach ($route->args as $index => $arg) {
-                    if (($arg !== true or $arg !== false) and isset($params[$arg])) {
+                    if (($arg !== true and $arg !== false) and isset($params[$arg])) {
                         $route->args[$index] = $params[$arg];
                     }
                 }
