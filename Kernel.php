@@ -36,6 +36,7 @@ use Radium\Http\Response;
 class Kernel
 {
     protected static $version = '2.0.0';
+    protected static $controller;
 
     /**
      * Runs the application and routes the request.
@@ -46,36 +47,36 @@ class Kernel
     {
         $route = Router::process(new Request);
 
-        $controller = new $route['controller']();
+        static::$controller = new $route['controller']();
 
         // Run before filters
-        static::runFilters($route['method'], $controller->filtersBefore());
+        static::runFilters($route['method'], static::$controller->filtersBefore());
 
         // Execute action
-        if ($controller->executeAction) {
+        if (static::$controller->executeAction) {
             $response = call_user_func_array(
-                array($controller, $route['method'] . 'Action'),
+                array(static::$controller, $route['method'] . 'Action'),
                 $route['args']
             );
         }
 
         // Run after filters
-        static::runFilters($route['method'], $controller->filtersBefore());
+        static::runFilters($route['method'], static::$controller->filtersBefore());
 
         // If the action returned something, pass it back to the application
         if ($response !== null) {
             // Response object
             if (is_object($response)) {
-                $controller->response = $response;
+                static::$controller->response = $response;
             }
             // Plain text
             else {
-                $controller->response->body = $response;
+                static::$controller->response->body = $response;
             }
         }
 
         // Shutdown the controller
-        $controller->__shutdown();
+        static::$controller->__shutdown();
     }
 
     /**
@@ -94,6 +95,16 @@ class Kernel
         foreach ($filters as $filter) {
             static::$app->{$filter}();
         }
+    }
+
+    /**
+     * Returns the instantiated controller object.
+     *
+     * @return object
+     */
+    public static function controller()
+    {
+        return static::$controller;
     }
 
     /**
