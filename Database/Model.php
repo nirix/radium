@@ -308,6 +308,8 @@ class Model
             ->from(static::table())
             ->model(get_called_class());
 
+        $prefix = static::connection()->prefix;
+
         foreach (static::$_belongsTo as $relation => $options) {
             if (is_integer($relation)) {
                 $relation = $options;
@@ -316,7 +318,7 @@ class Model
             $relationInfo = static::getRelationInfo($relation, $options);
             $query->join(
                 $relationInfo['table'],
-                "`{$relationInfo['table']}`.`{$relationInfo['primaryKey']}` = `" . static::table() . "`.`{$relationInfo['foreignKey']}`",
+                "`{$prefix}{$relationInfo['table']}`.`{$relationInfo['primaryKey']}` = `" . $prefix . static::table() . "`.`{$relationInfo['foreignKey']}`",
                 $relationInfo['columns']
             );
         }

@@ -457,7 +457,7 @@ class Query
             }
             // Alias
             else {
-                $columns[] = $this->columnName($column) . " AS `{$as}`";
+                $columns[] = $this->columnName($this->prefix . $column) . " AS `{$as}`";
             }
         }
 
@@ -538,7 +538,7 @@ class Query
         $joins = array();
 
         foreach ($this->query['joins'] as $join) {
-            $joins[] = "JOIN `{$join[0]}` ON {$join[1]}";
+            $joins[] = "JOIN `{$this->prefix}{$join[0]}` ON {$join[1]}";
         }
 
         return implode(" ", $joins);
