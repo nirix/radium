@@ -72,7 +72,19 @@ class View
         $filePath = static::filePath($view);
 
         if (!$filePath) {
-            Error::halt("View Error", "Unable to load view '{$view}'");
+            $error = array(
+                "Unable to load view for '{$view}'<br>",
+                "Search paths:<br>",
+                "<pre>"
+            );
+
+            foreach (static::$searchPaths as $path) {
+                $error[] = $path;
+            }
+
+            $error[] = "</pre>";
+
+            Error::halt("View Error", implode(PHP_EOL, $error));
         }
 
         // Global view variables
