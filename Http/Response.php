@@ -60,9 +60,6 @@ class Response
      */
     public function send()
     {
-        // Set powered-by header
-        header("X-Powered-By: Radium/" . Kernel::version());
-
         // Set response code
         $this->setResponseCode();
 
