@@ -668,4 +668,20 @@ class Model
             $this->updated_at = 'NOW()';
         }
     }
+
+    /**
+     * Returns the models properties in a key => value array.
+     *
+     * @return array
+     */
+    public function __toArray()
+    {
+        $data = array();
+
+        foreach (static::schema() as $field => $options) {
+            $data[$field] = $this->{$field};
+        }
+
+        return $data;
+    }
 }
