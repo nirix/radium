@@ -26,6 +26,7 @@ use Radium\Http\Router;
 use Radium\Http\Request;
 use Radium\Http\Response;
 use Radium\Language;
+use Radium\Database;
 
 /**
  * Controller
@@ -62,6 +63,9 @@ class Controller
 
         // Create response
         $this->response = new Response;
+
+        // Set database connection
+        $this->db = Database::connection();
     }
 
     /**
