@@ -42,6 +42,7 @@ class Request
     public static $post = array();
     public static $scheme;
     public static $host;
+    public static $query;
 
     protected static $requestedWith;
     protected static $base;
@@ -81,6 +82,9 @@ class Request
 
         // Set currnet request
         static::$current = $this;
+
+        // Query string
+        static::$query = $_SERVER['QUERY_STRING'];
     }
 
     /**
