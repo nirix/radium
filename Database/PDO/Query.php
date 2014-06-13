@@ -515,7 +515,10 @@ class Query
 
                     // Add value to the bind queue
                     $valueBindKey = str_replace(array('.', '`'), array('_', ''), $safeColumn);
-                    $this->valuesToBind[$valueBindKey] = $value;
+
+                    if (!empty($value) or $value !== null) {
+                        $this->valuesToBind[$valueBindKey] = $value;
+                    }
 
                     // Add condition to group
                     $group[] = str_replace("?", ":{$valueBindKey}", $condition);
