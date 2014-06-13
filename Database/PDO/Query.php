@@ -121,14 +121,14 @@ class Query
     }
 
     /**
-     * Sets the table name with the prefix.
+     * Sets the table name.
      *
      * @param string $name
      */
     private function tableName($name = null)
     {
         if ($name) {
-            $this->query['table'] = "{$this->prefix}{$name}";
+            $this->query['table'] = $name;
         }
 
         return $this->query['table'];
@@ -257,6 +257,8 @@ class Query
             $this->query['where'][count($this->query['where']) - 1],
             $column
         );
+
+        return $this;
     }
 
     /**
@@ -345,7 +347,7 @@ class Query
         $result = $this->connection()->prepare($this->assemble());
 
         foreach ($this->valuesToBind as $key => $value) {
-            $result->bindValue($key, $value);
+            $result->bindValue(":{$key}", $value);
         }
 
         return $result->model($this->model)->exec();
@@ -457,7 +459,7 @@ class Query
             }
             // Alias
             else {
-                $columns[] = $this->columnName($this->prefix . $column) . " AS `{$as}`";
+                $columns[] = $this->columnName($column) . " AS `{$as}`";
             }
         }
 
@@ -538,7 +540,7 @@ class Query
         $joins = array();
 
         foreach ($this->query['joins'] as $join) {
-            $joins[] = "JOIN `{$this->prefix}{$join[0]}` ON {$join[1]}";
+            $joins[] = "JOIN `{$join[0]}` ON {$join[1]}";
         }
 
         return implode(" ", $joins);

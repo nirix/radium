@@ -236,7 +236,7 @@ class Model
         // Make sure we haven't already fetched
         // the tables schema.
         if (static::$_schema[static::table()] === null) {
-            $result = static::connection()->prepare("DESCRIBE `{prefix}" . static::table() . "`")->exec();
+            $result = static::connection()->prepare("DESCRIBE `" . static::table() . "`")->exec();
             foreach ($result->fetchAll(\PDO::FETCH_COLUMN) as $column) {
                 static::$_schema[static::table()][$column['Field']] = array(
                     'type'    => $column['Type'],
@@ -308,8 +308,6 @@ class Model
             ->from(static::table())
             ->model(get_called_class());
 
-        $prefix = static::connection()->prefix;
-
         foreach (static::$_belongsTo as $relation => $options) {
             if (is_integer($relation)) {
                 $relation = $options;
@@ -318,7 +316,7 @@ class Model
             $relationInfo = static::getRelationInfo($relation, $options);
             $query->join(
                 $relationInfo['table'],
-                "`{$prefix}{$relationInfo['table']}`.`{$relationInfo['primaryKey']}` = `" . $prefix . static::table() . "`.`{$relationInfo['foreignKey']}`",
+                "`{$relationInfo['table']}`.`{$relationInfo['primaryKey']}` = `" . static::table() . "`.`{$relationInfo['foreignKey']}`",
                 $relationInfo['columns']
             );
         }
