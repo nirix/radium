@@ -635,7 +635,9 @@ class Model
                 $info = static::getRelationInfo($relation, $options);
 
                 // Set relation
-                $this->{$relation} = $info['model']::select()->where(Inflector::foreignKey(static::table()) . " = ?", $this->{static::$_primaryKey});
+                $this->{$relation} = $info['model']::select()
+                    ->where(Inflector::foreignKey(static::table()) . " = ?", $this->{static::$_primaryKey})
+                    ->mergeNextWhere();
             }
         }
 

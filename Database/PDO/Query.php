@@ -71,6 +71,13 @@ class Query
     protected $valuesToBind = array();
 
     /**
+     * Whether or not to merge the next `where()` called with the previous.
+     *
+     * @var boolean
+     */
+    protected $mergeNextWhere = false;
+
+    /**
      * PDO Query builder constructor.
      *
      * @param string $type
@@ -212,6 +219,20 @@ class Query
     }
 
     /**
+     * Tells the query builder whether to merge the next `where()`
+     * call with the previous one or not.
+     *
+     * @param integer $group
+     *
+     * @return object
+     */
+    public function mergeNextWhere($group = true)
+    {
+        $this->mergeNextWhere = $group;
+        return $this;
+    }
+
+    /**
      * Easily add a "table = something" to the query.
      *
      * @example
@@ -228,6 +249,13 @@ class Query
     {
         if (!isset($this->query['where'])) {
             $this->query['where'] = array();
+        }
+
+        // Are we merging this with the previous?
+        // This is used when coming out of Model.
+        if ($this->mergeNextWhere and count($this->query['where']) > 0) {
+            $this->mergeNextWhere = false;
+            return $this->_and($column, $value);
         }
 
         // Array? too easy
