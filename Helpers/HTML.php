@@ -42,7 +42,7 @@ class HTML
      */
     public static function cssLinkTag($href, $media = 'screen')
     {
-        if (strpos($href, 'http') === false) {
+        if (strpos($href, 'http') === false and strpos($href, '//') === false) {
             $href = Request::base($href);
         }
         return '<link rel="stylesheet" href="' . $href . '" media="' . $media . '">' . PHP_EOL;
@@ -57,7 +57,7 @@ class HTML
      */
     public static function jsIncTag($path)
     {
-        if (strpos($path, 'http') === false) {
+        if (strpos($path, 'http') === false and strpos($path, '//') === false) {
             $path = Request::base($path);
         }
         return '<script src="' . $path . '" type="text/javascript"></script>' . PHP_EOL;
