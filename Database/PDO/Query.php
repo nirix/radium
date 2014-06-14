@@ -40,35 +40,35 @@ class Query
      *
      * @var string
      */
-    private $connectionName;
+    protected $connectionName;
 
     /**
      * The model to put the data into.
      *
      * @var string
      */
-    private $model;
+    protected $model;
 
     /**
      * The query, joined together when needed.
      *
      * @var array
      */
-    private $query = array();
+    protected $query = array();
 
     /**
      * Table prefix
      *
      * @var string
      */
-    private $prefix;
+    protected $prefix;
 
     /**
      * Values that need to be binded to the query.
      *
      * @var array
      */
-    private $valuesToBind = array();
+    protected $valuesToBind = array();
 
     /**
      * PDO Query builder constructor.
