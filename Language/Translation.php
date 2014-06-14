@@ -21,6 +21,8 @@
 
 namespace Radium\Language;
 
+use Radium\Helpers\Time;
+
 /**
  * Translation class.
  *

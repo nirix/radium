@@ -109,6 +109,11 @@ class View
             return Language::translate($string, $vars);
         };
 
+        // Shortcut for Language::date()
+        $l = function($format, $timestamp = null) {
+            return Language::date($format, $timestamp);
+        };
+
         ob_start();
         include($filePath);
         return ob_get_clean();
