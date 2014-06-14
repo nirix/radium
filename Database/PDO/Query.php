@@ -543,7 +543,14 @@ class Query
         $joins = array();
 
         foreach ($this->query['joins'] as $join) {
-            $joins[] = "JOIN `{$join[0]}` ON {$join[1]}";
+            // Handle join with alias
+            if (is_array($join[0])) {
+                $joins[] = "LEFT JOIN `{$join[0][0]}` `{$join[0][1]}` on {$join[1]}";
+            }
+            // Handle regular joining
+            else {
+                $joins[] = "LEFT JOIN `{$join[0]}` on {$join[1]}";
+            }
         }
 
         return implode(" ", $joins);

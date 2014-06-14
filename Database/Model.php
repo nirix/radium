@@ -173,7 +173,12 @@ class Model
                     // and put it into its own model.
                     $data = array();
                     foreach ($relation['model']::schema() as $column => $info) {
-                        $key = strtolower("{$relation['class']}_{$column}");
+                        // Handle join alias
+                        if (isset($relation['join_alias'])) {
+                            $key = strtolower("{$relation['name']}_{$column}");
+                        } else {
+                            $key = strtolower("{$relation['class']}_{$column}");
+                        }
 
                         // Make sure the key is set
                         if (isset($this->{$key})) {
@@ -283,7 +288,7 @@ class Model
             $find = static::$_primaryKey;
         }
 
-        return static::select()->where($find . " = ?", $value)->fetch();
+        return static::select()->where("{$find} = ?", $value)->fetch();
     }
 
     /**
@@ -313,10 +318,15 @@ class Model
                 $relation = $options;
             }
 
+            if (!is_array($options)) {
+                $options = array();
+            }
+
             $relationInfo = static::getRelationInfo($relation, $options);
+
             $query->join(
-                $relationInfo['table'],
-                "`{$relationInfo['table']}`.`{$relationInfo['primaryKey']}` = `" . static::table() . "`.`{$relationInfo['foreignKey']}`",
+                array($relationInfo['table'], $relationInfo['join_alias']),
+                "`{$relationInfo['join_alias']}`.`{$relationInfo['primaryKey']}` = `" . static::table() . "`.`{$relationInfo['foreignKey']}`",
                 $relationInfo['columns']
             );
         }
@@ -349,6 +359,9 @@ class Model
 
         // Name
         $relation['name'] = $name;
+
+        // Join alias
+        $relation['join_alias'] = $name;
 
         // Model and class
         if (!isset($relation['model'])) {
@@ -383,7 +396,11 @@ class Model
         // Columns
         $relation['columns'] = array();
         foreach (array_keys($relation['model']::schema()) as $column) {
-            $relation['columns']["{$relation['table']}.{$column}"] = "{$relation['name']}_{$column}";
+            if (isset($relation['join_alias'])) {
+                $relation['columns']["{$relation['join_alias']}.{$column}"] = "{$relation['name']}_{$column}";
+            } else {
+                $relation['columns']["{$relation['table']}.{$column}"] = "{$relation['name']}_{$column}";
+            }
         }
 
         static::$_relationInfo["{$class->getName()}.{$name}"] = $relation;
