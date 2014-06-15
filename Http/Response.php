@@ -48,6 +48,11 @@ class Response
      */
     public $contentType = 'text/html';
 
+    /**
+     * Response headers.
+     */
+    protected $headers = array();
+
     public function __construct($response = null)
     {
         // Anonymous function to configure the response block-style.
@@ -79,6 +84,17 @@ class Response
     }
 
     /**
+     * Sets a response header.
+     *
+     * @param string $header
+     * @param string $value
+     */
+    public function header($header, $value, $replace = true)
+    {
+        $this->headers[] = array($header, $value, $replace);
+    }
+
+    /**
      * Sends the response to the browser.
      */
     public function send()
@@ -88,6 +104,11 @@ class Response
 
         // Set content-type
         header("Content-Type: {$this->contentType}");
+
+        // Set headers
+        foreach ($this->headers as $header) {
+            header("{$header[0]}: {$header[1]}", $header[2]);
+        }
 
         // Print the content
         print($this->body);
