@@ -54,27 +54,6 @@ class Model
     protected static $_primaryKey = 'id';
 
     /**
-     * Belongs to relationships.
-     *
-     * @var array
-     */
-    protected static $_belongsTo = array();
-
-    /**
-     * Has many relationships.
-     *
-     * @var array
-     */
-    protected static $_hasMany = array();
-
-    /**
-     * Holds relation info.
-     *
-     * @var array
-     */
-    protected static $_relationInfo = array();
-
-    /**
      * Field validations.
      *
      * @example
@@ -129,6 +108,13 @@ class Model
     protected static $_after = array();
 
     /**
+     * Cached relationship objects.
+     *
+     * @var array
+     */
+    protected $_relationsCache = array();
+
+    /**
      * Model constructor.
      *
      * @param array $data
@@ -157,53 +143,7 @@ class Model
                     $this->{$timestamp} = Time::gmtToLocal($this->{$timestamp});
                 }
             }
-
-            // Put belongsTo relations into their models
-            foreach (static::$_belongsTo as $relation => $options) {
-                if (is_integer($relation)) {
-                    $relation = $options;
-                }
-
-                // Get the relation information
-                $key = get_called_class() . ".{$relation}";
-                    if (isset(static::$_relationInfo[$key])) {
-                    $relation = static::$_relationInfo[$key];
-
-                    // Get the table data for the relation
-                    // and put it into its own model.
-                    $data = array();
-                    foreach ($relation['model']::schema() as $column => $info) {
-                        // Handle join alias
-                        if (isset($relation['join_alias'])) {
-                            $key = strtolower("{$relation['name']}_{$column}");
-                        } else {
-                            $key = strtolower("{$relation['class']}_{$column}");
-                        }
-
-                        // Make sure the key is set
-                        if (isset($this->{$key})) {
-                            $data[$column] = $this->{$key};
-                        }
-                    }
-
-                    // If the only thing in the data array is the relationships
-                    // primary key, don't bother.
-                    if (count($data) == 1 and isset($data[$relation['localKey']])) {
-                        continue;
-                    }
-                    // Create the relations model
-                    else {
-                        $this->{$relation['name']} = new $relation['model']($data, false);
-                    }
-                }
-            }
-
-            // Clear everything
-            unset($relation, $options, $column, $info, $timestamp, $data);
         }
-
-        // Setup relations
-        $this->setupRelations();
 
         // Add filters
         foreach (array('create', 'save') as $action) {
@@ -306,117 +246,12 @@ class Model
      *
      * @return object
      */
-    public static function select($fields = '*')
+    public static function select()
     {
-        $query = static::connection()
+        return static::connection()
             ->select()
             ->from(static::table())
             ->model(get_called_class());
-
-        foreach (static::$_belongsTo as $relation => $options) {
-            if (is_integer($relation)) {
-                $relation = $options;
-            }
-
-            if (!is_array($options)) {
-                $options = array();
-            }
-
-            $relationInfo = static::getRelationInfo($relation, $options);
-
-            $query->join(
-                array($relationInfo['table'], $relationInfo['join_alias']),
-                "`{$relationInfo['join_alias']}`.`{$relationInfo['foreignKey']}` = `" . static::table() . "`.`{$relationInfo['localKey']}`",
-                $relationInfo['columns']
-            );
-        }
-
-        return $query;
-    }
-
-    /**
-     * Returns an array containing information about the
-     * relation.
-     *
-     * @param string $name     Relation name
-     * @param array  $relation Relation info
-     *
-     * @return array
-     */
-    protected static function getRelationInfo($name, $relation, $type = 'belongsTo')
-    {
-        // Current models class
-        $class = new \ReflectionClass(get_called_class());
-        $namespace = $class->getNamespaceName();
-
-        if (isset(static::$_relationInfo["{$class->getName()}.{$name}"])) {
-            return static::$_relationInfo["{$class->getName()}.{$name}"];
-        }
-
-        if (!is_array($relation)) {
-            $relation = array();
-        }
-
-        // Name
-        $relation['name'] = $name;
-
-        // Join alias
-        $relation['join_alias'] = $name;
-
-        // Model and class
-        if (!isset($relation['model'])) {
-            // Model
-            $relation['model'] = Inflector::modelise($name);
-        }
-
-        // Set model namespace
-        if (strpos($relation['model'], '\\') === false) {
-            $relation['model'] = "\\{$namespace}\\" . $relation['model'];
-        }
-
-        // Class
-        $model = new \ReflectionClass($relation['model']);
-        $relation['class'] = $model->getShortName();
-
-        // Table
-        if (!isset($relation['table'])) {
-            $relation['table'] = $relation['model']::table();
-        }
-
-        // Belongs to relationship
-        if ($type == 'belongsTo') {
-            if (!isset($relation['localKey'])) {
-                $relation['localKey'] = Inflector::foreignKey($relation['class']);
-            }
-
-            if (!isset($relation['foreignKey'])) {
-                $relation['foreignKey'] = $relation['model']::primaryKey();
-            }
-        }
-        // Has many relationship
-        else if ($type == 'hasMany') {
-            if (!isset($relation['localKey'])) {
-                $relation['localKey'] = static::primaryKey();
-            }
-
-            if (!isset($relation['foreignKey'])) {
-                $relation['foreignKey'] = Inflector::foreignKey(static::table());;
-            }
-        }
-
-        // Columns
-        $relation['columns'] = array();
-        foreach (array_keys($relation['model']::schema()) as $column) {
-            if (isset($relation['join_alias'])) {
-                $relation['columns']["{$relation['join_alias']}.{$column}"] = "{$relation['name']}_{$column}";
-            } else {
-                $relation['columns']["{$relation['table']}.{$column}"] = "{$relation['name']}_{$column}";
-            }
-        }
-
-        static::$_relationInfo["{$class->getName()}.{$name}"] = $relation;
-
-        return $relation;
     }
 
     /**
@@ -627,53 +462,6 @@ class Model
     }
 
     /**
-     * Sets up relationships, better than using __get()
-     */
-    protected function setupRelations()
-    {
-        // Has many
-        foreach (static::$_hasMany as $relation => $options)
-        {
-            // If this is an easy-mode relation,
-            // set the relation name.
-            if (is_integer($relation)) {
-                $relation = $options;
-            }
-
-            // Make sure we don't override anything
-            if (!isset($this->{$relation})) {
-                // Get relation info
-                $info = static::getRelationInfo($relation, $options, 'hasMany');
-
-                // Set relation
-                $this->{$relation} = $info['model']::select()
-                    ->where("{$info['foreignKey']} = ?", $this->{$info['localKey']})
-                    ->mergeNextWhere();
-            }
-        }
-
-        // Belongs to
-        foreach (static::$_belongsTo as $relation => $options) {
-            // If this is an easy-mode relation,
-            // set the relation name.
-            if (is_integer($relation)) {
-                $relation = $options;
-            }
-
-            // Make sure we don't override anything
-            if (!isset($this->{$relation})) {
-                // Get relation info
-                $info = static::getRelationInfo($relation, $options);
-
-                // Set relation
-                $this->{$relation} = $info['model']::select()
-                    ->where($info['foreignKey'] . " = ?", $this->{$info['localKey']})
-                    ->fetch();
-            }
-        }
-    }
-
-    /**
      * Set the created_at value.
      */
     protected function beforeCreateTimestamps()
@@ -697,6 +485,108 @@ class Model
         if (!isset($this->updated_at) or $this->updated_at === null) {
             $this->updated_at = 'NOW()';
         }
+    }
+
+    /**
+     * Returns an array containing information about the
+     * relation.
+     *
+     * @param string $name     Relation name
+     * @param array  $relation Relation info
+     *
+     * @return array
+     */
+    public static function getRelationInfo($name, $options = array())
+    {
+        $info = array();
+
+        // Get current models namespace
+        $class = new \ReflectionClass(get_called_class());
+        $namespace = $class->getNamespaceName();
+
+        // Name
+        $info['name'] = $name;
+
+        // Model and class
+        if (!isset($info['model'])) {
+            // Model
+            $info['model'] = Inflector::modelise($name);
+        }
+
+        // Set model namespace
+        if (strpos($info['model'], '\\') === false) {
+            $info['model'] = "\\{$namespace}\\" . $info['model'];
+        }
+
+        // Class
+        $model = new \ReflectionClass($info['model']);
+        $info['class'] = $model->getShortName();
+
+        return $info;
+    }
+
+    /**
+     * Returns the owning object.
+     *
+     * @param string $model   Name of the model.
+     * @param aray   $options Optional relation options.
+     *
+     * @return object
+     */
+    public function belongsTo($model, $options = array())
+    {
+        if (isset($this->_relationsCache[$model])) {
+            return $this->_relationsCache[$model];
+        }
+
+        $options = array_merge(
+            static::getRelationInfo($model, $options),
+            $options
+        );
+
+        if (!isset($options['localKey'])) {
+            $options['localKey'] = Inflector::foreignKey($model);
+        }
+
+        if (!isset($options['foreignKey'])) {
+            $options['foreignKey'] = $options['model']::primaryKey();
+        }
+
+        return $this->_relationsCache[$model] = $options['model']::select()
+            ->where("{$options['foreignKey']} = ?", $this->{$options['localKey']})
+            ->fetch();
+    }
+
+    /**
+     * Returns an array of owned objects.
+     *
+     * @param string $model   Name of the model.
+     * @param aray   $options Optional relation options.
+     *
+     * @return array
+     */
+    public function hasMany($model, $options = array())
+    {
+        if (isset($this->_relationsCache[$model])) {
+            return $this->_relationsCache[$model];
+        }
+
+        $options = array_merge(
+            static::getRelationInfo($model, $options),
+            $options
+        );
+
+        if (!isset($options['localKey'])) {
+            $options['localKey'] = static::primaryKey();
+        }
+
+        if (!isset($options['foreignKey'])) {
+            $options['foreignKey'] = Inflector::foreignKey(static::table());
+        }
+
+        return $this->_relationsCache[$model] = $options['model']::select()
+            ->where("{$options['foreignKey']} = ?", $this->{$options['localKey']})
+            ->mergeNextWhere();
     }
 
     /**
