@@ -199,6 +199,13 @@ class Router
         if (!isset(static::$routes['404'])) {
             Error::halt("Route Error", "There is no 404 route set.");
         }
+
+        // Get request file extension
+        $match = preg_match("#(?<extension>" . implode('|', static::$extensions) . ")?$#", Request::$requestUri, $params);
+        if (isset($params['extension'])) {
+            static::$routes['404']->params['extension'] = $params['extension'];
+        }
+
         return static::setRoute(static::$routes['404']);
     }
 
