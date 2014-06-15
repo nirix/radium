@@ -126,6 +126,24 @@ class Controller
     }
 
     /**
+     * Easily respond to different request formats.
+     *
+     * @param closure $func
+     *
+     * @return object
+     */
+    public function respondTo($func)
+    {
+        $route      = Router::currentRoute();
+        $controller = $this;
+
+        // Set response content-type
+        $this->response->format($route['extension']);
+
+        return $func($route['extension'], $controller);
+    }
+
+    /**
      * Sets the response to a 404 Not Found
      */
     public function show404()
@@ -165,10 +183,8 @@ class Controller
     {
         $route = Router::currentRoute();
 
-        // Is this a .json request?
-        if ($route['extension'] == 'json') {
+        if ($this->response->contentType !== 'text/html') {
             $this->layout = false;
-            $this->view = "{$this->view}.json";
         }
 
         // Does the view need to be rendered?
