@@ -188,7 +188,7 @@ class Model
 
                     // If the only thing in the data array is the relationships
                     // primary key, don't bother.
-                    if (count($data) == 1 and isset($data[$relation['primaryKey']])) {
+                    if (count($data) == 1 and isset($data[$relation['localKey']])) {
                         continue;
                     }
                     // Create the relations model
@@ -326,7 +326,7 @@ class Model
 
             $query->join(
                 array($relationInfo['table'], $relationInfo['join_alias']),
-                "`{$relationInfo['join_alias']}`.`{$relationInfo['primaryKey']}` = `" . static::table() . "`.`{$relationInfo['foreignKey']}`",
+                "`{$relationInfo['join_alias']}`.`{$relationInfo['foreignKey']}` = `" . static::table() . "`.`{$relationInfo['localKey']}`",
                 $relationInfo['columns']
             );
         }
@@ -343,7 +343,7 @@ class Model
      *
      * @return array
      */
-    protected static function getRelationInfo($name, $relation)
+    protected static function getRelationInfo($name, $relation, $type = 'belongsTo')
     {
         // Current models class
         $class = new \ReflectionClass(get_called_class());
@@ -378,19 +378,30 @@ class Model
         $model = new \ReflectionClass($relation['model']);
         $relation['class'] = $model->getShortName();
 
-        // Primary key
-        if (!isset($relation['primaryKey'])) {
-            $relation['primaryKey'] = $relation['model']::primaryKey();
-        }
-
         // Table
         if (!isset($relation['table'])) {
             $relation['table'] = $relation['model']::table();
         }
 
-        // Foreign key
-        if (!isset($relation['foreignKey'])) {
-            $relation['foreignKey'] = Inflector::foreignKey($relation['class']);
+        // Belongs to relationship
+        if ($type == 'belongsTo') {
+            if (!isset($relation['localKey'])) {
+                $relation['localKey'] = Inflector::foreignKey($relation['class']);
+            }
+
+            if (!isset($relation['foreignKey'])) {
+                $relation['foreignKey'] = $relation['model']::primaryKey();
+            }
+        }
+        // Has many relationship
+        else if ($type == 'hasMany') {
+            if (!isset($relation['localKey'])) {
+                $relation['localKey'] = static::primaryKey();
+            }
+
+            if (!isset($relation['foreignKey'])) {
+                $relation['foreignKey'] = Inflector::foreignKey(static::table());;
+            }
         }
 
         // Columns
@@ -632,11 +643,11 @@ class Model
             // Make sure we don't override anything
             if (!isset($this->{$relation})) {
                 // Get relation info
-                $info = static::getRelationInfo($relation, $options);
+                $info = static::getRelationInfo($relation, $options, 'hasMany');
 
                 // Set relation
                 $this->{$relation} = $info['model']::select()
-                    ->where(Inflector::foreignKey(static::table()) . " = ?", $this->{static::$_primaryKey})
+                    ->where("{$info['foreignKey']} = ?", $this->{$info['localKey']})
                     ->mergeNextWhere();
             }
         }
@@ -655,7 +666,9 @@ class Model
                 $info = static::getRelationInfo($relation, $options);
 
                 // Set relation
-                $this->{$relation} = $info['model']::select()->where($info['primaryKey'] . " = ?", $this->{$info['foreignKey']})->fetch();
+                $this->{$relation} = $info['model']::select()
+                    ->where($info['foreignKey'] . " = ?", $this->{$info['localKey']})
+                    ->fetch();
             }
         }
     }
