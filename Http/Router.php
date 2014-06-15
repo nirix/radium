@@ -183,7 +183,7 @@ class Router
 
         // No matches, try 404 route
         if (isset(static::$routes['404'])) {
-            return static::setRoute(static::$routes['404']);
+            return static::set404();
         }
         // No 404 route, Exception time! FUN :D
         else {
