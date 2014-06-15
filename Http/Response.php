@@ -43,6 +43,11 @@ class Response
      */
     public $body;
 
+    /**
+     * Response content-type.
+     */
+    public $contentType = 'text/html';
+
     public function __construct($response = null)
     {
         // Anonymous function to configure the response block-style.
@@ -56,12 +61,33 @@ class Response
     }
 
     /**
+     * Takes a file extension and sets the content-type.
+     *
+     * @param string $format
+     */
+    public function format($format)
+    {
+        switch ($format) {
+            case 'html':
+                $this->contentType = 'text/html';
+                break;
+
+            case 'json':
+                $this->contentType = 'application/json';
+                break;
+        }
+    }
+
+    /**
      * Sends the response to the browser.
      */
     public function send()
     {
         // Set response code
         $this->setResponseCode();
+
+        // Set content-type
+        header("Content-Type: {$this->contentType}");
 
         // Print the content
         print($this->body);
