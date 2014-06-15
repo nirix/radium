@@ -39,7 +39,8 @@ class Request
     public static $uri;
     public static $method;
     public static $request = array();
-    public static $post = array();
+    public static $get     = array();
+    public static $post    = array();
     public static $scheme;
     public static $host;
     public static $query;
@@ -76,6 +77,9 @@ class Request
 
         // _REQUEST
         static::$request = $_REQUEST;
+
+        // _GET
+        static::$get = $_GET;
 
         // _POST
         static::$post = $_POST;
