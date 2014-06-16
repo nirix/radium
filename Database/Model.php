@@ -567,10 +567,6 @@ class Model
      */
     public function hasMany($model, $options = array())
     {
-        if (isset($this->_relationsCache[$model])) {
-            return $this->_relationsCache[$model];
-        }
-
         $options = array_merge(
             static::getRelationInfo($model, $options),
             $options
@@ -584,7 +580,7 @@ class Model
             $options['foreignKey'] = Inflector::foreignKey(static::table());
         }
 
-        return $this->_relationsCache[$model] = $options['model']::select()
+        return $options['model']::select()
             ->where("{$options['foreignKey']} = ?", $this->{$options['localKey']})
             ->mergeNextWhere();
     }
