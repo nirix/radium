@@ -108,6 +108,20 @@ class Model
     protected static $_after = array();
 
     /**
+     * Belongs-to relationships.
+     *
+     * @var array
+     */
+    protected static $_belongsTo = array();
+
+    /**
+     * Has-many relationships.
+     *
+     * @var array
+     */
+    protected static $_hasMany = array();
+
+    /**
      * Cached relationship objects.
      *
      * @var array
@@ -521,6 +535,40 @@ class Model
         $info['class'] = $model->getShortName();
 
         return $info;
+    }
+
+    /**
+     * We'll use this to handle relationships.
+     *
+     * @param string $method
+     * @param array  $arguments
+     *
+     * @throws BadMethodCallException if no relationship is found.
+     *
+     * @return mixed
+     */
+    public function __call($method, array $arguments = array())
+    {
+        if (isset($this->_relationsCache[$method])) {
+            return $this->_relationsCache[$method];
+        }
+
+        // Belongs-to relationships
+        if (isset(static::$_belongsTo[$method])) {
+            return $this->_relationsCache[$method] = $this->belongsTo($method, static::$_belongsTo[$method]);
+        } else if (in_array($method, static::$_belongsTo)) {
+            return $this->_relationsCache[$method] = $this->belongsTo($method);
+        }
+
+        // Has-many relationships
+        if (isset(static::$_hasMany[$method])) {
+            return $this->hasMany($method, static::$_hasMany[$method]);
+        } else if (in_array($method, static::$_hasMany)) {
+            return $this->hasMany($method);
+        }
+
+        // Mad method call
+        throw new \BadMethodCallException;
     }
 
     /**
