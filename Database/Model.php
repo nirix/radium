@@ -1,7 +1,7 @@
 <?php
 /*!
  * Radium
- * Copyright (C) 2011-2013 Jack P.
+ * Copyright (C) 2011-2014 Jack P.
  * https://github.com/nirix
  *
  * This file is part of Radium.
@@ -491,15 +491,13 @@ class Model
      * Returns an array containing information about the
      * relation.
      *
-     * @param string $name     Relation name
-     * @param array  $relation Relation info
+     * @param string $name Relation name
+     * @param array  $info Relation info
      *
      * @return array
      */
-    public static function getRelationInfo($name, $options = array())
+    public static function getRelationInfo($name, $info = array())
     {
-        $info = array();
-
         // Get current models namespace
         $class = new \ReflectionClass(get_called_class());
         $namespace = $class->getNamespaceName();
@@ -515,7 +513,7 @@ class Model
 
         // Set model namespace
         if (strpos($info['model'], '\\') === false) {
-            $info['model'] = "\\{$namespace}\\" . $info['model'];
+            $info['model'] = "\\{$namespace}\\{$info['model']}";
         }
 
         // Class
@@ -539,10 +537,7 @@ class Model
             return $this->_relationsCache[$model];
         }
 
-        $options = array_merge(
-            static::getRelationInfo($model, $options),
-            $options
-        );
+        $options = static::getRelationInfo($model, $options);
 
         if (!isset($options['localKey'])) {
             $options['localKey'] = Inflector::foreignKey($model);
@@ -567,10 +562,7 @@ class Model
      */
     public function hasMany($model, $options = array())
     {
-        $options = array_merge(
-            static::getRelationInfo($model, $options),
-            $options
-        );
+        $options = static::getRelationInfo($model, $options);
 
         if (!isset($options['localKey'])) {
             $options['localKey'] = static::primaryKey();
