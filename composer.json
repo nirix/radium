@@ -1,9 +1,8 @@
 {
     "name": "radium/radium",
     "description": "The Radium framework.",
-    "version": "2.0.0",
     "keywords": ["framework", "radium"],
-    "license": "LGPL-3.0",
+    "license": "Apache-2.0",
     "minimum-stability": "dev",
     "authors": [
         {
