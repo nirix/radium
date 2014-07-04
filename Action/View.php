@@ -125,7 +125,9 @@ class View
      */
     public static function fileName($view)
     {
-        return preg_replace("/^[\w\d]+\/Controllers\/([\w\d\/]+)/", "$1", $view);
+        $path = str_replace('\\', '/', $view);
+        $path = preg_replace("/^[\w\d]+\/Controllers\/([\w\d\/]+)/", "$1", $path);
+        return str_replace('/', DIRECTORY_SEPARATOR, $path);
     }
 
     /**
@@ -137,18 +139,15 @@ class View
      */
     public static function filePath($view)
     {
-        $searchPaths   = static::$searchPaths;
-        $searchPaths[] = str_replace("Controllers", "Views", Loader::vendorDirectory() . "/{$view}");
-
-        // Strip `VendorName\Controllers` from the view
-        $view = static::fileName($view);
+        $searchPaths = static::$searchPaths;
 
         // Loop over search paths
         foreach ($searchPaths as $path) {
             foreach (static::$extensions as $ext) {
-                if ($filePath = "{$path}.{$ext}" and file_exists($filePath)) {
-                    return $filePath;
-                } elseif ($filePath = "{$path}/{$view}.{$ext}" and file_exists($filePath)) {
+                $fileName = static::fileName("{$view}.{$ext}");
+                $filePath = "{$path}/{$fileName}";
+
+                if (file_exists($filePath)) {
                     return $filePath;
                 }
             }
