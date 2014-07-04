@@ -69,9 +69,11 @@ class View
         $filePath = static::filePath($view);
 
         if (!$filePath) {
+            $fileName = static::fileName($view);
+
             $error = array(
-                "Unable to load view for '{$view}'<br>",
-                "Search paths:<br>",
+                "Unable to load view for '{$fileName}'<br>",
+                "Searched in:<br>",
                 "<pre>"
             );
 
