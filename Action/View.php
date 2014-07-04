@@ -117,6 +117,18 @@ class View
     }
 
     /**
+     * Convert to filename format and strip `Vendor\Controllers`.
+     *
+     * @param string $view
+     *
+     * @return string
+     */
+    public static function fileName($view)
+    {
+        return preg_replace("/^[\w\d]+\/Controllers\/([\w\d\/]+)/", "$1", $view);
+    }
+
+    /**
      * Searches for the view in the registered search paths.
      *
      * @param string $view View to render.
@@ -129,7 +141,7 @@ class View
         $searchPaths[] = str_replace("Controllers", "Views", Loader::vendorDirectory() . "/{$view}");
 
         // Strip `VendorName\Controllers` from the view
-        $view = preg_replace("/^[\w\d]+\/Controllers\/([\w\d\/]+)/", "$1", $view);
+        $view = static::fileName($view);
 
         // Loop over search paths
         foreach ($searchPaths as $path) {
