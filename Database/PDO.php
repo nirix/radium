@@ -195,6 +195,18 @@ class PDO extends Driver
     }
 
     /**
+     * Retrieve a database connection attribute.
+     *
+     * @param integer $attribute
+     *
+     * @return mixed
+     */
+    public function getAttribute($attribute)
+    {
+        return $this->connection->getAttribute($attribute);
+    }
+
+    /**
      * Returns the number of queries that
      * have been executed.
      *
