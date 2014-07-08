@@ -119,7 +119,7 @@ class Controller
      */
     public function redirectTo($path)
     {
-        Request::redirectTo($pat);
+        Request::redirectTo($path);
     }
 
     /**
