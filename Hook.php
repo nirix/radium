@@ -34,7 +34,7 @@ class Hook
      * Adds a plugin to the library
      *
      * @param string $class
-     * @param mixed $plugin String of the function or array of the class and method.
+     * @param mixed  $plugin String of the function or array of the class and method.
      */
     public static function add($hook, $plugin)
     {
@@ -51,18 +51,13 @@ class Hook
      * Executes a hook
      *
      * @param string $hook
-     * @param array $params Parameters to be passed to the plugins method.
+     * @param array  $params Parameters to be passed to the plugins method.
      */
-    public static function run($hook, $params = array())
+    public static function run($hook, array $params = array())
     {
         // Make sure the hook index exists
         if (!isset(static::$plugins[$hook])) {
             return false;
-        }
-
-        // Make sure $params is an array
-        if (!is_array($params)) {
-            throw new Exception('Parameters to be passed to plugin methods need to be wrapped in an array.');
         }
 
         // Run the hook
