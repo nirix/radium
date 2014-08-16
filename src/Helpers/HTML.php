@@ -93,6 +93,19 @@ class HTML
     }
 
     /**
+     * Returns the code for an image.
+     *
+     * @param string $url
+     * @param array  $attributes Element attributes
+     */
+    public static function image($url, array $attributes = array())
+    {
+        $attributes['src'] = $url;
+        $attributes = static::buildAttributes($attributes);
+        return "<img {$attributes}>";
+    }
+
+    /**
      * Returns the code for a link unless the current request matches the URL.
      *
      * @param string $label   The label
