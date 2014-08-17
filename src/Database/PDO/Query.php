@@ -298,6 +298,23 @@ class Query
     }
 
     /**
+     * Allows us to trick PHP into letting us use the `and` and `or` keywords as
+     * functions.
+     *
+     * @param string $method
+     * @param mixed  $args
+     */
+    public function __call($method, $args = null)
+    {
+        if ($method === 'and' or $method === 'or') {
+            return call_user_func_array(array($this, "_{$method}"), $args);
+        }
+
+        // I seem to have fallen and can't get up.
+        throw new \BadMethodCallException;
+    }
+
+    /**
      * Limits the query rows.
      *
      * @param integer $from
