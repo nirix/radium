@@ -609,6 +609,8 @@ class Query
             return $this->connection()->quote(gmdate("Y-m-d H:i:s"));
         } elseif ($value === "NULL") {
             return 'NULL';
+        } elseif (is_array($value)) {
+            return $this->connection()->quote(json_encode($value));
         } else {
             return $this->connection()->quote($value);
         }
