@@ -100,8 +100,12 @@ class HTML
      */
     public static function image($url, array $attributes = array())
     {
-        $attributes['src'] = $url;
-        $attributes = static::buildAttributes($attributes);
+        $defaults = array(
+            'src' => $url,
+            'alt' => ''
+        );
+
+        $attributes = static::buildAttributes($attributes + $defaults);
         return "<img {$attributes}>";
     }
 
