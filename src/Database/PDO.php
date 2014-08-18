@@ -185,6 +185,24 @@ class PDO extends Driver
     }
 
     /**
+     * Checks if the table exists.
+     *
+     * @param string $table
+     *
+     * @return boolean
+     */
+    public function tableExists($table)
+    {
+        try {
+            $result = $this->query("SELECT 1 FROM `{$table}` LIMIT 1");
+        } catch (\Exception $e) {
+            return false;
+        }
+
+        return $result !== false;
+    }
+
+    /**
      * Returns the ID of the last inserted row.
      *
      * @return integer
