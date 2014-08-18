@@ -13,6 +13,9 @@
     "require": {
         "php": ">=5.3.0"
     },
+    "suggest": {
+        "radium/schema-builder": "Easily manage database schema."
+    },
     "autoload": {
         "psr-4": {
             "Radium\\": "src/"
