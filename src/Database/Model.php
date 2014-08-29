@@ -19,115 +19,30 @@
 namespace Radium\Database;
 
 use Radium\Database;
-use Radium\Database\Validations;
-use Radium\Helpers\Time;
-use Radium\Util\Inflector;
-use Radium\Core\Hook;
-use Radium\Language;
-
+use Radium\Database\Model\Base;
+use Radium\Database\Model\Errors;
+use Radium\Database\Model\Filterable;
 use Radium\Database\Model\Relatable;
+use Radium\Database\Model\Validatable;
+use Radium\Database\Validations;
+use Radium\Hook;
+use Radium\Language;
+use Radium\Util\Inflector;
 
 /**
  * Database Model class
  *
- * @package Avalon
- * @subpackage Database
+ * @package Radium\Database
  * @since 0.1
  * @author Jack P. <nrx@nirix.net>
  * @copyright Copyright (c) Jack P.
  */
-class Model
+class Model extends Base
 {
+    use Errors;
+    use Filterable;
     use Relatable;
-
-    /**
-     * Table name.
-     *
-     * @var string
-     */
-    protected static $_table;
-
-    /**
-     * Primary key field, uses `id` by default.
-     *
-     * @var string
-     */
-    protected static $_primaryKey = 'id';
-
-    /**
-     * Field validations.
-     *
-     * @example
-     *  $_validates = [
-     *      'username' => ['unique' => true, 'maxLength' => 20] // Unique and max 20 characters
-     *  ];
-     *
-     * @var array
-     */
-    protected static $_validates = array();
-
-    /**
-     * Model errors.
-     *
-     * @var array
-     */
-    protected $errors = array();
-
-    /**
-     * Name of the connection name if not the default one.
-     *
-     * @var string
-     */
-    protected static $_connectionName = 'default';
-
-    /**
-     * Is new row?
-     *
-     * @var boolean
-     */
-    protected $_isNew;
-
-    /**
-     * Table schema.
-     *
-     * @var array
-     */
-    protected static $_schema = array();
-
-    /**
-     * Filters to process data before certain events.
-     *
-     * @var array
-     */
-    protected static $_before = array();
-
-    /**
-     * Filters to process data after certain events.
-     *
-     * @var array
-     */
-    protected static $_after = array();
-
-    /**
-     * Belongs-to relationships.
-     *
-     * @var array
-     */
-    protected static $_belongsTo = array();
-
-    /**
-     * Has-many relationships.
-     *
-     * @var array
-     */
-    protected static $_hasMany = array();
-
-    /**
-     * Cached relationship objects.
-     *
-     * @var array
-     */
-    protected $_relationsCache = array();
+    use Validatable;
 
     /**
      * Model constructor.
@@ -135,10 +50,9 @@ class Model
      * @param array $data
      * @param bool  $isNew
      */
-    public function __construct(array $data = array(), $isNew = true)
+    public function __construct(array $data = [], $isNew = true)
     {
-        // Set isNew
-        $this->_isNew = $isNew;
+        parent::__construct($data, $isNew);
 
         // Set defaults
         foreach (static::schema() as $field => $properties) {
@@ -150,16 +64,6 @@ class Model
             $this->{$column} = $value;
         }
 
-        // Run stuff for rows fetched from the database.
-        if (!$isNew) {
-            // Convert timestamps to local
-            foreach (array('created_at', 'updated_at') as $timestamp) {
-                if (array_key_exists($timestamp, $data) and $this->{$timestamp} !== null) {
-                    $this->{$timestamp} = Time::gmtToLocal($this->{$timestamp});
-                }
-            }
-        }
-
         // Add filters
         foreach (array('create', 'save') as $action) {
             if (!array_key_exists($action, static::$_before)) {
@@ -167,15 +71,10 @@ class Model
             }
         }
 
-        // Add before create filters
-        if (!in_array('beforeCreateTimestamps', static::$_before['create'])) {
-            static::$_before['create'][] = 'beforeCreateTimestamps';
-        }
-
-        // Add before save filters
-        if (!in_array('beforeSaveTimestamps', static::$_before['save'])) {
-            static::$_before['save'][] = 'beforeSaveTimestamps';
-        }
+        // Add timestamp filters
+        $this->addBeforeFilter('create', 'setCreatedAt');
+        $this->addBeforeFilter('save', 'setUpdatedAt');
+        $this->addAfterFilter('construct', 'timestampsToLocal');
 
         // Run filters
         $this->runFilters('after', 'construct');
@@ -270,16 +169,6 @@ class Model
     }
 
     /**
-     * Returns the models primary key.
-     *
-     * @return string
-     */
-    public static function primaryKey()
-    {
-        return static::$_primaryKey;
-    }
-
-    /**
      * Returns the models table.
      *
      * @return string
@@ -288,36 +177,6 @@ class Model
     {
         $class = new \ReflectionClass(get_called_class());
         return static::$_table !== null ? static::$_table : Inflector::tablise($class->getShortName());
-    }
-
-    /**
-     * Runs the filters for the specified action.
-     *
-     * @param string $action
-     */
-    protected function runFilters($when, $action)
-    {
-        $when = "_{$when}";
-        $filters = static::${$when};
-
-        // Anything to do?
-        if (array_key_exists($action, $filters)) {
-            foreach ($filters[$action] as $method) {
-                $this->{$method}();
-            }
-        }
-    }
-
-    /**
-     * Updates the model attributes.
-     *
-     * @param array $attributes
-     */
-    public function set($attributes)
-    {
-        foreach ($attributes as $column => $value) {
-            $this->{$column} = $value;
-        }
     }
 
     /**
@@ -334,81 +193,6 @@ class Model
             }
         }
         return $data;
-    }
-
-    /**
-     * Returns the errors array.
-     *
-     * @return array
-     */
-    public function errors()
-    {
-        return $this->errors;
-    }
-
-    /**
-     * Returns the models errors with proper messages.
-     *
-     * @return array
-     */
-    public function errorMessages()
-    {
-        $messages = array();
-
-        // Loop over each field
-        foreach ($this->errors as $field => $errors) {
-            $messages[$field] = array();
-
-            // Loop over the fields errors
-            foreach ($errors as $validation => $error) {
-                $vars = array_merge(
-                    array('field' => Language::translate($field)),
-                    $error
-                );
-                unset($vars['message']);
-                $messages[$field][] = Language::translate($error['message'], $vars);
-            }
-        }
-
-        return $messages;
-    }
-
-    /**
-     * Adds an error for the specified field.
-     *
-     * @param string $field
-     * @param string $message
-     */
-    public function addError($field, $validation, $data)
-    {
-        if (!isset($this->errors[$field])) {
-            $this->errors[$field] = array();
-        }
-
-        $this->errors[$field][$validation] = $data;
-    }
-
-    /**
-     * Validates the model data.
-     *
-     * @param array $data
-     *
-     * @return boolean
-     */
-    public function validates($data = null)
-    {
-        $this->errors = array();
-
-        // Get data if it wasn't passed
-        if ($data === null) {
-            $data = $this->data();
-        }
-
-        foreach (static::$_validates as $field => $validations) {
-            Validations::run($this, $field, $validations);
-        }
-
-        return count($this->errors) == 0;
     }
 
     /**
@@ -474,32 +258,6 @@ class Model
         }
 
         return $result;
-    }
-
-    /**
-     * Set the created_at value.
-     */
-    protected function beforeCreateTimestamps()
-    {
-        if (!isset($this->created_at)) {
-            $this->created_at = 'NOW()';
-        }
-    }
-
-    /**
-     * Set the updated_at value.
-     */
-    protected function beforeSaveTimestamps()
-    {
-        // Convert created_at back to GMT for saving
-        if (isset($this->created_at)) {
-            $this->created_at = Time::localToGmt($this->created_at);
-        }
-
-        // Set updated at
-        if (!isset($this->updated_at) or $this->updated_at === null) {
-            $this->updated_at = 'NOW()';
-        }
     }
 
     /**
