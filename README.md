@@ -1,7 +1,7 @@
 Radium
 ======
 
-Radium is a PHP 5.3+ framework and is the future of the [Avalon][1] framework.
+Radium is a PHP 5.4+ framework and is the future of the [Avalon][1] framework.
 
 License
 -------
