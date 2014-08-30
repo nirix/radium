@@ -18,7 +18,6 @@
 
 namespace Radium\Action;
 
-use Radium\Loader;
 use Radium\Error;
 use Radium\Language;
 

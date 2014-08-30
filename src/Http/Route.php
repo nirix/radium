@@ -18,7 +18,6 @@
 
 namespace Radium\Http;
 
-use Radium\Loader;
 
 /**
  * Route class.
