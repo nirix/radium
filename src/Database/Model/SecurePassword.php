@@ -29,6 +29,9 @@ use Radium\Hook;
  */
 trait SecurePassword
 {
+    /**
+     * Crypts the users password.
+     */
     public function preparePassword()
     {
         $this->{$this->securePasswordField} = crypt(
@@ -37,8 +40,26 @@ trait SecurePassword
         );
     }
 
+    /**
+     * Authenticates the password with the users current password.
+     *
+     * @param string $password
+     *
+     * @return boolean
+     */
     public function authenticate($password)
     {
         return $this->password === crypt($password, $this->password);
+    }
+
+    /**
+     * Sets and crypts the new password.
+     *
+     * @param string $newPassword
+     */
+    public function setPassword($newPassword)
+    {
+        $this->password = $newPassword;
+        $this->preparePassword();
     }
 }
