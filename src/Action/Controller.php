@@ -18,6 +18,7 @@
 
 namespace Radium\Action;
 
+use ReflectionClass;
 use Radium\Kernel;
 use Radium\Http\Router;
 use Radium\Http\Request;
@@ -49,6 +50,12 @@ class Controller
      * Whether or not to execute the routed action.
      */
     public $executeAction = true;
+
+    /**
+     * Before and after filters.
+     */
+    protected $before = ['*' => []];
+    protected $after  = ['*' => []];
 
     /**
      * Sets the request, route, database, view and response variables.
@@ -156,10 +163,9 @@ class Controller
      *
      * @return array
      */
-    public function filtersBefore() {
-        return array(
-            '*' => array()
-        );
+    public function filtersBefore()
+    {
+        return $this->allPropertyDefaults()['before'];
     }
 
     /**
@@ -167,11 +173,32 @@ class Controller
      *
      * @return array
      */
-    public function filtersAfter() {
-        return array(
-            '*' => array()
-        );
+    public function filtersAfter()
+    {
+        return $this->allPropertyDefaults()['after'];
     }
+
+    /**
+     * Gets all properties, including herited, with their default values.
+     *
+     * @return array
+     */
+     protected function allPropertyDefaults()
+     {
+         $class = new ReflectionClass($this);
+
+         $properties = $class->getDefaultProperties();
+
+         while ($parent = $class->getParentClass()) {
+             $properties = array_merge_recursive(
+                 $parent->getDefaultProperties(), $properties
+             );
+
+             $class = $parent->getParentClass();
+         }
+
+         return $properties;
+     }
 
     /**
      * Renders the view and layout then sends the response.
