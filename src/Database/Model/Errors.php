@@ -18,6 +18,7 @@
 
 namespace Radium\Database\Model;
 
+use Radium\Language;
 use Radium\Util\Inflector;
 
 /**
