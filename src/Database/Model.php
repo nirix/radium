@@ -24,7 +24,6 @@ use Radium\Database\Model\Errors;
 use Radium\Database\Model\Filterable;
 use Radium\Database\Model\Relatable;
 use Radium\Database\Model\Validatable;
-use Radium\Database\Validations;
 use Radium\Hook;
 use Radium\Language;
 use Radium\Util\Inflector;

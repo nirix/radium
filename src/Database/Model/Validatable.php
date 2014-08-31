@@ -18,6 +18,7 @@
 
 namespace Radium\Database\Model;
 
+use Radium\Database\Validations;
 use Radium\Util\Inflector;
 
 /**
