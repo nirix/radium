@@ -165,7 +165,7 @@ class Controller
      */
     public function filtersBefore()
     {
-        return $this->allPropertyDefaults()['before'];
+        return $this->getFilters()['before'];
     }
 
     /**
@@ -175,7 +175,7 @@ class Controller
      */
     public function filtersAfter()
     {
-        return $this->allPropertyDefaults()['after'];
+        return $this->getFilters()['after'];
     }
 
     /**
@@ -183,22 +183,29 @@ class Controller
      *
      * @return array
      */
-     protected function allPropertyDefaults()
-     {
-         $class = new ReflectionClass($this);
+    protected function getFilters()
+    {
+        $parents    = class_parents($this);
+        $properties = [
+            'before' => $this->before,
+            'after'  => $this->after
+        ];
 
-         $properties = $class->getDefaultProperties();
+        foreach ($parents as $parent) {
+            $class = new ReflectionClass($parent);
+            $defaults = $class->getDefaultProperties();
 
-         while ($parent = $class->getParentClass()) {
-             $properties = array_merge_recursive(
-                 $parent->getDefaultProperties(), $properties
-             );
+            $properties['before'] = array_merge_recursive(
+                $defaults['before'], $properties['before']
+            );
 
-             $class = $parent->getParentClass();
-         }
+            $properties['after'] = array_merge_recursive(
+                $defaults['after'], $properties['after']
+            );
+        }
 
-         return $properties;
-     }
+        return $properties;
+    }
 
     /**
      * Renders the view and layout then sends the response.
