@@ -20,6 +20,7 @@ namespace Radium\Action;
 
 use ReflectionClass;
 use Radium\Kernel;
+use Radium\Error;
 use Radium\Http\Router;
 use Radium\Http\Request;
 use Radium\Http\Response;
@@ -209,25 +210,44 @@ class Controller
 
     /**
      * Renders the view and layout then sends the response.
+     *
+     * @param mixed $response Response from the routed method
      */
-    public function __shutdown()
+    public function __shutdown($response = null)
     {
         $route = Router::currentRoute();
 
-        if ($this->response->contentType !== 'text/html') {
-            $this->layout = false;
+        // Object that response to the `send` method.
+        if (is_object($response)) {
+            if (!method_exists($response, 'send')) {
+                Error::halt("Controller Error", "The object returned from the route does not contain a 'send' method.");
+            }
+
+            $this->response = $response;
+        }
+
+        // If the response isn't null and not an object add it to the responses body.
+        if ($response !== null && !is_object($response)) {
+            $this->response->body = $response;
         }
 
         // Does the view need to be rendered?
-        if ($this->response->body === null and $this->executeAction and $this->view) {
-            $this->response->body = $this->render($this->view);
+        if ($response === null) {
+            if ($this->response->body === null and $this->executeAction and $this->view) {
+                $this->response->body = $this->render($this->view);
+            }
+        }
+
+        // Don't render the layout if the content type isn't HTML
+        if ($this->response->contentType !== 'text/html') {
+            $this->layout = false;
         }
 
         // Render the layout
         if ($this->layout) {
             $this->response->body = $this->render(
                 "Layouts/{$this->layout}",
-                array('content' => $this->response->body)
+                ['content' => $this->response->body]
             );
         }
 

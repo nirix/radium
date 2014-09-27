@@ -66,20 +66,8 @@ class Kernel
         // Run after filters
         static::runFilters($route['method'], static::$controller->filtersAfter());
 
-        // If the action returned something, pass it back to the application
-        if ($response !== null) {
-            // Response object
-            if (is_object($response)) {
-                static::$controller->response = $response;
-            }
-            // Plain text
-            else {
-                static::$controller->response->body = $response;
-            }
-        }
-
         // Shutdown the controller
-        static::$controller->__shutdown();
+        static::$controller->__shutdown($response);
     }
 
     /**
