@@ -35,6 +35,12 @@ class Router
     // Current route
     protected static $currentRoute;
 
+    public static $controller;
+    public static $method;
+    public static $params;
+    public static $args;
+    public static $extension;
+
     // Registered routes
     protected static $routes = array();
 
@@ -246,6 +252,12 @@ class Router
         if ($info['extension'][0] == '.') {
             $info['extension'] = substr($info['extension'], 1);
         }
+
+        static::$controller = $info['controller'];
+        static::$method     = $info['method'];
+        static::$params     = $info['params'];
+        static::$args       = $info['args'];
+        static::$extension  = $info['extension'];
 
         return static::$currentRoute = $info;
     }
