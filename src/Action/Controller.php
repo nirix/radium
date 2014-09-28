@@ -139,13 +139,12 @@ class Controller
      */
     public function respondTo($func)
     {
-        $route      = Router::currentRoute();
-        $controller = $this;
+        $route = Router::currentRoute();
 
         // Set response content-type
         $this->response->format($route['extension']);
 
-        return $func($route['extension'], $controller);
+        return $func($route['extension'], $this);
     }
 
     /**
