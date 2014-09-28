@@ -152,9 +152,10 @@ class Controller
      */
     public function show404()
     {
-        $this->setView("Errors/404");
+        $this->executeAction = false;
         return $this->response = new Response(function($resp){
             $resp->status = 404;
+            $resp->body   = $this->render('Errors/404');
         });
     }
 
