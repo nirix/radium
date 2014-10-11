@@ -36,7 +36,7 @@ trait SecurePassword
     {
         $this->{$this->securePasswordField} = crypt(
             $this->{$this->securePasswordField},
-            '$2a$10$' . sha1(microtime() . $this->username . $this->email) . '$'
+            '$2y$10$' . sha1(microtime() . $this->username . $this->email) . '$'
         );
     }
 
