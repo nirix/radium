@@ -18,6 +18,7 @@
 
 namespace Radium;
 
+use Exception;
 use Radium\Database;
 use Radium\Action\View;
 
@@ -82,7 +83,7 @@ class Application
         if (file_exists($routesFile)) {
             require $routesFile;
         } else {
-            Error::halt("Unable to load routes.");
+            throw new Exception("Unable to load routes.");
         }
     }
 
@@ -99,7 +100,7 @@ class Application
         if (file_exists($configPath)) {
             $this->databaseConfig = require $configPath;
         } else {
-            Error::halt("Unable to load database configuration.");
+            throw new Exception("Unable to load database configuration.");
         }
     }
 
