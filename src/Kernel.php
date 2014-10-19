@@ -27,8 +27,7 @@ use Radium\Http\Response;
  *
  * @since 0.1
  * @package Radium
- * @author Jack P.
- * @copyright (C) Jack P.
+ * @author Jack Polgar <jack@polgar.id.au>
  */
 class Kernel
 {
