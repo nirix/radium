@@ -159,7 +159,7 @@ class Pagination
                 if ($this->prevPage != 1) {
                     $this->prevPageUri = $this->createUri($this->prevPage);
                 } else {
-                    $this->prevPageUri = Request::$uri;
+                    $this->prevPageUri = Request::pathInfo();
                 }
             }
 
@@ -181,7 +181,7 @@ class Pagination
         $queryString[] = "page={$page}";
         $queryString   = implode('&', $queryString);
 
-        return Request::$uri . "?{$queryString}";
+        return Request::pathInfo() . "?{$queryString}";
     }
 
     /**
