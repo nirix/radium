@@ -19,6 +19,7 @@
 namespace Radium;
 
 use Exception;
+use ReflectionObject;
 use Radium\Database;
 use Radium\Action\View;
 
@@ -49,7 +50,7 @@ class Application
      * Connects to the database and loads the routes.
      */
     public function __construct() {
-        $classInfo   = new \ReflectionObject($this);
+        $classInfo   = new ReflectionObject($this);
         $this->path  = dirname($classInfo->getFilename());
 
         // Load the database configuration and connect
