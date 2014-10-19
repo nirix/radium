@@ -27,19 +27,12 @@ use Radium\Util\Inflector;
  *
  * @since 0.1
  * @package Radium/Http
- * @author Jack P.
- * @copyright (C) Jack P.
+ * @author Jack Polgar <jack@polgar.id.au>
  */
 class Router
 {
     // Current route
     protected static $currentRoute;
-
-    public static $controller;
-    public static $method;
-    public static $params;
-    public static $args;
-    public static $extension;
 
     // Registered routes
     protected static $routes = array();
@@ -152,10 +145,10 @@ class Router
      */
     public static function process(Request $request)
     {
-        $uri = "/" . trim($request->uri(), '/');
+        $uri = "/" . trim($request->pathInfo(), '/');
 
         // Check if this is root page
-        if (isset(static::$routes['root']) and $request->uri() == '/') {
+        if (isset(static::$routes['root']) and $request->pathInfo() == '/') {
             return static::setRoute(static::$routes['root']);
         }
 
@@ -178,7 +171,7 @@ class Router
                     }
                 }
 
-                if (in_array($request->method(), $route->method)) {
+                if (in_array(strtolower($request->method()), $route->method)) {
                     return static::setRoute($route);
                 }
             }
@@ -252,12 +245,6 @@ class Router
         if ($info['extension'][0] == '.') {
             $info['extension'] = substr($info['extension'], 1);
         }
-
-        static::$controller = $info['controller'];
-        static::$method     = $info['method'];
-        static::$params     = $info['params'];
-        static::$args       = $info['args'];
-        static::$extension  = $info['extension'];
 
         return static::$currentRoute = $info;
     }

@@ -25,175 +25,213 @@ use Radium\Exception as Exception;
  *
  * @since 0.1
  * @package Radium/Http
- * @author Jack P.
- * @copyright (C) Jack P.
+ * @author Jack Polgar <jack@polgar.id.au>
  */
 class Request
 {
-    protected static $current;
+    /**
+     * @var array
+     */
+    public static $request = [];
 
+    /**
+     * @var array
+     */
+    public static $get = [];
+
+    /**
+     * @var array
+     */
+    public static $post = [];
+
+    /**
+     * @var array
+     */
+    public static $server;
+
+    /**
+     * @var array
+     */
+    public static $files;
+
+    /**
+     * @var array
+     */
+    public static $headers;
+
+    /**
+     * @var string
+     */
+    public static $pathInfo;
+
+    /**
+     * @var string
+     */
     public static $requestUri;
-    public static $uri;
-    public static $method;
-    public static $request = array();
-    public static $get     = array();
-    public static $post    = array();
-    public static $scheme;
-    public static $host;
-    public static $query;
 
-    protected static $requestedWith;
-    protected static $base;
-    protected static $segments = array();
+    /**
+     * @var string
+     */
+    public static $baseUrl;
+
+    /**
+     * @var string
+     */
+    public static $basePath;
+
+    /**
+     * @var string
+     */
+    public static $method;
 
     public function __construct()
     {
-        // Set request scheme
-        static::$scheme = static::isSecure() ? 'https' : 'http';
-
-        // Set host
-        static::$host = strtolower(preg_replace('/:\d+$/', '', trim($_SERVER['SERVER_NAME'])));
-
-        // Set base url
-        static::$base = static::getBaseUrl();
-
-        // Set the request path
-        static::$requestUri = static::getRequestUri();
-
-        // Set relative uri
-        static::$uri = str_replace(static::$base, '', static::$requestUri);
-
-        // Request segments
-        static::$segments = explode('/', trim(static::$uri, '/'));
-
-        // Set the request method
-        static::$method = strtolower($_SERVER['REQUEST_METHOD']);
-
-        // Requested with
-        static::$requestedWith = @$_SERVER['HTTP_X_REQUESTED_WITH'];
-
-        // _REQUEST
         static::$request = $_REQUEST;
+        static::$get     = $_GET;
+        static::$post    = $_POST;
+        static::$server  = $_SERVER;
+        static::$headers = getallheaders();
 
-        // _GET
-        static::$get = $_GET;
-
-        // _POST
-        static::$post = $_POST;
-
-        // Set currnet request
-        static::$current = $this;
-
-        // Query string
-        static::$query = $_SERVER['QUERY_STRING'];
+        static::$requestUri = static::prepareRequestUri();
+        static::$baseUrl    = static::prepareBaseUrl();
+        static::$basePath   = static::prepareBasePath();
+        static::$pathInfo   = static::preparePathInfo();
     }
 
     /**
-     * Returns the URI.
-     *
-     * @return string
+     * @param string $key
+     * @param mixed  $fallback
      */
-    public static function uri()
+    public static function server($key, $fallback = '')
     {
-        return static::$uri;
+        return isset(static::$server[$key]) ? static::$server[$key] : $fallback;
     }
 
     /**
-     * Check if the request matches the specified pattern.
-     *
-     * @param string $pattern
-     *
-     * @return boolean
+     * @param string $key
+     * @param mixed  $fallback
      */
-    public static function matches($pattern)
+    public static function get($key, $fallback = '')
     {
-        if (preg_match("#^{$pattern}?$#", static::$uri)) {
-            return true;
-        }
-        return false;
+        return isset(static::$get[$key]) ? static::$get[$key] : $fallback;
     }
 
     /**
-     * Returns the value of the key from the POST array,
-     * if it's not set, returns null by default.
-     *
-     * @param string $key     Key to get from POST array
-     * @param mixed  $not_set Value to return if not set
-     *
-     * @return mixed
+     * @param string $key
+     * @param mixed  $fallback
      */
-    public static function post($key, $fallback = null)
+    public static function post($key, $fallback = '')
     {
         return isset(static::$post[$key]) ? static::$post[$key] : $fallback;
     }
 
     /**
-     * Gets the URI segment.
-     *
-     * @param integer $segment Segment index
-     *
-     * @return mixed
+     * @param string $key
+     * @param mixed  $fallback
      */
-    public static function seg($segment)
+    public static function header($key, $fallback = '')
     {
-        return (isset(static::$segments[$segment]) ? static::$segments[$segment] : false);
+        return isset(static::$headers[$key]) ? static::$headers[$key] : $fallback;
     }
 
     /**
-     * Redirects to the specified URL.
-     *
-     * @param string $url
-     */
-    public static function redirect($url)
-    {
-        header("Location: " . $url);
-        exit;
-    }
-
-    /**
-     * Redirects to the specified path relative to the
-     * entry file.
-     *
-     * @param string $path
-     */
-    public static function redirectTo($path)
-    {
-        static::redirect(static::base($path));
-    }
-
-    /**
-     * Checks if the request was made via Ajax.
-     *
-     * @return boolean
-     */
-    public static function isAjax()
-    {
-        return strtolower(static::$requestedWith) == 'xmlhttprequest';
-    }
-
-    /**
-     * Gets the base URL
-     *
      * @return string
      */
-    public static function base($path = '')
+    public static function schemeAndHttpHost()
     {
-        return static::$base . '/' . trim($path, '/');
+        return static::scheme() . '://' . static::httpHost();
     }
 
     /**
-     * Returns the current request method.
-     *
+     * @return bool
+     */
+    public static function isSecure()
+    {
+        $https = static::server('HTTPS');
+        return !empty($https) && strtolower($https) !== 'off';
+    }
+
+    /**
+     * @return string
+     */
+    public static function scheme()
+    {
+        return static::isSecure() ? 'https' : 'http';
+    }
+
+    /**
+     * @return string
+     */
+    public static function host()
+    {
+        if (!$host = static::header('Host')) {
+            if (!$host = static::server('SERVER_NAME')) {
+                $host = static::server('SERVER_ADDR', '');
+            }
+        }
+
+        $host = strtolower(trim($host));
+        $host = preg_replace('/:\d+$/', '', $host);
+
+        return $host;
+    }
+
+    /**
+     * @return integer
+     */
+    public static function port()
+    {
+        if ($host = static::header('Host')) {
+            $pos = strpos($host, ':');
+            if ($pos !== false) {
+                return intval(substr($host, $pos + 1));
+            }
+        }
+
+        return static::server('SERVER_PORT');
+    }
+
+    /**
+     * @return string
+     */
+    public static function httpHost()
+    {
+        $scheme = static::scheme();
+        $host   = static::host();
+        $port   = static::port();
+
+        if (($scheme == 'http' && $port == 80) || ($scheme == 'https' && $port == 443)) {
+            return $host;
+        }
+
+        return $host . ':' . $port;
+    }
+
+    /**
      * @return string
      */
     public static function method()
     {
-        return static::$method;
+        return static::$server['REQUEST_METHOD'];
     }
 
     /**
-     * Returns the current requested URI.
-     *
+     * @return string
+     */
+    public static function basePath($append = null)
+    {
+        return static::$basePath . ($append ? '/' . ltrim($append, '/') : '');
+    }
+
+    /**
+     * @return string
+     */
+    public static function pathInfo()
+    {
+        return static::$pathInfo;
+    }
+
+    /**
      * @return string
      */
     public static function requestUri()
@@ -202,87 +240,123 @@ class Request
     }
 
     /**
-     * Determines if the request is secure.
-     *
-     * @return boolean
+     * @return bool
      */
-    public static function isSecure()
+    public static function matches($path)
     {
-        if (!isset($_SERV['HTTPS']) or empty($_SERVER['HTTPS'])) {
-            return false;
-        }
-
-        return $_SERVER['HTTPS'] == 'on' or $_SERVER['HTTPS'] == 1;
+        return preg_match("#^{$path}$#", static::$pathInfo);
     }
 
     /**
-     * Returns the instantiated request object.
-     *
-     * @return object
-     */
-    public static function current()
-    {
-        return static::$current;
-    }
-
-    /**
-     * Returns the base URI.
-     *
      * @return string
      */
-    protected static function getBaseUrl()
+    protected static function prepareBaseUrl()
     {
-        $filename = basename($_SERVER['SCRIPT_FILENAME']);
+        $fileName = basename(static::$server['SCRIPT_FILENAME']);
 
-        if (basename($_SERVER['SCRIPT_NAME']) === $filename) {
-            $baseUrl = $_SERVER['SCRIPT_NAME'];
-        } elseif (basename($_SERVER['PHP_SELF']) === $filename) {
-            $baseUrl = $_SERVER['PHP_SELF'];
-        } elseif (basename($_SERVER['ORIG_SCRIPT_NAME']) === $filename) {
-            $baseUrl = $_SERVER['ORIG_SCRIPT_NAME'];
+        if ($fileName === basename(static::$server['SCRIPT_NAME'])) {
+            $baseUrl = static::$server['SCRIPT_NAME'];
+        } elseif ($fileName === basename(static::$server['PHP_SELF'])) {
+            $baseUrl = static::$server['PHP_SELF'];
+        } elseif ($fileName === basename(static::$server['ORIG_SCRIPT_NAME'])) {
+            $baseUrl = static::$server['ORIG_SCRIPT_NAME'];
         }
 
-        $baseUrl = rtrim(str_replace($filename, '', $baseUrl), '/');
+        if (strpos($baseUrl, '?') !== false) {
+            $baseUrl = explode('?', $baseUrl)[0];
+        }
 
-        return $baseUrl;
+        return rtrim(str_replace($fileName, '', $baseUrl), '/');
     }
 
     /**
-     * Determines the request URI.
-     *
      * @return string
      */
-    protected static function getRequestUri()
+    protected static function prepareBasePath()
+    {
+        $fileName = basename(static::$server['SCRIPT_FILENAME']);
+        $baseUrl  = static::$baseUrl;
+
+        if (empty($baseUrl)) {
+            return '';
+        }
+
+        if ($fileName === basename($baseUrl)) {
+            $basePath = dirname($baseUrl);
+        } else {
+            $basePath = $baseUrl;
+        }
+
+        if (DIRECTORY_SEPARATOR === '\\') {
+            $basePath = str_replace('\\', '/', $basePath);
+        }
+
+        return rtrim($basePath, '/');
+    }
+
+    /**
+     * @return string
+     */
+    public static function preparePathInfo()
+    {
+        $requestUri = static::$requestUri;
+        $baseUrl    = static::$baseUrl;
+
+        if ($baseUrl === null || $requestUri === null) {
+            return '/';
+        }
+
+        $pathInfo = '/';
+
+        // Remove the query string
+        if ($pos = strpos($requestUri, '?')) {
+            $requestUri = substr($requestUri, 0, $pos);
+        }
+
+        if (false === $pathInfo = substr($requestUri, strlen($baseUrl))) {
+            return $requestUri;
+        }
+
+        return $pathInfo;
+    }
+
+    /**
+     * @return string
+     */
+    protected static function prepareRequestUri()
     {
         $requestUri = '';
 
-        if (isset($_SERVER['HTTP_X_ORIGINAL_URL'])) {
-            $requestUri = $_SERVER['HTTP_X_ORIGINAL_URL'];
-        } elseif (isset($_SERVER['HTTP_X_REWRITE_URL'])) {
-            $requestUri = $_SERVER['HTTP_X_REWRITE_URL'];
-        } elseif (isset($_SERVER['IIS_WasUrlRewritten'])
-                  and $_SERVER['IIS_WasUrlRewritten'] = 1
-                  and isset($_SERVER['UNENCODED_URL'])
-                  and $_SERVER['UNENCODED_URL'] != '')
-        {
-            $requestUri = $_SERVER['UNENCODED_URL'];
-        } elseif (isset($_SERVER['REQUEST_URI'])) {
-            $requestUri = $_SERVER['REQUEST_URI'];
-
-            $schemeAndHost = static::$scheme . '://' . static::$host;
-            if (strpos($requestUri, $schemeAndHost)) {
-                $requestUri = substr($requestUri, strlen($schemeAndHost));
+        // Microsoft IIS Rewrite Module
+        if (isset(static::$headers['X_ORIGINAL_URL'])) {
+            $requestUri = static::$headers['X_ORIGINAL_URL'];
+        }
+        // IIS ISAPI_Rewrite
+        elseif (isset(static::$headers['X_REWRITE_URL'])) {
+            $requestUri = static::$header['X_REWRITE_URL'];
+        }
+        // IIS7 URL Rewrite
+        elseif (static::server('IIS_WasUrlRewritten') == '1' && static::server('UNENCODED_URL') != '') {
+            $requestUri = static::server('UNENCODED_URL');
+        }
+        // HTTP proxy, request URI with scheme, host and port + the URL path
+        elseif (isset(static::$server['REQUEST_URI'])) {
+            $requestUri = static::$server['REQUEST_URI'];
+            $schemeAndHttpHost = static::schemeAndHttpHost();
+            if (strpos($requestUri, $schemeAndHttpHost) === 0) {
+                $requestUri = substr($requestUri, strlen($schemeAndHttpHost));
             }
-        } elseif (isset($_SERVER['ORIG_PATH_INFO'])) {
-            $requestUri = $_SERVER['ORIG_PATH_INFO'];
+        }
+        // IIS 5, PHP as CGI
+        elseif (isset(static::$server['ORIG_PATH_INFO'])) {
+            $requestUri = static::$server['ORIG_PATH_INFO'];
+
+            if (static::$queryString != '') {
+                $requestUri .= '?' . static::$server['ORIG_PATH_INFO'];
+            }
         }
 
-        // Remove query string
-        if (strpos($requestUri, '?') !== false) {
-            $requestUri = explode('?', $requestUri);
-            $requestUri = $requestUri[0];
-        }
-
+        static::$server['REQUEST_URI'] = $requestUri;
         return $requestUri;
     }
 }

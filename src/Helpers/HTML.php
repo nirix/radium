@@ -23,9 +23,8 @@ use Radium\Http\Request;
 /**
  * HTML Helper
  *
- * @author Jack P.
- * @package Radium
- * @subpackage Helpers
+ * @package Radium\Helpers
+ * @author Jack Polgar <jack@polgar.id.au>
  */
 class HTML
 {
@@ -40,7 +39,7 @@ class HTML
     public static function cssLinkTag($href, $media = 'screen')
     {
         if (strpos($href, 'http') === false and strpos($href, '//') === false) {
-            $href = Request::base($href);
+            $href = Request::basePath($href);
         }
         return '<link rel="stylesheet" href="' . $href . '" media="' . $media . '">' . PHP_EOL;
     }
@@ -55,7 +54,7 @@ class HTML
     public static function jsIncTag($path)
     {
         if (strpos($path, 'http') === false and strpos($path, '//') === false) {
-            $path = Request::base($path);
+            $path = Request::basePath($path);
         }
         return '<script src="' . $path . '" type="text/javascript"></script>' . PHP_EOL;
     }
@@ -83,7 +82,7 @@ class HTML
 
         // Is this a local link?
         if (substr($url, 0, 4) != 'http') {
-            $url = Request::base(ltrim($url, '/'));
+            $url = Request::basePath($url);
         }
 
         $attributes['href'] = $url;
