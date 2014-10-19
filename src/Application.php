@@ -37,10 +37,10 @@ class Application
     protected $path;
 
     // Routes file location.
-    protected $routesFile = "Config/Routes.php";
+    protected $routesFile = "config/routes.php";
 
     // Database config file location.
-    protected $databaseConfigFile = "Config/Database.php";
+    protected $databaseConfigFile = "config/database.php";
 
     // Database config array and connection object.
     protected $databaseConfig;
@@ -61,7 +61,7 @@ class Application
         $this->loadRoutes();
 
         // Add views directory
-        View::addSearchPath("{$this->path}/Views");
+        View::addSearchPath("{$this->path}/views");
     }
 
     /**
