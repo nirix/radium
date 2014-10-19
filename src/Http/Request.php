@@ -96,6 +96,7 @@ class Request
         static::$baseUrl    = static::prepareBaseUrl();
         static::$basePath   = static::prepareBasePath();
         static::$pathInfo   = static::preparePathInfo();
+        static::$method     = static::$server['REQUEST_METHOD'];
     }
 
     /**
