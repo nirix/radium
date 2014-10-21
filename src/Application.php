@@ -53,6 +53,8 @@ class Application
         $classInfo   = new ReflectionObject($this);
         $this->path  = dirname($classInfo->getFilename());
 
+        $this->loadEnvironment();
+
         // Load the database configuration and connect
         $this->loadDatabaseConfig();
         $this->connectDatabase();
@@ -123,5 +125,22 @@ class Application
     public function run()
     {
         Kernel::run($this);
+    }
+
+    /**
+     * Loads the environment configuration.
+     */
+    protected function loadEnvironment()
+    {
+        if (file_exists("{$this->path}/config/environment.php")) {
+            require "{$this->path}/config/environment.php";
+        }
+
+        if (getenv('RADIUM_ENV')) {
+            $this->environment = getenv('RADIUM_ENV');
+            if (file_exists("{$this->path}/config/environment/{$this->environment}.php")) {
+                require "{$this->path}/config/environment/{$this->environment}.php";
+            }
+        }
     }
 }
