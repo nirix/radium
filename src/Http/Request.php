@@ -29,6 +29,10 @@ use Radium\Exception as Exception;
  */
 class Request
 {
+    const HTTP_MOVED_PERMANENTLY = 301;
+    const HTTP_FOUND             = 302;
+    const HTTP_SEE_OTHER         = 303;
+
     /**
      * @var array
      */
@@ -133,6 +137,25 @@ class Request
     public static function header($key, $fallback = '')
     {
         return isset(static::$headers[$key]) ? static::$headers[$key] : $fallback;
+    }
+
+    /**
+     * @param string  $url
+     * @param integer $responseCode
+     */
+    public static function redirect($url, $responseCode = Request::HTTP_SEE_OTHER)
+    {
+        header("Location: {$url}", true, $responseCode);
+        exit;
+    }
+
+    /**
+     * @param string  $url
+     * @param integer $responseCode
+     */
+    public static function redirectTo($url, $responseCode = Request::HTTP_SEE_OTHER)
+    {
+        static::redirect(static::basePath($url), $responseCode);
     }
 
     /**
