@@ -46,6 +46,9 @@ class Application
     protected $databaseConfig;
     protected $databaseConnection;
 
+    // Environment
+    protected $environment;
+
     /**
      * Connects to the database and loads the routes.
      */
@@ -136,8 +139,7 @@ class Application
             require "{$this->path}/config/environment.php";
         }
 
-        if (getenv('RADIUM_ENV')) {
-            $this->environment = getenv('RADIUM_ENV');
+        if ($this->environment) {
             if (file_exists("{$this->path}/config/environment/{$this->environment}.php")) {
                 require "{$this->path}/config/environment/{$this->environment}.php";
             }
