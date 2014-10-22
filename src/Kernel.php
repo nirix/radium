@@ -18,6 +18,7 @@
 
 namespace Radium;
 
+use Radium\Action\Controller;
 use Radium\EventDispatcher;
 use Radium\Http\Router;
 use Radium\Http\Request;
@@ -32,7 +33,11 @@ use Radium\Http\Response;
  */
 class Kernel
 {
-    protected static $version = '2.0.0';
+    const VERSION = '2.0.0-dev';
+
+    /**
+     * @var Controller
+     */
     protected static $controller;
 
     /**
