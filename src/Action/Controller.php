@@ -18,6 +18,7 @@
 
 namespace Radium\Action;
 
+use Exception;
 use ReflectionClass;
 use Radium\Kernel;
 use Radium\Error;
@@ -217,7 +218,7 @@ class Controller
         // Object that response to the `send` method.
         if (is_object($response)) {
             if (!method_exists($response, 'send')) {
-                Error::halt("Controller Error", "The object returned from the route does not contain a 'send' method.");
+                throw new Exception("The controller did not return a valid response object");
             }
 
             $this->response = $response;
