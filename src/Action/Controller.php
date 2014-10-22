@@ -21,6 +21,7 @@ namespace Radium\Action;
 use ReflectionClass;
 use Radium\Kernel;
 use Radium\Error;
+use Radium\EventDispatcher;
 use Radium\Http\Router;
 use Radium\Http\Request;
 use Radium\Http\Response;
@@ -53,10 +54,12 @@ class Controller
     public $executeAction = true;
 
     /**
-     * Before and after filters.
+     * Filters
      */
-    protected $before = ['*' => []];
-    protected $after  = ['*' => []];
+    protected $filters = [
+        'before' => ['*' => []],
+        'after'  => ['*' => []]
+    ];
 
     /**
      * Sets the request, route, database, view and response variables.
@@ -160,52 +163,54 @@ class Controller
     }
 
     /**
-     * Filters to run before executing the action.
+     * Add before filter.
      *
-     * @return array
+     * @param string $action
+     * @param mixed  $callback
+     *
+     * @example
+     *     $this->before('create', 'checkPermission'); // calls the controllers `checkPermission` method
+     *     $this->before('create', [$currentUser, 'checkPermission']); // calls `$currentUser->checkPermission()`
+     *     $this->before('create', function(){
+     *         // Calls the closure / anonymous function
+     *     });
      */
-    public function filtersBefore()
+    protected function before($action, $callback)
     {
-        return $this->getFilters()['before'];
+        $this->addFilter('before', $action, $callback);
     }
 
     /**
-     * Filters to run after executing the action.
+     * Add before filter.
      *
-     * @return array
+     * @param string $action
+     * @param mixed  $callback
      */
-    public function filtersAfter()
+    protected function after($action, $callback)
     {
-        return $this->getFilters()['after'];
+        $this->addFilter('after', $action, $callback);
     }
 
     /**
-     * Gets all properties, including herited, with their default values.
+     * Adds the filter to the event dispatcher.
      *
-     * @return array
+     * @param string $when     Either 'before' or 'after'
+     * @param string $action
+     * @param mixed  $callback
      */
-    protected function getFilters()
+    protected function addFilter($when, $action, $callback)
     {
-        $parents    = class_parents($this);
-        $properties = [
-            'before' => $this->before,
-            'after'  => $this->after
-        ];
-
-        foreach ($parents as $parent) {
-            $class = new ReflectionClass($parent);
-            $defaults = $class->getDefaultProperties();
-
-            $properties['before'] = array_merge_recursive(
-                $defaults['before'], $properties['before']
-            );
-
-            $properties['after'] = array_merge_recursive(
-                $defaults['after'], $properties['after']
-            );
+        if (!is_callable($callback) && !is_array($callback)) {
+            $callback = [$this, $callback];
         }
 
-        return $properties;
+        if (is_array($action)) {
+            foreach ($action as $method) {
+                $this->addFilter($when, $method, $callback);
+            }
+        } else {
+            EventDispatcher::addListener("{$when}." . get_called_class() . "::{$action}", $callback);
+        }
     }
 
     /**

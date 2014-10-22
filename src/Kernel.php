@@ -18,6 +18,7 @@
 
 namespace Radium;
 
+use Radium\EventDispatcher;
 use Radium\Http\Router;
 use Radium\Http\Request;
 use Radium\Http\Response;
@@ -52,7 +53,8 @@ class Kernel
         static::$controller = new $route['controller']();
 
         // Run before filters
-        static::runFilters($route['method'], static::$controller->filtersBefore());
+        EventDispatcher::dispatch("before." . $route['controller'] . "::*");
+        EventDispatcher::dispatch("before." . $route['controller'] . "::{$route['method']}");
 
         // Execute action
         if (static::$controller->executeAction) {
@@ -63,28 +65,11 @@ class Kernel
         }
 
         // Run after filters
-        static::runFilters($route['method'], static::$controller->filtersAfter());
+        EventDispatcher::dispatch("after." . $route['controller'] . "::*");
+        EventDispatcher::dispatch("after." . $route['controller'] . "::{$route['method']}");
 
         // Shutdown the controller
         static::$controller->__shutdown($response);
-    }
-
-    /**
-     * Runs the filters for the specified action.
-     *
-     * @param string $action  Routed method/action.
-     * @param array  $filters Array containing controller filters.
-     */
-    protected static function runFilters($action, $filters)
-    {
-        $filters = array_merge(
-            $filters['*'],
-            isset($filters[$action]) ? $filters[$action] : array()
-        );
-
-        foreach ($filters as $filter) {
-            static::$controller->{$filter}();
-        }
     }
 
     /**
