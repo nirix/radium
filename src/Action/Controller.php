@@ -54,14 +54,6 @@ class Controller
     public $executeAction = true;
 
     /**
-     * Filters
-     */
-    protected $filters = [
-        'before' => ['*' => []],
-        'after'  => ['*' => []]
-    ];
-
-    /**
      * Sets the request, route, database, view and response variables.
      */
     public function __construct()
