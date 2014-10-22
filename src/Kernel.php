@@ -65,7 +65,9 @@ class Kernel
         $params = [];
 
         foreach ($r->getParameters() as $param) {
-            $params[] = $route['params'][$param->getName()];
+            if (isset($route['params'][$param->getName()])) {
+                $params[] = $route['params'][$param->getName()];
+            }
         }
         unset($r, $param);
 
