@@ -44,10 +44,14 @@ class Kernel
     {
         $route = Router::process(new Request);
 
-        // Route to 404 if controller and/or method
+        // Route to 404 if controller and/or method cannot be found
         if (!class_exists($route['controller'])
         or !method_exists($route['controller'], "{$route['method']}Action")) {
-            $route = Router::set404();
+            if ($app->environment() == 'development') {
+                throw new Exception("Unable to find controller for '" . Request::pathInfo() . "'");
+            } else {
+                $route = Router::set404();
+            }
         }
 
         static::$controller = new $route['controller']();
