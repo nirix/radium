@@ -131,6 +131,14 @@ class Application
     }
 
     /**
+     * @return string
+     */
+    public function environment()
+    {
+        return $this->environment;
+    }
+
+    /**
      * Loads the environment configuration.
      */
     protected function loadEnvironment()
