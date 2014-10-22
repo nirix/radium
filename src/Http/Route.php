@@ -31,9 +31,9 @@ class Route
 {
     public $route;
     public $destination;
-    public $method = array('get', 'post');
-    public $params = array();
-    public $args = array();
+    public $method  = ['get', 'post'];
+    public $params  = [];
+    public $default = [];
 
     /**
      * Creates a new route.
@@ -54,10 +54,10 @@ class Route
      * @example
      *     to('Admin/Settings.index')
      */
-    public function to($destination, array $args = array())
+    public function to($destination, array $defaults = [])
     {
         $this->destination = $destination;
-        $this->args        = $args;
+        $this->defaults    = $defaults;
         return $this;
     }
 
@@ -68,14 +68,14 @@ class Route
      *
      * @example
      *     method('get');
-     *     method(array('get', 'post'));
+     *     method(['get', 'post']);
      *
      */
     public function method($method)
     {
         // Convert to an array if needed
         if (!is_array($method)) {
-            $method = array($method);
+            $method = [$method];
         }
 
         $this->method = $method;

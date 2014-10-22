@@ -18,6 +18,7 @@
 
 namespace Radium;
 
+use ReflectionMethod;
 use Radium\Action\Controller;
 use Radium\EventDispatcher;
 use Radium\Http\Router;
@@ -59,6 +60,15 @@ class Kernel
             }
         }
 
+        // Get method parameters
+        $r = new ReflectionMethod("{$route['controller']}::{$route['method']}Action");
+        $params = [];
+
+        foreach ($r->getParameters() as $param) {
+            $params[] = $route['params'][$param->getName()];
+        }
+        unset($r, $param);
+
         static::$controller = new $route['controller']();
 
         // Run before filters
@@ -69,7 +79,7 @@ class Kernel
         if (static::$controller->executeAction) {
             $response = call_user_func_array(
                 array(static::$controller, $route['method'] . 'Action'),
-                $route['args']
+                $params
             );
         }
 

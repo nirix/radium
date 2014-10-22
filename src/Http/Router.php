@@ -164,12 +164,8 @@ class Router
                 $route->params = array_merge($route->params, $params);
                 $route->destination = preg_replace($pattern, $route->destination, $uri);
 
-                // Routed method arguments
-                foreach ($route->args as $index => $arg) {
-                    if (($arg !== true and $arg !== false) and isset($params[$arg])) {
-                        $route->args[$index] = $params[$arg];
-                    }
-                }
+                // Merge params with defaults
+                $route->params = array_merge($route->defaults, $route->params);
 
                 if (in_array(strtolower($request->method()), $route->method)) {
                     return static::setRoute($route);
@@ -237,7 +233,7 @@ class Router
             'controller' => $destination[0],
             'method'     => $destination[1],
             'params'     => $route->params,
-            'args'       => $route->args,
+            'defaults'   => $route->defaults,
             'extension'  => (isset($route->params['extension']) ? $route->params['extension'] : 'html')
         );
 
