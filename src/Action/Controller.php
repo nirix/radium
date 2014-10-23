@@ -87,7 +87,7 @@ class Controller
         $view = $this->renderView($view, $locals);
 
         if ($this->layout) {
-            $view = $this->renderView("Layouts/{$this->layout}", [
+            $view = $this->renderView("layouts/{$this->layout}", [
                 'content' => $view
             ]);
         }
@@ -156,7 +156,7 @@ class Controller
         $this->executeAction = false;
         return $this->response = new Response(function($resp){
             $resp->status = 404;
-            $resp->body   = $this->render('Errors/404');
+            $resp->body   = $this->render('errors/404');
         });
     }
 
