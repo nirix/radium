@@ -105,7 +105,7 @@ class Controller
     {
         $content = View::render($view, $locals);
 
-        if (isset($locals['_layout'])) {
+        if (isset($locals['_layout']) && $locals['_layout']) {
             $content = $this->renderView("layouts/{$locals['_layout']}", [
                 'content' => $content
             ]);
@@ -160,7 +160,9 @@ class Controller
         $this->executeAction = false;
         return $this->response = new Response(function($resp){
             $resp->status = 404;
-            $resp->body   = $this->renderView('errors/404', ['layout' => $this->layout]);
+            $resp->body   = $this->renderView('errors/404', [
+                '_layout' => $this->layout
+            ]);
         });
 
         return new Response(function($resp){
