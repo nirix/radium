@@ -18,7 +18,7 @@
 
 namespace Radium\Action;
 
-use Radium\Error;
+use Exception;
 use Radium\Language;
 
 /**
@@ -68,21 +68,9 @@ class View
         $filePath = static::filePath($view);
 
         if (!$filePath) {
-            $fileName = static::fileName($view);
-
-            $error = array(
-                "Unable to load view for '{$fileName}'<br>",
-                "Searched in:<br>",
-                "<pre>"
+            throw new Exception(
+                sprintf("Unable to find view '%s' in [%s]", $view, implode(', ', static::$searchPaths))
             );
-
-            foreach (static::$searchPaths as $path) {
-                $error[] = $path;
-            }
-
-            $error[] = "</pre>";
-
-            Error::halt("View Error", implode(PHP_EOL, $error));
         }
 
         // Global view variables

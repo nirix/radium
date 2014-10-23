@@ -18,34 +18,11 @@
 
 namespace Radium\Database;
 
-use Radium\Error;
-
 /**
  * Database driver
  *
  * @since 0.2
- * @package Radium
- * @subpackage Database
- * @author Jack P.
- * @copyright (C) Jack P.
+ * @package Radium\Database
+ * @author Jack Polgar <jack@polgar.id.au>
  */
-class Driver
-{
-    /**
-     * Shortcut to the Error::halt method.
-     *
-     * @param string $error Error message
-     */
-    public function halt($error = 'Unknown error')
-    {
-        if (is_array($error) and isset($error[2]) and !empty($error[2])) {
-            $error = $error[2];
-        } elseif (!is_array($error)) {
-            $error = $error;
-        } else {
-            $error = 'Unknown error. ' . implode('/', $error);
-        }
-
-        Error::halt("Database Error", $error . '<br />' . $this->lastQuery);
-    }
-}
+abstract class Driver {}

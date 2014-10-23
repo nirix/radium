@@ -18,7 +18,7 @@
 
 namespace Radium\Http;
 
-use Radium\Exception as Exception;
+use Exception;
 use Radium\Error;
 use Radium\Util\Inflector;
 
@@ -179,7 +179,7 @@ class Router
         }
         // No 404 route, Exception time! FUN :D
         else {
-            Error::halt("Routing Error", "No routes found for '{$uri}'");
+            throw new Exception("No routes found for '{$uri}'");
         }
     }
 
@@ -189,7 +189,7 @@ class Router
     public static function set404()
     {
         if (!isset(static::$routes['404'])) {
-            Error::halt("Route Error", "There is no 404 route set.");
+            throw new Exception("There is no 404 route set.");
         }
 
         // Get request file extension
