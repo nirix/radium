@@ -160,7 +160,11 @@ class Controller
         $this->executeAction = false;
         return $this->response = new Response(function($resp){
             $resp->status = 404;
-            $resp->body   = $this->render('errors/404');
+            $resp->body   = $this->renderView('errors/404', ['layout' => $this->layout]);
+        });
+
+        return new Response(function($resp){
+            $resp->status = 404;
         });
     }
 
