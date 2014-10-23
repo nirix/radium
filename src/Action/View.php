@@ -26,8 +26,7 @@ use Radium\Language;
  *
  * @since 0.1
  * @package Radium/Action
- * @author Jack P.
- * @copyright (C) Jack P.
+ * @author Jack Polgar <jack@polgar.id.au>
  */
 class View
 {
@@ -106,20 +105,6 @@ class View
     }
 
     /**
-     * Convert to filename format and strip `Vendor\Controllers`.
-     *
-     * @param string $view
-     *
-     * @return string
-     */
-    public static function fileName($view)
-    {
-        $path = str_replace('\\', '/', $view);
-        $path = preg_replace("/^[\w\d]+\/Controllers\/([\w\d\/]+)/", "$1", $path);
-        return str_replace('/', DIRECTORY_SEPARATOR, $path);
-    }
-
-    /**
      * Searches for the view in the registered search paths.
      *
      * @param string $view View to render.
@@ -133,7 +118,7 @@ class View
         // Loop over search paths
         foreach ($searchPaths as $path) {
             foreach (static::$extensions as $ext) {
-                $fileName = static::fileName("{$view}.{$ext}");
+                $fileName = "{$view}.{$ext}";
                 $filePath = "{$path}/{$fileName}";
 
                 if (file_exists($filePath)) {
