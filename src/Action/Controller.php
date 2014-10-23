@@ -84,16 +84,12 @@ class Controller
      */
     public function render($view, array $locals = [])
     {
-        $view = $this->renderView($view, $locals);
+        $locals = $locals + [
+            '_layout' => $this->layout
+        ];
 
-        if ($this->layout) {
-            $view = $this->renderView("layouts/{$this->layout}", [
-                'content' => $view
-            ]);
-        }
-
-        return new Response(function($resp) use ($view) {
-            $resp->body = $view;
+        return new Response(function($resp) use ($view, $locals) {
+            $resp->body = $this->renderView($view, $locals);
         });
     }
 
@@ -107,7 +103,15 @@ class Controller
      */
     public function renderView($view, array $locals = [])
     {
-        return View::render($view, $locals);
+        $content = View::render($view, $locals);
+
+        if (isset($locals['_layout'])) {
+            $content = $this->renderView("layouts/{$locals['_layout']}", [
+                'content' => $content
+            ]);
+        }
+
+        return $content;
     }
 
     /**
