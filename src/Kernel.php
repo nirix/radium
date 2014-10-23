@@ -18,6 +18,7 @@
 
 namespace Radium;
 
+use Exception;
 use ReflectionMethod;
 use Radium\Action\Controller;
 use Radium\EventDispatcher;
@@ -89,8 +90,15 @@ class Kernel
         EventDispatcher::dispatch("after." . $route['controller'] . "::*");
         EventDispatcher::dispatch("after." . $route['controller'] . "::{$route['method']}");
 
+        // Send response
+        if (!$response instanceof Response) {
+            throw new Exception("The controller returned an invalid response.");
+        } else {
+            $response->send();
+        }
+
         // Shutdown the controller
-        static::$controller->__shutdown($response);
+        static::$controller->__shutdown();
     }
 
     /**

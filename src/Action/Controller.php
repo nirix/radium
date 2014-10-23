@@ -60,10 +60,6 @@ class Controller
     public function __construct()
     {
         $route = Router::currentRoute();
-        $this->setView(get_called_class() . "\\{$route['method']}");
-
-        // Create response
-        $this->response = new Response;
 
         // Set database connection
         $this->db = Database::connection();
@@ -81,17 +77,24 @@ class Controller
     }
 
     /**
-     * Sets the view.
+     * Renders a response.
      *
-     * @param string $view
+     * @param string $view   View to render.
+     * @param array  $locals Variables for the view.
      */
-    public function setView($view)
+    public function render($view, array $locals = [])
     {
-        $this->view = str_replace(
-            array("\\", "/"),
-            DIRECTORY_SEPARATOR,
-            $view
-        );
+        $view = $this->renderView($view, $locals);
+
+        if ($this->layout) {
+            $view = $this->renderView("Layouts/{$this->layout}", [
+                'content' => $view
+            ]);
+        }
+
+        return new Response(function($resp) use ($view) {
+            $resp->body = $view;
+        });
     }
 
     /**
@@ -102,7 +105,7 @@ class Controller
      *
      * @return string
      */
-    public function render($view, array $locals = array())
+    public function renderView($view, array $locals = [])
     {
         return View::render($view, $locals);
     }
@@ -129,18 +132,20 @@ class Controller
     /**
      * Easily respond to different request formats.
      *
-     * @param closure $func
+     * @param callable $func
      *
      * @return object
      */
     public function respondTo($func)
     {
-        $route = Router::currentRoute();
+        $route    = Router::currentRoute();
+        $response = $func($route['extension'], $this);
 
-        // Set response content-type
-        $this->response->format($route['extension']);
+        if ($response === null) {
+            return $this->show404();
+        }
 
-        return $func($route['extension'], $this);
+        return $response;
     }
 
     /**
@@ -207,48 +212,7 @@ class Controller
     }
 
     /**
-     * Renders the view and layout then sends the response.
-     *
-     * @param mixed $response Response from the routed method
+     * Handles controller shutdown.
      */
-    public function __shutdown($response = null)
-    {
-        $route = Router::currentRoute();
-
-        // Object that response to the `send` method.
-        if (is_object($response)) {
-            if (!method_exists($response, 'send')) {
-                throw new Exception("The controller did not return a valid response object");
-            }
-
-            $this->response = $response;
-        }
-
-        // If the response isn't null and not an object add it to the responses body.
-        if ($response !== null && !is_object($response)) {
-            $this->response->body = $response;
-        }
-
-        // Does the view need to be rendered?
-        if ($response === null) {
-            if ($this->response->body === null and $this->executeAction and $this->view) {
-                $this->response->body = $this->render($this->view);
-            }
-        }
-
-        // Don't render the layout if the content type isn't HTML
-        if ($this->response->contentType !== 'text/html') {
-            $this->layout = false;
-        }
-
-        // Render the layout
-        if ($this->layout) {
-            $this->response->body = $this->render(
-                "Layouts/{$this->layout}",
-                ['content' => $this->response->body]
-            );
-        }
-
-        $this->response->send();
-    }
+    public function __shutdown() {}
 }
