@@ -18,8 +18,6 @@
 
 namespace Radium\Http;
 
-use Radium\Exception as Exception;
-
 /**
  * Radium's HTTP request class.
  *

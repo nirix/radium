@@ -18,6 +18,7 @@
 
 namespace Radium\Database;
 
+use Exception;
 use Radium\Database\PDO\Query;
 use Radium\Database\PDO\Statement;
 
@@ -67,20 +68,14 @@ class PDO extends Driver
         }
 
         // Connect to the database
-        try {
-            $this->connection = new \PDO(
-                $dsn,
-                isset($config['username']) ? $config['username'] : null,
-                isset($config['password']) ? $config['password'] : null,
-                isset($config['options']) ? $config['options'] : array()
-            );
+        $this->connection = new \PDO(
+            $dsn,
+            isset($config['username']) ? $config['username'] : null,
+            isset($config['password']) ? $config['password'] : null,
+            isset($config['options']) ? $config['options'] : array()
+        );
 
-            unset($dsn);
-        }
-        // Unable to connect, display error
-        catch (\PDOException $e) {
-            $this->halt($e->getMessage());
-        }
+        unset($dsn);
     }
 
     /**

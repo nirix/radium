@@ -18,16 +18,14 @@
 
 namespace Radium;
 
-use Radium\Exception;
+use Exception;
 
 /**
  * Radium's Database class.
  *
  * @since 0.1
- * @package Radium
- * @subpackage Database
- * @author Jack P.
- * @copyright (C) Jack P.
+ * @package Radium\Database
+ * @author Jack Polgar <jack@polgar.id.au>
  */
 class Database
 {

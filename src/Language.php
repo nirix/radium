@@ -18,6 +18,7 @@
 
 namespace Radium;
 
+use InvalidArgumentException;
 use Radium\Language\Translation;
 
 require __DIR__ . "/Translations/enAU.php";
@@ -26,10 +27,8 @@ require __DIR__ . "/Translations/enAU.php";
  * Language class.
  *
  * @since 0.1
- * @package Radium
- * @subpackage Language
- * @author Jack P.
- * @copyright (C) Jack P.
+ * @package Radium\Language
+ * @author Jack Polgar <jack@polgar.id.au>
  */
 class Language
 {
@@ -47,7 +46,7 @@ class Language
         static::$link = $this;
 
         if (!is_callable($language)) {
-            throw new \Radium\Exception("Expected callable argument");
+            throw new InvalidArgumentException('Expected \'$language\' to be callable');
         }
 
         // Create translation
