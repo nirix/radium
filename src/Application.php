@@ -21,15 +21,14 @@ namespace Radium;
 use Exception;
 use ReflectionObject;
 use Radium\Database;
-use Radium\Action\View;
+use Radium\Templating\View;
+use Radium\Templating\Engines\PhpEngine;
 
 /**
  * Application base class.
  *
- * @since 2.0
- * @package Radium
- * @author Jack P.
- * @copyright (C) Jack P.
+ * @since 2.0.0
+ * @author Jack Polgar <jack@polgar.id.au>
  */
 class Application
 {
@@ -65,8 +64,8 @@ class Application
         // Load the routes
         $this->loadRoutes();
 
-        // Add views directory
-        View::addSearchPath("{$this->path}/views");
+        // Configure templating
+        $this->configureTemplating();
     }
 
     /**
@@ -120,6 +119,15 @@ class Application
         }
 
         $this->databaseConnection = Database::factory($this->databaseConfig);
+    }
+
+    /**
+     * Configures the view rendering system.
+     */
+    protected function configureTemplating()
+    {
+        View::setEngine(new PhpEngine);
+        View::addPath("{$this->path}/views");
     }
 
     /**
