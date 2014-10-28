@@ -28,6 +28,7 @@ use Radium\Http\Request;
 use Radium\Http\Response;
 use Radium\Language;
 use Radium\Database;
+use Radium\Templating\View;
 
 /**
  * Controller
@@ -73,7 +74,7 @@ class Controller
      */
     public function set($name, $value = null)
     {
-        View::set($name, $value);
+        View::addGlobal($name, $value);
     }
 
     /**
