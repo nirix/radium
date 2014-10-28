@@ -18,6 +18,7 @@
 
 namespace Radium\Database\PDO;
 
+use Exception;
 use Radium\Database;
 use Radium\Database\PDO;
 
@@ -156,7 +157,7 @@ class Statement
         if ($result) {
             return $this;
         } else {
-            Database::connection($this->connectionName)->halt($this->statement->errorInfo());
+            throw new Exception($this->statement->errorInfo()[2]);
         }
     }
 
