@@ -32,6 +32,11 @@ class Request
     const HTTP_SEE_OTHER         = 303;
 
     /**
+     * @var Request
+     */
+    protected static $instance;
+
+    /**
      * @var array
      */
     public static $request = [];
@@ -88,6 +93,8 @@ class Request
 
     public function __construct()
     {
+        static::$instance = $this;
+
         static::$request = $_REQUEST;
         static::$get     = $_GET;
         static::$post    = $_POST;
@@ -380,5 +387,15 @@ class Request
 
         static::$server['REQUEST_URI'] = $requestUri;
         return $requestUri;
+    }
+
+    /**
+     * Get the instantiated request instance instead of creating a new one.
+     *
+     * @return Request
+     */
+    public static function getInstance()
+    {
+        return static::$instance;
     }
 }
