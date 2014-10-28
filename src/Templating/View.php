@@ -70,9 +70,15 @@ class View
      * @param string $name
      * @param mixed  $value
      */
-    public static function addGlobal($name, $value)
+    public static function addGlobal($name, $value = null)
     {
-        static::$engine->addGlobal($name, $value);
+        if (is_array($name)) {
+            foreach ($name as $variable => $value) {
+                static::addGlobal($variable, $value);
+            }
+        } else {
+            static::$engine->addGlobal($name, $value);
+        }
     }
 
     /**
