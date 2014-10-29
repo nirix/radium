@@ -43,7 +43,7 @@ class Controller
     /**
      * Name of the layout to render.
      */
-    public $layout = 'default';
+    public $layout = 'default.phtml';
 
     /**
      * The view to be rendered.
