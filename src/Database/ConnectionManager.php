@@ -16,18 +16,17 @@
  * limitations under the License.
  */
 
-namespace Radium;
+namespace Radium\Database;
 
 use Exception;
 
 /**
- * Radium's Database class.
+ * Radium's database connection manager.
  *
  * @since 0.1
- * @package Radium\Database
  * @author Jack Polgar <jack@polgar.id.au>
  */
-class Database
+class ConnectionManager
 {
     protected static $connections = array();
 
@@ -39,7 +38,7 @@ class Database
      *
      * @return object
      */
-    public static function factory(array $config, $name = 'default')
+    public static function create(array $config, $name = 'default')
     {
         // Make sure a connection with same name doesn't exist
         if (array_key_exists($name, static::$connections)) {
