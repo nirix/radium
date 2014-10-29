@@ -159,15 +159,11 @@ class Controller
     public function show404()
     {
         $this->executeAction = false;
-        return $this->response = new Response(function($resp){
-            $resp->status = 404;
-            $resp->body   = $this->renderView('errors/404', [
-                '_layout' => $this->layout
-            ]);
-        });
-
         return new Response(function($resp){
             $resp->status = 404;
+            $resp->body   = $this->renderView('errors/404.phtml', [
+                '_layout' => $this->layout
+            ]);
         });
     }
 
