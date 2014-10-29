@@ -92,7 +92,7 @@ class Kernel
 
         // Send response
         if (!$response instanceof Response) {
-            throw new Exception("The controller returned an invalid response.");
+            throw new Exception("The controller [{$route['controller']}::{$route['method']}] returned an invalid response.");
         } else {
             $response->send();
         }
