@@ -20,7 +20,7 @@ namespace Radium;
 
 use Exception;
 use ReflectionObject;
-use Radium\Database;
+use Radium\Database\ConnectionManager;
 use Radium\Templating\View;
 use Radium\Templating\Engines\PhpEngine;
 
@@ -118,7 +118,7 @@ class Application
             return null;
         }
 
-        $this->databaseConnection = Database::factory($this->databaseConfig);
+        $this->databaseConnection = ConnectionManager::create($this->databaseConfig);
     }
 
     /**

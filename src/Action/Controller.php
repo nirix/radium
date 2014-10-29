@@ -27,7 +27,7 @@ use Radium\Http\Router;
 use Radium\Http\Request;
 use Radium\Http\Response;
 use Radium\Language;
-use Radium\Database;
+use Radium\Database\ConnectionManager;
 use Radium\Templating\View;
 
 /**
@@ -63,7 +63,7 @@ class Controller
         $route = Router::currentRoute();
 
         // Set database connection
-        $this->db = Database::connection();
+        $this->db = ConnectionManager::connection();
     }
 
     /**
