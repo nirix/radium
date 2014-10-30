@@ -156,11 +156,7 @@ class Pagination
 
             // Previous page URI
             if ($this->prevPage > 0) {
-                if ($this->prevPage != 1) {
-                    $this->prevPageUri = $this->createUri($this->prevPage);
-                } else {
-                    $this->prevPageUri = Request::pathInfo();
-                }
+                $this->prevPageUri = $this->createUri($this->prevPage);
             }
 
             // Create page links
