@@ -130,6 +130,15 @@ class Request
      * @param string $key
      * @param mixed  $fallback
      */
+    public static function request($key, $fallback = '')
+    {
+        return isset(static::$request[$key]) ? static::$request[$key] : $fallback;
+    }
+
+    /**
+     * @param string $key
+     * @param mixed  $fallback
+     */
     public static function post($key, $fallback = '')
     {
         return isset(static::$post[$key]) ? static::$post[$key] : $fallback;
