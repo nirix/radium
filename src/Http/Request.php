@@ -286,6 +286,30 @@ class Request
     }
 
     /**
+     * Builds a query string, including the question mark.
+     *
+     * @param array $data
+     *
+     * @return string
+     */
+    public static function buildQueryString(array $data = null)
+    {
+        if ($data === null) {
+            $data = static::$get;
+        }
+
+        $query = [];
+
+        foreach ($data as $name => $value) {
+            $query[] = "{$name}=" . urlencode($value);
+        }
+
+        if (count($query)) {
+            return '?' . implode('&', $query);
+        }
+    }
+
+    /**
      * @return string
      */
     protected static function prepareBaseUrl()
