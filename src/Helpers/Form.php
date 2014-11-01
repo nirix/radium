@@ -199,9 +199,21 @@ class Form
      *
      * @return string
      */
-    private static function selectOption($option, $value)
+    public static function selectOption($option, $value)
     {
-        return '<option value="' . $option['value'] . '"' . ($value == $option['value'] ? ' selected="selected"' :'') . '>' . $option['label'] . '</option>';
+        $attributes = [''];
+
+        $options[] = "value=\"{$option['value']}\"";
+
+        if (
+            (is_array($value) && in_array($option['value'], $value))
+            || ($option['value'] == $value)
+        ) {
+            $attributes[] = 'selected="selected"';
+        }
+
+        $attributes = implode(' ', $attributes);
+        return "<option {$attributes}>{$option['label']}</option>";
     }
 
     /**
