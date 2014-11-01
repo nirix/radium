@@ -99,7 +99,7 @@ class Request
         static::$get     = $_GET;
         static::$post    = $_POST;
         static::$server  = $_SERVER;
-        static::$headers = getallheaders();
+        static::$headers = static::getAllHeaders();
 
         static::$requestUri = static::prepareRequestUri();
         static::$baseUrl    = static::prepareBaseUrl();
@@ -307,6 +307,28 @@ class Request
         if (count($query)) {
             return '?' . implode('&', $query);
         }
+    }
+
+    /**
+     * Gets headers from `_SERVER` and formats the names nicely.
+     *
+     * @return array
+     */
+    protected function getAllHeaders()
+    {
+        $headers = [];
+
+        foreach ($_SERVER as $key => $value) {
+            if (substr($key, 0, 5) == 'HTTP_') {
+                $key = substr($key, 5);
+                $key = str_replace('_', ' ', strtolower($key));
+                $key = str_replace(' ', '-', ucwords($key));
+
+                $headers[$key] = $value;
+            }
+        }
+
+        return $headers;
     }
 
     /**
