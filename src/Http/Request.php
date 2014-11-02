@@ -292,7 +292,7 @@ class Request
      *
      * @return string
      */
-    public static function buildQueryString(array $data = null)
+    public static function buildQueryString(array $data = null, $urlEncode = true)
     {
         if ($data === null) {
             $data = static::$get;
@@ -301,7 +301,7 @@ class Request
         $query = [];
 
         foreach ($data as $name => $value) {
-            $query[] = "{$name}=" . urlencode($value);
+            $query[] = "{$name}=" . ($urlEncode ? urlencode($value) : $value);
         }
 
         if (count($query)) {
