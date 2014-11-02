@@ -203,7 +203,7 @@ class Form
     {
         $attributes = [''];
 
-        $options[] = "value=\"{$option['value']}\"";
+        $attributes[] = "value=\"{$option['value']}\"";
 
         if (
             (is_array($value) && in_array($option['value'], $value))
