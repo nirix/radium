@@ -156,6 +156,7 @@ class Application
         }
 
         if ($this->environment) {
+            $_ENV['environment'] = $this->environment;
             if (file_exists("{$this->path}/config/environment/{$this->environment}.php")) {
                 require "{$this->path}/config/environment/{$this->environment}.php";
             }
