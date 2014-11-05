@@ -1,0 +1,25 @@
+{
+    "name": "radium/helpers",
+    "description": "Radium Helpers Component.",
+    "keywords": ["radium", "framework", "helpers"],
+    "license": "Apache-2.0",
+    "authors": [
+        {
+            "name": "Jack Polgar",
+            "email": "jack@polgar.id.au"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Radium\\Helpers\\": ""
+        }
+    },
+    "extra": {
+        "branch-alias": {
+           "dev-master": "2.0.x-dev"
+        }
+    }
+}
