@@ -56,11 +56,16 @@ class Controller
     public $executeAction = true;
 
     /**
+     * @var array
+     */
+    protected $route;
+
+    /**
      * Sets the request, route, database, view and response variables.
      */
     public function __construct()
     {
-        $route = Router::currentRoute();
+        $this->route = Router::currentRoute();
 
         // Set database connection
         $this->db = ConnectionManager::connection();
