@@ -75,8 +75,13 @@ class Kernel
         static::$controller = new $route['controller']();
 
         // Run before filters
-        EventDispatcher::dispatch("before." . $route['controller'] . "::*");
-        EventDispatcher::dispatch("before." . $route['controller'] . "::{$route['method']}");
+        $beforeAll    = EventDispatcher::dispatch("before." . $route['controller'] . "::*");
+        $beforeAction = EventDispatcher::dispatch("before." . $route['controller'] . "::{$route['method']}");
+
+        if ($beforeAll instanceof Response || $beforeAction instanceof Response) {
+            static::$controller->executeAction = false;
+            $response = $beforeAll ?: $beforeAction;
+        }
 
         // Execute action
         if (static::$controller->executeAction) {
@@ -87,8 +92,12 @@ class Kernel
         }
 
         // Run after filters
-        EventDispatcher::dispatch("after." . $route['controller'] . "::*");
-        EventDispatcher::dispatch("after." . $route['controller'] . "::{$route['method']}");
+        $afterAll    = EventDispatcher::dispatch("after." . $route['controller'] . "::*");
+        $afterAction = EventDispatcher::dispatch("after." . $route['controller'] . "::{$route['method']}");
+
+        if ($afterAll instanceof Response || $afterAction instanceof Response) {
+            $response = $afterAll instanceof Response ? $afterAll : $afterAction;
+        }
 
         // Send response
         if (!$response instanceof Response) {
