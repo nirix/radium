@@ -60,7 +60,11 @@ class EventDispatcher
     {
         if (isset(static::$listeners[$action])) {
             foreach (static::$listeners[$action] as $callback) {
-                call_user_func_array($callback, $parameters);
+                $response = call_user_func_array($callback, $parameters);
+
+                if ($response !== null) {
+                    return $response;
+                }
             }
         }
     }
