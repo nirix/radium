@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-namespace Radium\Action;
+namespace Radium\Http;
 
 use Exception;
 use ReflectionClass;
@@ -34,9 +34,7 @@ use Radium\Templating\View;
  * Controller
  *
  * @since 0.3
- * @package Radium/Action
  * @author Jack P.
- * @copyright (C) Jack P.
  */
 class Controller
 {
@@ -44,11 +42,6 @@ class Controller
      * Name of the layout to render.
      */
     public $layout = 'default.phtml';
-
-    /**
-     * The view to be rendered.
-     */
-    public $view;
 
     /**
      * Whether or not to execute the routed action.
@@ -126,7 +119,7 @@ class Controller
      * @param string $string       String to translate.
      * @param array  $replacements Replacements to be inserted into the string.
      */
-    public function translate($string, array $replacements = array())
+    public function translate($string, array $replacements = [])
     {
         return Language::translate($string, $replacements);
     }
