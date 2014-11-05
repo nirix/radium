@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-namespace Radium\Http;
+namespace Radium\Routing;
 
 
 /**

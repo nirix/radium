@@ -16,17 +16,16 @@
  * limitations under the License.
  */
 
-namespace Radium\Http;
+namespace Radium\Routing;
 
 use Exception;
-use Radium\Error;
+use Radium\Http\Request;
 use Radium\Util\Inflector;
 
 /**
  * Radium's Router.
  *
  * @since 0.1
- * @package Radium/Http
  * @author Jack Polgar <jack@polgar.id.au>
  */
 class Router

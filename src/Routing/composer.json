@@ -1,0 +1,25 @@
+{
+    "name": "radium/routing",
+    "description": "Radium Routing Component.",
+    "keywords": ["radium", "framework", "routing"],
+    "license": "Apache-2.0",
+    "authors": [
+        {
+            "name": "Jack Polgar",
+            "email": "jack@polgar.id.au"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Radium\\Routing\\": ""
+        }
+    },
+    "extra": {
+        "branch-alias": {
+           "dev-master": "2.0.x-dev"
+        }
+    }
+}

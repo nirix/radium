@@ -22,7 +22,7 @@ use Exception;
 use ReflectionMethod;
 use Radium\Action\Controller;
 use Radium\EventDispatcher;
-use Radium\Http\Router;
+use Radium\Routing\Router;
 use Radium\Http\Request;
 use Radium\Http\Response;
 
