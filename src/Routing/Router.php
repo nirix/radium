@@ -75,7 +75,7 @@ class Router
      *
      * @throws Exception
      */
-    public static function pathFor($name, array $tokens = [])
+    public static function generateUrl($name, array $tokens = [])
     {
         if ($name === null) {
             return;
