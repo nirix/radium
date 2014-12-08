@@ -119,6 +119,19 @@ class Controller
     }
 
     /**
+     * Returns the compiled path for the route.
+     *
+     * @param string $routeName
+     * @param array  $tokens
+     *
+     * @return string
+     */
+    protected function generateUrl($routeName, array $tokens = [])
+    {
+        return Router::generateUrl($routeName, $tokens);
+    }
+
+    /**
      * Translates the passed string.
      *
      * @param string $string       String to translate.
