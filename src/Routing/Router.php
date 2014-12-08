@@ -30,19 +30,27 @@ use Radium\Util\Inflector;
  */
 class Router
 {
-    // Current route
+    /**
+     * Current route.
+     */
     protected static $currentRoute;
 
-    // Registered routes
-    public static $routes = array();
+    /**
+     * Registered routes.
+     */
+    protected static $routes = [];
 
-    // Registered tokens
-    protected static $tokens = array(
+    /**
+     * Route tokens.
+     */
+    protected static $tokens = [
         ':id' => "(?<id>\d+)"
-    );
+    ];
 
-    // Extensions
-    public static $extensions = array('.json', '.atom');
+    /**
+     * Route extensions.
+     */
+    public static $extensions = ['.json', '.atom'];
 
     /**
      * Closure style routing.
