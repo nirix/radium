@@ -274,13 +274,13 @@ class Router
     {
         $destination = explode('::', $route->destination);
 
-        $info = array(
+        $info = [
             'controller' => $destination[0],
             'method'     => $destination[1],
             'params'     => $route->params,
             'defaults'   => $route->defaults,
             'extension'  => (isset($route->params['extension']) ? $route->params['extension'] : 'html')
-        );
+        ];
 
         // Remove the first dot from the extension
         if ($info['extension'][0] == '.') {
