@@ -58,13 +58,42 @@ class Router
     }
 
     /**
+     * Returns compiled path for the route.
+     *
+     * @param string $name   Route name.
+     * @param array  $tokens Token values for route.
+     *
+     * @return string
+     *
+     * @throws Exception
+     */
+    public static function pathFor($name, array $tokens = [])
+    {
+        if (isset(static::$routes[$name])) {
+            $route = static::$routes[$name];
+        } else {
+            foreach (static::$routes as $r) {
+                if ($r->name === $name) {
+                    $route = $r;
+                }
+            }
+        }
+
+        if (isset($route)) {
+            return $route->compilePath($tokens);
+        } else {
+            throw new Exception("No route with name [{$name}]");
+        }
+    }
+
+    /**
      * Sets the root route.
      *
      * @param string $to Controller to route the root URL to.
      */
     public static function root($to = null)
     {
-        static::$routes['root'] = new Route('root');
+        static::$routes['root'] = new Route('/');
 
         if ($to) {
             static::$routes['root']->to($to);
@@ -77,22 +106,22 @@ class Router
      * Shortcut for `Router::route(...)->method('get')`
      *
      * @param string $route
+     * @param string $name  Route name
      */
-    public static function get($route)
+    public static function get($route, $name = null)
     {
-        $route = new Route($route);
-        return static::$routes[] = $route->method('get');
+        return static::route($route, $name)->method('get');
     }
 
     /**
      * Shortcut for `Router::route(...)->method('post')`
      *
      * @param string $route
+     * @param string $name  Route name
      */
-    public static function post($route)
+    public static function post($route, $name = null)
     {
-        $route = new Route($route);
-        return static::$routes[] = $route->method('post');
+        return static::route($route, $name)->method('post');
     }
 
     /**
@@ -126,15 +155,20 @@ class Router
      * Adds a new route.
      *
      * @param string $route URI to route
+     * @param string $name  Route name
      */
-    public static function route($route)
+    public static function route($route, $name = null)
     {
         // 404 Route
         if ($route == '404') {
             return static::$routes['404'] = new Route('404');
         }
 
-        return static::$routes[] = new Route($route);
+        if ($name) {
+            return static::$routes[$name] = new Route($route, $name);
+        } else {
+            return static::$routes[] = new Route($route);
+        }
     }
 
     /**

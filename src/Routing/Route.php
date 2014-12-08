@@ -18,6 +18,7 @@
 
 namespace Radium\Routing;
 
+use Radium\Util\Inflector;
 
 /**
  * Route class.
@@ -29,6 +30,7 @@ namespace Radium\Routing;
  */
 class Route
 {
+    public $name;
     public $route;
     public $destination;
     public $method  = ['get', 'post'];
@@ -39,10 +41,12 @@ class Route
      * Creates a new route.
      *
      * @param string $route URL to route
+     * @param string $name  Route name
      */
-    public function __construct($route)
+    public function __construct($route, $name = null)
     {
         $this->route = $route;
+        $this->name  = $name ? $name : Inflector::underscore($route);
     }
 
     /**
@@ -52,12 +56,25 @@ class Route
      * @param array  $args        Arguments to pass to the routed method
      *
      * @example
-     *     to('Admin/Settings.index')
+     *     to('Admin\Settings::index')
      */
     public function to($destination, array $defaults = [])
     {
         $this->destination = $destination;
         $this->defaults    = $defaults;
+        return $this;
+    }
+
+    /**
+     * Sets the routes name.
+     *
+     * @param string $name
+     *
+     * @return Route
+     */
+    public function name($name)
+    {
+        $this->name = $name;
         return $this;
     }
 
@@ -80,5 +97,23 @@ class Route
 
         $this->method = $method;
         return $this;
+    }
+
+    /**
+     * Compiles the path, replacing tokens with specified values.
+     *
+     * @param array $tokens
+     *
+     * @return string
+     */
+    public function compilePath(array $tokens = [])
+    {
+        $path = $this->route;
+
+        foreach ($tokens as $key => $value) {
+            str_replace(":{$key}", $value, $path);
+        }
+
+        return $path;
     }
 }
