@@ -44,6 +44,11 @@ class Controller
     public $layout = 'default.phtml';
 
     /**
+     * Name of the view to render for 404 pages.
+     */
+    protected $notFoundView = 'errors/404.phtml';
+
+    /**
      * Whether or not to execute the routed action.
      */
     public $executeAction = true;
@@ -159,7 +164,7 @@ class Controller
         $this->executeAction = false;
         return new Response(function($resp){
             $resp->status = 404;
-            $resp->body   = $this->renderView('errors/404.phtml', [
+            $resp->body   = $this->renderView($this->notFoundView, [
                 '_layout' => $this->layout
             ]);
         });
