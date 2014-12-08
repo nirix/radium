@@ -148,19 +148,19 @@ class Router
 
         // Index, show
         static::get("/{$uri}")->to("{$controller}::index");
-        static::get("/{$uri}/(?P<id>[0-9]+)")->to("{$controller}::show", array('id'));
+        static::get("/{$uri}/:id")->to("{$controller}::show");
 
         // New
         static::get("/{$uri}/new")->to("{$controller}::new");
         static::post("/{$uri}/new")->to("{$controller}::create");
 
         // Edit
-        static::get("/{$uri}/(?P<id>[0-9]+)/edit")->to("{$controller}::edit", array('id'));
-        static::post("/{$uri}/(?P<id>[0-9]+)/edit")->to("{$controller}::save", array('id'));
+        static::get("/{$uri}/:id/edit")->to("{$controller}::edit");
+        static::post("/{$uri}/:id/edit")->to("{$controller}::save");
 
         // Delete
-        static::get("/{$uri}/(?P<id>[0-9]+)/delete")->to("{$controller}::delete", array('id'));
-        static::post("/{$uri}/(?P<id>[0-9]+)/delete")->to("{$controller}::destroy", array('id'));
+        static::get("/{$uri}/:id/delete")->to("{$controller}::delete");
+        static::post("/{$uri}/:id/delete")->to("{$controller}::destroy");
     }
 
     /**
