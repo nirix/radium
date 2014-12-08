@@ -34,7 +34,7 @@ class Router
     protected static $currentRoute;
 
     // Registered routes
-    protected static $routes = array();
+    public static $routes = array();
 
     // Registered tokens
     protected static $tokens = array(
@@ -69,6 +69,10 @@ class Router
      */
     public static function pathFor($name, array $tokens = [])
     {
+        if ($name === null) {
+            return;
+        }
+
         if (isset(static::$routes[$name])) {
             $route = static::$routes[$name];
         } else {

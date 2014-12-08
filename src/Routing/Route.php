@@ -18,8 +18,6 @@
 
 namespace Radium\Routing;
 
-use Radium\Util\Inflector;
-
 /**
  * Route class.
  *
@@ -46,7 +44,7 @@ class Route
     public function __construct($route, $name = null)
     {
         $this->route = $route;
-        $this->name  = $name ? $name : Inflector::underscore($route);
+        $this->name  = $name;
     }
 
     /**
@@ -60,6 +58,12 @@ class Route
      */
     public function to($destination, array $defaults = [])
     {
+        if ($this->name === null) {
+            $this->name = strtolower(
+                str_replace(['\\', '::'], '_', $destination)
+            );
+        }
+
         $this->destination = $destination;
         $this->defaults    = $defaults;
         return $this;
