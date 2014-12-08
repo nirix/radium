@@ -105,7 +105,7 @@ class Router
      */
     public static function root($to = null)
     {
-        static::$routes['root'] = new Route('/');
+        static::$routes['root'] = new Route('/', 'root');
 
         if ($to) {
             static::$routes['root']->to($to);
@@ -173,7 +173,7 @@ class Router
     {
         // 404 Route
         if ($route == '404') {
-            return static::$routes['404'] = new Route('404');
+            return static::$routes['404'] = new Route('404', '404');
         }
 
         if ($name) {
