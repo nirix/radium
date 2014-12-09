@@ -81,9 +81,9 @@ class HTML
         }
 
         // Is this a local link?
-        if (substr($url, 0, 4) != 'http') {
-            $url = Request::basePath($url);
-        }
+        // if (substr($url, 0, 4) != 'http') {
+        //     $url = Request::basePath($url);
+        // }
 
         $attributes['href'] = $url;
         $attributes = static::buildAttributes($attributes);
