@@ -115,7 +115,7 @@ class Route
         $path = $this->route;
 
         foreach ($tokens as $key => $value) {
-            str_replace(":{$key}", $value, $path);
+            $path = str_replace(":{$key}", $value, $path);
         }
 
         return $path;
