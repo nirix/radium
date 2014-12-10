@@ -105,7 +105,7 @@ class Router
      */
     public static function root($to = null)
     {
-        static::$routes['root'] = new Route('/', 'root');
+        static::$routes['root'] = new Route('root', 'root');
 
         if ($to) {
             static::$routes['root']->to($to);
