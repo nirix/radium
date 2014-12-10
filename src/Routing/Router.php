@@ -92,7 +92,7 @@ class Router
         }
 
         if (isset($route)) {
-            return $route->compilePath($tokens);
+            return $route->generateUrl($tokens);
         } else {
             throw new Exception("No route with name [{$name}]");
         }
