@@ -74,6 +74,7 @@ class Route
      */
     public function __construct($route, $name = null)
     {
+        $this->path  = $route;
         $this->route = $route;
         $this->name  = $name;
     }
@@ -135,15 +136,15 @@ class Route
     }
 
     /**
-     * Compiles the path, replacing tokens with specified values.
+     * Generates the path, replacing tokens with specified values.
      *
      * @param array $tokens
      *
      * @return string
      */
-    public function compilePath(array $tokens = [])
+    public function generateUrl(array $tokens = [])
     {
-        $path = $this->route;
+        $path = $this->path;
 
         foreach ($tokens as $key => $value) {
             $path = str_replace(":{$key}", $value, $path);
