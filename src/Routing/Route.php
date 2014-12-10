@@ -28,10 +28,41 @@ namespace Radium\Routing;
  */
 class Route
 {
+    /**
+     * Route name.
+     *
+     * @var string
+     */
     public $name;
+
+    /**
+     * Route path.
+     *
+     * @var string
+     */
+    public $path;
+
+    /**
+     * Route.
+     *
+     * @var string
+     */
     public $route;
+
+    /**
+     * Controller.
+     *
+     * @var string
+     */
     public $destination;
+
+    /**
+     * Accepted HTTP request methods.
+     *
+     * @var string[]
+     */
     public $method  = ['get', 'post'];
+
     public $params  = [];
     public $default = [];
 
