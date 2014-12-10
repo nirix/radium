@@ -53,6 +53,41 @@ class Router
     public static $extensions = ['.json', '.atom'];
 
     /**
+     * Routed controller class.
+     *
+     * @var string
+     */
+    public static $controller;
+
+    /**
+     * Routed controller method.
+     *
+     * @var string
+     */
+    public static $method;
+
+    /**
+     * Route parameters.
+     *
+     * @var array
+     */
+    public static $params;
+
+    /**
+     * Route defaults.
+     *
+     * @var array
+     */
+    public static $defaults;
+
+    /**
+     * Route extension.
+     *
+     * @var string
+     */
+    public static $extension;
+
+    /**
      * Closure style routing.
      *
      * @example
@@ -286,6 +321,13 @@ class Router
         if ($info['extension'][0] == '.') {
             $info['extension'] = substr($info['extension'], 1);
         }
+
+        // Allow static use current route info.
+        static::$controller = $info['controller'];
+        static::$method     = $info['method'];
+        static::$params     = $info['params'];
+        static::$defaults   = $info['defaults'];
+        static::$extension  = $info['extension'];
 
         return static::$currentRoute = $info;
     }
